@@ -3,19 +3,29 @@ import { db } from '@/lib/firebase';
 interface Product {
   id: string;
   title: string;
-  description: string;
+  description?: string; // Make description optional
   price: number;
   category: string;
   image_url: string;
 }
 
-async function getProduct(id: string): Promise<Product> {
-  const doc = await db.collection('garden').doc(id).get();
-  return { id: doc.id, ...doc.data() } as Product;
+async function getProduct(id: string): Promise<Product | null> {
+  const collections = ['garden', 'hiking', 'leisure'];
+  for (const collectionName of collections) {
+    const doc = await db.collection(collectionName).doc(id).get();
+    if (doc.exists) {
+      return { id: doc.id, ...doc.data() } as Product;
+    }
+  }
+  return null;
 }
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
   const product = await getProduct(params.id);
+
+  if (!product) {
+    return <div>Product not found</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -30,12 +40,12 @@ export default async function ProductPage({ params }: { params: { id: string } }
         </div>
         <div className="flex flex-col justify-center">
           <h1 className="text-4xl font-bold mb-4">{product.title}</h1>
-          <p className="text-lg text-gray-500 dark:text-gray-400 mb-6">{product.description}</p>
+          <p className="text-lg text-gray-500 dark:text-gray-400 mb-6">{product.description || 'Описание отсутствует.'}</p>
           <div className="flex items-center justify-between mb-6">
             <p className="text-3xl font-bold">${product.price}</p>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500 dark:text-gray-400">Category:</span>
-              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-50">
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-500">
                 {product.category}
               </span>
             </div>

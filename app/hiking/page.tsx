@@ -2,9 +2,19 @@
 import ProductCard from '@/components/ProductCard';
 import { firestore } from '@/lib/firebase/server';
 
-async function getHikingProducts() {
+// Define the Product type
+interface Product {
+    id: string;
+    image_url: string;
+    title: string;
+    category: string;
+    description: string;
+    price: number;
+}
+
+async function getHikingProducts(): Promise<Product[]> {
     const snapshot = await firestore.collection('hiking').get();
-    const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
     return products;
 }
 
