@@ -3,6 +3,11 @@ import { NextResponse } from 'next/server';
 import { db } from '../../../lib/firebaseAdmin';
 
 export async function GET() {
+  // If db is not initialized (e.g., during build), return an empty array.
+  if (!db) {
+    return NextResponse.json([]);
+  }
+
   try {
     const hikingSnapshot = await db.collection('hiking').get();
     const gardenSnapshot = await db.collection('garden').get();

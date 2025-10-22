@@ -5,6 +5,11 @@ import { db } from '../../../../../lib/firebaseAdmin';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request, { params }: { params: { category: string, id: string } }) {
+  // If db is not initialized (e.g., during build), return a 404 error.
+  if (!db) {
+    return new NextResponse('Database not initialized', { status: 500 });
+  }
+
   try {
     const { category, id } = params;
     
