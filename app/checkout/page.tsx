@@ -59,7 +59,7 @@ export default function CheckoutPage() {
   return (
     <div className="bg-gray-900 min-h-screen text-white p-4 md:p-12">
       <main className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center text-lime-400">Оформление заказа</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center text-lime-400">Checkout</h1>
         
         <div className="bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4">Ваш заказ ({cartCount} поз.)</h2>
