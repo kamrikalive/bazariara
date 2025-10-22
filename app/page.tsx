@@ -1,14 +1,21 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link'; // Import the Link component
+import Link from 'next/link';
 
-// We will create an API route to securely fetch data.
-async function fetchProducts() {
+// Define the Product type for strong typing
+type Product = {
+  id: string;
+  title: string;
+  category: string;
+  price: number;
+  description?: string;
+  image_url?: string;
+};
+
+async function fetchProducts(): Promise<Product[]> {
   const res = await fetch('/api/products');
   if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
     throw new Error('Failed to fetch data');
   }
   return res.json();
@@ -17,8 +24,8 @@ async function fetchProducts() {
 const ITEMS_PER_PAGE = 20;
 
 export default function HomePage() {
-  const [allProducts, setAllProducts] = useState<any[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>('All');
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,7 +35,8 @@ export default function HomePage() {
         const products = await fetchProducts();
         setAllProducts(products);
         setFilteredProducts(products);
-        const uniqueCategories = Array.from(new Set(products.map((p: any) => p.category)));
+        // Correctly typed map function
+        const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
         setCategories(['All', ...uniqueCategories]);
     };
 
@@ -76,7 +84,8 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {paginatedProducts.map((product: any) => (
+          {/* Correctly typed product in map function */}
+          {paginatedProducts.map((product) => (
             <Link href={`/products/${product.id}`} key={product.id}>
               <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer">
                 <img src={product.image_url} alt={product.title} className="w-full h-64 object-cover" />
