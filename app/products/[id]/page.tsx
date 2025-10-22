@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
-import { ShoppingCartIcon } from '@heroicons/react/24/solid';
+import { ShoppingCartIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
+import Link from 'next/link';
 
 // Define the Product type for strong typing
 type Product = {
@@ -59,38 +60,52 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
-      <main className="p-12">
-        <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg overflow-hidden md:flex">
-          {/* === Product Image === */}
-          <div className="md:w-1/2">
-            <img
-              src={product.image_url}
-              alt={product.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
+      <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+            <ArrowLeftIcon className="h-5 w-5"/>
+            Back to Products
+          </Link>
+        </div>
 
-          {/* === Product Info === */}
-          <div className="p-8 md:w-1/2 flex flex-col justify-between">
-            <div>
-              <h1 className="text-4xl font-bold mb-4">{product.title}</h1>
-              <p className="text-gray-400 mb-4 text-lg">{product.category}</p>
-              <p className="text-2xl font-semibold mb-4">₾{product.price}</p>
-
-              {/* === Description Field === */}
-              {product.description && (
-                <p className="text-gray-300 mb-6 leading-relaxed whitespace-pre-line">
-                  {product.description}
-                </p>
-              )}
+        <div className="bg-gray-800/40 rounded-xl shadow-2xl overflow-hidden backdrop-blur-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+            {/* === Product Image === */}
+            <div className="p-4">
+              <img
+                src={product.image_url}
+                alt={product.title}
+                className="w-full h-full object-cover rounded-lg shadow-lg"
+              />
             </div>
 
-            <button 
-              onClick={() => addToCart(product)}
-              className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-600 transition-colors duration-300 flex items-center justify-center">
-              <ShoppingCartIcon className="h-6 w-6 mr-2"/>
-              Add to Cart
-            </button>
+            {/* === Product Info === */}
+            <div className="p-8 flex flex-col justify-center">
+              <div>
+                <p className="text-sm text-lime-400 font-semibold mb-2">{product.category}</p>
+                <h1 className="text-4xl lg:text-5xl font-extrabold mb-4 text-gray-100">{product.title}</h1>
+                
+                <p className="text-4xl font-bold text-lime-500 mb-6">₾{product.price}</p>
+
+                {/* === Description Field === */}
+                {product.description && (
+                  <div className="text-gray-300 leading-relaxed space-y-4 whitespace-pre-line">
+                    {product.description.split('\n').map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-8">
+                <button 
+                  onClick={() => addToCart(product)}
+                  className="w-full flex items-center justify-center px-4 py-4 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
+                  <ShoppingCartIcon className="h-6 w-6 mr-3"/>
+                  Add to Cart
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </main>

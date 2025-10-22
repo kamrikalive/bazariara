@@ -82,18 +82,20 @@ export default function HomePage() {
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
-      <main className="p-12">
-        <div className="mb-8 text-center">
-            <h2 className="text-3xl font-bold mb-4">Categories</h2>
-            <div className="flex justify-center gap-4 flex-wrap">
+      <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-12 text-center">
+            <h2 className="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">
+              Our Products
+            </h2>
+            <div className="flex justify-center gap-3 flex-wrap">
                 {categories.map(category => (
                     <button 
                         key={category}
                         onClick={() => setSelectedCategory(category)} 
-                        className={`px-4 py-2 font-semibold rounded-lg transition-colors duration-300 ${
+                        className={`px-5 py-2 font-medium rounded-full text-sm transition-all duration-300 ease-in-out ${
                             selectedCategory === category 
-                            ? 'bg-lime-500 text-gray-900'
-                            : 'bg-gray-700 hover:bg-lime-500 hover:text-gray-900'
+                            ? 'bg-lime-500 text-gray-900 shadow-lg shadow-lime-500/30'
+                            : 'bg-gray-800 hover:bg-gray-700'
                         }`}>
                         {category}
                     </button>
@@ -101,23 +103,32 @@ export default function HomePage() {
             </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {paginatedProducts.map((product) => (
-            <div key={product.id} className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col">
+            <div 
+              key={product.id} 
+              className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
+            >
                 <Link href={`/products/${product.id}`} className="flex-grow">
-                    <img src={product.image_url} alt={product.title} className="w-full h-64 object-cover" />
-                    <div className="p-6">
-                        <h2 className="text-2xl font-bold mb-2">{product.title}</h2>
-                        <p className="text-gray-400 mb-4">{product.category}</p>
-                        <p className="text-lg font-semibold">₾{product.price}</p>
+                    <div className="overflow-hidden">
+                      <img 
+                        src={product.image_url} 
+                        alt={product.title} 
+                        className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
+                      />
+                    </div>
+                    <div className="p-5">
+                        <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
+                        <p className="text-gray-400 text-sm mb-3">{product.category}</p>
+                        <p className="text-2xl font-semibold text-lime-500">₾{product.price}</p>
                     </div>
                 </Link>
-                <div className="p-6 pt-0">
+                <div className="p-5 pt-0 mt-auto">
                     <button 
                         onClick={() => addToCart(product)} // Add product to cart
-                        className="w-full flex items-center justify-center px-4 py-2 font-semibold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-600 transition-colors duration-300"
+                        className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
                     >
-                        <ShoppingCartIcon className="h-6 w-6 mr-2"/>
+                        <ShoppingCartIcon className="h-5 w-5 mr-2"/>
                         Add to Cart
                     </button>
                 </div>
@@ -125,19 +136,19 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div className="mt-12 flex justify-center items-center gap-4">
+        <div className="mt-16 flex justify-center items-center gap-4">
             <button 
                 onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 font-semibold rounded-lg bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-lime-500 hover:text-gray-900 transition-colors duration-300"
+                className="px-4 py-2 font-semibold rounded-lg bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors duration-300"
             >
                 Previous
             </button>
-            <span className="text-lg">Page {currentPage} of {totalPages}</span>
+            <span className="text-lg font-medium text-gray-300">Page {currentPage} of {totalPages}</span>
             <button 
                 onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 font-semibold rounded-lg bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-lime-500 hover:text-gray-900 transition-colors duration-300"
+                className="px-4 py-2 font-semibold rounded-lg bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors duration-300"
             >
                 Next
             </button>
