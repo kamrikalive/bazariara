@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link'; // Import the Link component
 
 // We will create an API route to securely fetch data.
 async function fetchProducts() {
@@ -76,14 +77,16 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {paginatedProducts.map((product: any) => (
-            <div key={product.id} className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
-              <img src={product.image_url} alt={product.title} className="w-full h-64 object-cover" />
-              <div className="p-6">
-                <h2 className="text-2xl font-bold mb-2">{product.title}</h2>
-                <p className="text-gray-400 mb-4">{product.category}</p>
-                <p className="text-lg font-semibold">₾{product.price}</p>
+            <Link href={`/products/${product.id}`} key={product.id}>
+              <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer">
+                <img src={product.image_url} alt={product.title} className="w-full h-64 object-cover" />
+                <div className="p-6">
+                  <h2 className="text-2xl font-bold mb-2">{product.title}</h2>
+                  <p className="text-gray-400 mb-4">{product.category}</p>
+                  <p className="text-lg font-semibold">₾{product.price}</p>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
