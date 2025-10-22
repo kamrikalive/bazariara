@@ -1,9 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useCart } from '@/contexts/CartContext';
+import { ShoppingCartIcon } from '@heroicons/react/24/solid';
+
+// Define the Product type for strong typing
+type Product = {
+  id: string;
+  title: string;
+  category: string;
+  price: number;
+  description?: string;
+  image_url?: string;
+};
 
 // === Fetch product by ID ===
-async function getProduct(id: string) {
+async function getProduct(id: string): Promise<Product> {
   const res = await fetch(`/api/products/${id}`);
   if (!res.ok) {
     throw new Error('Failed to fetch product data');
@@ -12,9 +24,10 @@ async function getProduct(id: string) {
 }
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -46,11 +59,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
-      <header className="py-12 bg-gray-800 text-center">
-        <a href="/" className="text-5xl font-bold">MarketGE</a>
-        <p className="text-xl mt-2">Your One-Stop Shop</p>
-      </header>
-
       <main className="p-12">
         <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg overflow-hidden md:flex">
           {/* === Product Image === */}
@@ -77,7 +85,10 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               )}
             </div>
 
-            <button className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-600 transition-colors duration-300">
+            <button 
+              onClick={() => addToCart(product)}
+              className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-600 transition-colors duration-300 flex items-center justify-center">
+              <ShoppingCartIcon className="h-6 w-6 mr-2"/>
               Add to Cart
             </button>
           </div>

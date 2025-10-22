@@ -1,29 +1,25 @@
-import { db } from '@/lib/firebase';
 import { NextResponse } from 'next/server';
-
-async function getProductFromCollection(collectionName: string, id: string) {
-    const doc = await db.collection(collectionName).doc(id).get();
-    if (doc.exists) {
-        return { id: doc.id, ...doc.data() };
-    }
-    return null;
-}
+import path from 'path';
+import fs from 'fs/promises';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
+    const filePath = path.join(process.cwd(), 'products.json');
+    
     try {
-        let product = await getProductFromCollection('garden', params.id);
-        if (!product) {
-            product = await getProductFromCollection('hiking', params.id);
-        }
+        const fileContent = await fs.readFile(filePath, 'utf8');
+        const products = JSON.parse(fileContent);
+        
+        const idAsNumber = parseInt(params.id, 10);
 
-        if (!product) {
-            return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 });
-        }
+        const product = products.find((p: any) => p.id === idAsNumber);
 
-        return NextResponse.json(product);
+        if (product) {
+            return NextResponse.json(product);
+        } else {
+            return new NextResponse(`Product with ID ${idAsNumber} not found`, { status: 404 });
+        }
     } catch (error) {
-        console.error('Error fetching product:', error);
-        // @ts-ignore
-        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+        console.error('Error reading or parsing products.json:', error);
+        return new NextResponse('Internal Server Error', { status: 500 });
     }
 }
