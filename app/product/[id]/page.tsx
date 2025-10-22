@@ -1,61 +1,71 @@
-import { db } from '@/lib/firebase';
+'use client';
 
-interface Product {
-  id: string;
-  title: string;
-  description?: string; // Make description optional
-  price: number;
-  category: string;
-  image_url: string;
-}
+import { useState, useEffect } from 'react';
 
-async function getProduct(id: string): Promise<Product | null> {
-  const collections = ['garden', 'hiking', 'leisure'];
-  for (const collectionName of collections) {
-    const doc = await db.collection(collectionName).doc(id).get();
-    if (doc.exists) {
-      return { id: doc.id, ...doc.data() } as Product;
-    }
+// This function will fetch the data for a single product.
+async function getProduct(id: string) {
+  const res = await fetch(`/api/products/${id}`);
+  if (!res.ok) {
+    throw new Error('Failed to fetch product data');
   }
-  return null;
+  return res.json();
 }
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await getProduct(params.id);
+export default function ProductDetailPage({ params }: { params: { id: string } }) {
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const productData = await getProduct(params.id);
+        setProduct(productData);
+      } catch (err) {
+        setError('Failed to load product. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [params.id]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-red-500">{error}</div>;
+  }
 
   if (!product) {
-    return <div>Product not found</div>;
+    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Product not found.</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="relative h-[400px] overflow-hidden rounded-lg">
-          <img
-            src={product.image_url || '/placeholder.svg'}
-            alt={product.title}
-            width={600}
-            height={600}
-            className="h-full w-full object-cover" />
-        </div>
-        <div className="flex flex-col justify-center">
-          <h1 className="text-4xl font-bold mb-4">{product.title}</h1>
-          <p className="text-lg text-gray-500 dark:text-gray-400 mb-6">{product.description || 'Описание отсутствует.'}</p>
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-3xl font-bold">${product.price}</p>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Category:</span>
-              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-500">
-                {product.category}
-              </span>
-            </div>
+    <div className="bg-gray-900 min-h-screen text-white">
+      <header className="py-12 bg-gray-800 text-center">
+        <a href="/" className="text-5xl font-bold">MarketGE</a>
+        <p className="text-xl mt-2">Your One-Stop Shop</p>
+      </header>
+      <main className="p-12">
+        <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg overflow-hidden md:flex">
+          <div className="md:w-1/2">
+              <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" />
           </div>
-          <button
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 w-full">
-            Add to Cart
-          </button>
+          <div className="p-8 md:w-1/2">
+            <h1 className="text-4xl font-bold mb-4">{product.title}</h1>
+            <p className="text-gray-400 mb-6 text-lg">{product.category}</p>
+            <p className="text-gray-300 mb-6">{product.description}</p>
+            <p className="text-2xl font-semibold mb-6">₾{product.price}</p>
+            <button className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-600 transition-colors duration-300">
+              Add to Cart
+            </button>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
