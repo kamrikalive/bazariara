@@ -31,13 +31,12 @@ interface OrderData {
     title: string;
     price: number;
     quantity: number;
-    image_url?: string;
+    image_url?: string | null;
   }>;
   total: number;
   createdAt: Date;
 }
 
-// Функция для отправки уведомления в Telegram
 async function sendTelegramNotification(orderData: OrderData): Promise<boolean> {
   const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
   const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -47,7 +46,6 @@ async function sendTelegramNotification(orderData: OrderData): Promise<boolean> 
     return false;
   }
 
-  // Формируем сообщение
   const itemsList = orderData.items
     .map((item, index) => 
       `${index + 1}. ${item.title}\n   Количество: ${item.quantity}\n   Цена: ₾${item.price}\n   Сумма: ₾${(item.price * item.quantity).toFixed(2)}`
@@ -121,16 +119,14 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
         title: item.product.title,
         price: item.product.price,
         quantity: item.quantity,
-        image_url: item.product.image_url
+        image_url: item.product.image_url ?? null,
       })),
       total,
       createdAt: new Date(),
     };
 
-    // Сохраняем заказ в Firestore
     await firestore.collection('orders').add(orderData);
 
-    // ВАЖНО: Отправляем уведомление в Telegram
     const telegramSent = await sendTelegramNotification(orderData);
     
     if (!telegramSent) {
@@ -138,8 +134,10 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
     }
 
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Ошибка при создании заказа:', error);
-    return { success: false, message: 'Произошла ошибка при создании заказа.' };
+    // Временно возвращаем реальное сообщение об ошибке для отладки
+    const errorMessage = error.message || 'Произошла неизвестная ошибка на сервере.';
+    return { success: false, message: `Отладочная ошибка: ${errorMessage}` };
   }
 }
