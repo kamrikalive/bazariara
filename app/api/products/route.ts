@@ -1,16 +1,20 @@
+
 import { NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import { db } from '../../../lib/firebaseAdmin';
 
 export async function GET() {
-    const filePath = path.join(process.cwd(), 'products.json');
-    
-    try {
-        const fileContent = await fs.readFile(filePath, 'utf8');
-        const products = JSON.parse(fileContent);
-        return NextResponse.json(products);
-    } catch (error) {
-        console.error('Error reading or parsing products.json:', error);
-        return new NextResponse('Internal Server Error', { status: 500 });
-    }
+  try {
+    const hikingSnapshot = await db.collection('hiking').get();
+    const gardenSnapshot = await db.collection('garden').get();
+
+    const hikingProducts = hikingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const gardenProducts = gardenSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    const allProducts = [...hikingProducts, ...gardenProducts];
+
+    return NextResponse.json(allProducts);
+  } catch (error) {
+    console.error('Error fetching products from Firestore:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 }
