@@ -15,9 +15,9 @@ type Product = {
   image_url?: string;
 };
 
-// === Fetch product by ID ===
-async function getProduct(id: string): Promise<Product> {
-  const res = await fetch(`/api/products/${id}`);
+// === Fetch product by ID and Category ===
+async function getProduct(category: string, id: string): Promise<Product> {
+  const res = await fetch(`/api/products/${category}/${id}`);
   if (!res.ok) {
     throw new Error('Failed to fetch product data');
   }
@@ -25,7 +25,7 @@ async function getProduct(id: string): Promise<Product> {
   return {...product, id: parseInt(product.id, 10)};
 }
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage({ params }: { params: { category: string, id: string } }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const productData = await getProduct(params.id);
+        const productData = await getProduct(params.category, params.id);
         setProduct(productData);
       } catch (err) {
         setError('Не удалось загрузить товар. Пожалуйста, попробуйте еще раз позже.');
@@ -45,7 +45,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     };
 
     fetchProduct();
-  }, [params.id]);
+  }, [params.category, params.id]);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Загрузка...</div>;

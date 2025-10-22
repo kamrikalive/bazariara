@@ -31,6 +31,12 @@ const categoryMap: { [key: string]: string } = {
     'garden': 'Сад',
 };
 
+// Create a reverse mapping
+const reverseCategoryMap: { [key: string]: string } = Object.fromEntries(
+  Object.entries(categoryMap).map(([key, value]) => [value, key])
+);
+
+
 // Define the categories to be displayed
 const displayCategories = ['Товары для отдыха', 'Сад'];
 
@@ -123,36 +129,39 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-          {paginatedProducts.map((product) => (
-            <div 
-              key={product.id} 
-              className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
-            >
-                <Link href={`/products/${product.id}`} className="flex-grow">
-                    <div className="overflow-hidden">
-                      <img 
-                        src={product.image_url} 
-                        alt={product.title} 
-                        className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
-                      />
-                    </div>
-                    <div className="p-5">
-                        <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
-                        <p className="text-gray-400 text-sm mb-3">{product.category}</p>
-                        <p className="text-2xl font-semibold text-lime-500">₾{product.price}</p>
-                    </div>
-                </Link>
-                <div className="p-5 pt-0 mt-auto">
-                    <button 
-                        onClick={() => addToCart(product)} // Add product to cart
-                        className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
-                    >
-                        <ShoppingCartIcon className="h-5 w-5 mr-2"/>
-                        Добавить в корзину
-                    </button>
-                </div>
-            </div>
-          ))}
+          {paginatedProducts.map((product) => {
+            const originalCategory = reverseCategoryMap[product.category];
+            return (
+              <div 
+                key={product.id} 
+                className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
+              >
+                  <Link href={`/products/${originalCategory}/${product.id}`} className="flex-grow">
+                      <div className="overflow-hidden">
+                        <img 
+                          src={product.image_url} 
+                          alt={product.title} 
+                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
+                        />
+                      </div>
+                      <div className="p-5">
+                          <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
+                          <p className="text-gray-400 text-sm mb-3">{product.category}</p>
+                          <p className="text-2xl font-semibold text-lime-500">₾{product.price}</p>
+                      </div>
+                  </Link>
+                  <div className="p-5 pt-0 mt-auto">
+                      <button 
+                          onClick={() => addToCart(product)} // Add product to cart
+                          className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
+                      >
+                          <ShoppingCartIcon className="h-5 w-5 mr-2"/>
+                          Добавить в корзину
+                      </button>
+                  </div>
+              </div>
+            )
+          })}
         </div>
 
         <div className="mt-16 flex justify-center items-center gap-4">
