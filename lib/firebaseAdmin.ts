@@ -1,14 +1,13 @@
 
 import admin from 'firebase-admin';
 
-// Check if the service account key is available
 const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
-// Initialize Firebase Admin only if it hasn't been initialized yet
-// and the service account key is available.
 if (!admin.apps.length && serviceAccountKey) {
   try {
-    const serviceAccount = JSON.parse(serviceAccountKey);
+    // Decode the base64 encoded service account key
+    const decodedServiceAccountKey = Buffer.from(serviceAccountKey, 'base64').toString('utf8');
+    const serviceAccount = JSON.parse(decodedServiceAccountKey);
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
@@ -17,8 +16,6 @@ if (!admin.apps.length && serviceAccountKey) {
   }
 }
 
-// Export a db instance only if an app is available.
-// This prevents the build-time error.
 const db = admin.apps.length ? admin.firestore() : null;
 
 export { db };
