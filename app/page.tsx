@@ -19,7 +19,7 @@ async function fetchProducts(): Promise<Product[]> {
   const res = await fetch('/api/products');
   if (!res.ok) {
     // Create an error object with the status text
-    throw new Error(`Failed to fetch data: ${res.statusText}`);
+    throw new Error(`Не удалось загрузить товары: ${res.statusText}`);
   }
   const products = await res.json();
   return products.map((product: any) => ({...product, id: parseInt(product.id, 10)}));
@@ -27,7 +27,7 @@ async function fetchProducts(): Promise<Product[]> {
 
 // Define a mapping for categories
 const categoryMap: { [key: string]: string } = {
-    'leisure': 'Товары для отдыха',
+    'hiking': 'Товары для отдыха',
     'garden': 'Сад',
 };
 
@@ -40,7 +40,7 @@ export default function HomePage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>('All');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>('Все');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +63,7 @@ export default function HomePage() {
         
         // Get unique categories from the processed products
         const uniqueCategories = Array.from(new Set(processedProducts.map((p) => p.category)));
-        setCategories(['All', ...uniqueCategories]);
+        setCategories(['Все', ...uniqueCategories]);
 
       } catch (err: any) {
         setError(err.message); // Set the error message to be displayed
@@ -77,7 +77,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (selectedCategory === 'All') {
+    if (selectedCategory === 'Все') {
       setFilteredProducts(allProducts);
     } else {
       setFilteredProducts(allProducts.filter(p => p.category === selectedCategory));
@@ -86,11 +86,11 @@ export default function HomePage() {
   }, [selectedCategory, allProducts]);
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-[60vh] text-white">Loading products...</div>;
+    return <div className="flex items-center justify-center min-h-[60vh] text-white">Загрузка товаров...</div>;
   }
 
   if (error) {
-    return <div className="flex items-center justify-center min-h-[60vh] text-red-500">Error: {error}</div>;
+    return <div className="flex items-center justify-center min-h-[60vh] text-red-500">Ошибка: {error}</div>;
   }
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -104,7 +104,7 @@ export default function HomePage() {
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
             <h2 className="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">
-              Our Products
+              Наши товары
             </h2>
             <div className="flex justify-center gap-3 flex-wrap">
                 {categories.map(category => (
@@ -148,7 +148,7 @@ export default function HomePage() {
                         className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
                     >
                         <ShoppingCartIcon className="h-5 w-5 mr-2"/>
-                        Add to Cart
+                        Добавить в корзину
                     </button>
                 </div>
             </div>
@@ -161,15 +161,15 @@ export default function HomePage() {
                 disabled={currentPage === 1}
                 className="px-4 py-2 font-semibold rounded-lg bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors duration-300"
             >
-                Previous
+                Назад
             </button>
-            <span className="text-lg font-medium text-gray-300">Page {currentPage} of {totalPages}</span>
+            <span className="text-lg font-medium text-gray-300">Страница {currentPage} из {totalPages}</span>
             <button 
                 onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
                 className="px-4 py-2 font-semibold rounded-lg bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors duration-300"
             >
-                Next
+                Вперед
             </button>
         </div>
 

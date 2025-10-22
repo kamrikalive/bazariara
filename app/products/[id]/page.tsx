@@ -37,7 +37,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         const productData = await getProduct(params.id);
         setProduct(productData);
       } catch (err) {
-        setError('Failed to load product. Please try again later.');
+        setError('Не удалось загрузить товар. Пожалуйста, попробуйте еще раз позже.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -48,7 +48,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   }, [params.id]);
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Loading...</div>;
+    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Загрузка...</div>;
   }
 
   if (error) {
@@ -56,7 +56,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   }
 
   if (!product) {
-    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Product not found.</div>;
+    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Товар не найден.</div>;
   }
 
   return (
@@ -65,7 +65,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ArrowLeftIcon className="h-5 w-5"/>
-            Back to Products
+            Назад к товарам
           </Link>
         </div>
 
@@ -103,7 +103,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   onClick={() => addToCart(product)}
                   className="w-full flex items-center justify-center px-4 py-4 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
                   <ShoppingCartIcon className="h-6 w-6 mr-3"/>
-                  Add to Cart
+                  Добавить в корзину
                 </button>
               </div>
             </div>

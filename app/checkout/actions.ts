@@ -103,11 +103,11 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
   const { customer, items, total } = orderDetails;
 
   if (!customer || !customer.name || !customer.contact) {
-    return { success: false, message: 'Customer details are missing.' };
+    return { success: false, message: 'Отсутствуют данные о клиенте.' };
   }
 
   if (!items || items.length === 0) {
-    return { success: false, message: 'Cart is empty.' };
+    return { success: false, message: 'Корзина пуста.' };
   }
 
   try {
@@ -139,7 +139,7 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error creating order:', error);
+    console.error('Ошибка при создании заказа:', error);
     return { success: false, message: 'Произошла ошибка при создании заказа.' };
   }
 }

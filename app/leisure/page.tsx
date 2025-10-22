@@ -1,14 +1,14 @@
 import { firestore } from '@/lib/firebase/server';
 import CardList from '@/components/CardList';
 
-async function getLeisureItems() {
-  const snapshot = await firestore.collection('items').where('category', '==', 'leisure').get();
+async function getHikingItems() {
+  const snapshot = await firestore.collection('items').where('category', '==', 'hiking').get();
   const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   return items;
 }
 
-export default async function LeisurePage() {
-  const items = await getLeisureItems();
+export default async function HikingPage() {
+  const items = await getHikingItems();
 
   return (
     <div>
