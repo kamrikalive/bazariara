@@ -21,8 +21,18 @@ async function fetchProducts(): Promise<Product[]> {
     // Create an error object with the status text
     throw new Error(`Failed to fetch data: ${res.statusText}`);
   }
-  return res.json();
+  const products = await res.json();
+  return products.map((product: any) => ({...product, id: parseInt(product.id, 10)}));
 }
+
+// Define a mapping for categories
+const categoryMap: { [key: string]: string } = {
+    'leisure': 'Товары для отдыха',
+    'garden': 'Сад',
+};
+
+// Define the categories to be displayed
+const displayCategories = ['Товары для отдыха', 'Сад'];
 
 const ITEMS_PER_PAGE = 20;
 
@@ -42,10 +52,19 @@ export default function HomePage() {
         setLoading(true);
         setError(null);
         const products = await fetchProducts();
-        setAllProducts(products);
-        setFilteredProducts(products);
-        const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
+        
+        // Map categories and filter out unwanted ones
+        const processedProducts = products
+          .map(p => ({ ...p, category: categoryMap[p.category] || p.category }))
+          .filter(p => displayCategories.includes(p.category));
+
+        setAllProducts(processedProducts);
+        setFilteredProducts(processedProducts);
+        
+        // Get unique categories from the processed products
+        const uniqueCategories = Array.from(new Set(processedProducts.map((p) => p.category)));
         setCategories(['All', ...uniqueCategories]);
+
       } catch (err: any) {
         setError(err.message); // Set the error message to be displayed
         console.error(err);

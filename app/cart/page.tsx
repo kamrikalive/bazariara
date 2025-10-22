@@ -46,7 +46,7 @@ export default function CartPage() {
                                                     type="number"
                                                     min="1"
                                                     value={item.quantity}
-                                                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
+                                                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10))}
                                                     className="w-16 p-2 bg-transparent text-center focus:outline-none appearance-none"
                                                     style={{ MozAppearance: 'textfield' }} // Hide spinners in Firefox
                                                 />

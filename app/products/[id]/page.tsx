@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 // Define the Product type for strong typing
 type Product = {
-  id: string;
+  id: number;
   title: string;
   category: string;
   price: number;
@@ -21,7 +21,8 @@ async function getProduct(id: string): Promise<Product> {
   if (!res.ok) {
     throw new Error('Failed to fetch product data');
   }
-  return res.json();
+  const product = await res.json();
+  return {...product, id: parseInt(product.id, 10)};
 }
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {

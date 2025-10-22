@@ -14,51 +14,6 @@ try {
 
 const firestore = getFirestore();
 
-const products = [
-    {
-        title: 'Садовая лейка',
-        price: 500,
-        image_url: '/sneakers/sneakers-3.jpg',
-        category: 'garden',
-        description: 'Удобная и легкая лейка для полива ваших растений в саду и дома.'
-    },
-    {
-        title: 'Газонокосилка',
-        price: 15000,
-        image_url: '/sneakers/sneakers-4.jpg',
-        category: 'garden',
-        description: 'Мощная и эффективная газонокосилка для поддержания вашего газона в идеальном состоянии.'
-    },
-    {
-        title: 'Надувной матрас',
-        price: 2500,
-        image_url: '/sneakers/sneakers-5.jpg',
-        category: 'leisure',
-        description: 'Комфортный надувной матрас, который отлично подойдет для отдыха на природе или в качестве дополнительного спального места.'
-    },
-    {
-        title: 'Набор для бадминтона',
-        price: 1200,
-        image_url: '/sneakers/sneakers-6.jpg',
-        category: 'leisure',
-        description: 'Набор для бадминтона для активного отдыха на свежем воздухе. Включает 2 ракетки и воланчик.'
-    },
-    {
-        title: 'Мужские Кроссовки Nike Blazer Mid Suede',
-        price: 12999,
-        image_url: '/sneakers/sneakers-1.jpg',
-        category: 'hiking', // Changed from 'shoes' to 'hiking' to match existing categories
-        description: 'Классические кеды Nike Blazer в замшевом исполнении. Стильный выбор на каждый день.'
-    },
-    {
-        title: 'Мужские Кроссовки Nike Air Max 270',
-        price: 15599,
-        image_url: '/sneakers/sneakers-2.jpg',
-        category: 'hiking', // Changed from 'shoes' to 'hiking'
-        description: 'Современные и удобные кроссовки Nike Air Max 270 с большой воздушной подушкой для максимального комфорта.'
-    }
-];
-
 async function seedDatabase() {
     console.log('Seeding database...');
     try {

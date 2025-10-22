@@ -21,7 +21,6 @@ export default function Header() {
                 </Link>
                 <nav className="hidden md:flex gap-6 items-center">
                     <Link href="/" className="text-white hover:text-lime-400 transition-colors duration-300">All Products</Link>
-                    <Link href="/gre-garden" className="text-white hover:text-lime-400 transition-colors duration-300">Gre Garden</Link>
                 </nav>
                 <div className="flex items-center gap-6">
                     <Link href="/cart" className="relative flex items-center text-white hover:text-lime-400 transition-colors duration-300">
