@@ -2,7 +2,7 @@
 
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
-import { TrashIcon } from '@heroicons/react/24/outline'; // Using outline icon for a sleeker look
+import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 
 export default function CartPage() {
     const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -37,14 +37,23 @@ export default function CartPage() {
                                                 <p className="text-lime-500 font-semibold">₾{item.price.toFixed(2)}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <input 
-                                                type="number"
-                                                min="1"
-                                                value={item.quantity}
-                                                onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                                                className="w-20 p-2 bg-gray-700/50 border border-gray-600 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-lime-500 transition-all duration-300"
-                                            />
+                                        <div className="flex items-center gap-2 sm:gap-4">
+                                            <div className="flex items-center rounded-lg bg-gray-700/50 border border-gray-600">
+                                                <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-l-lg transition-colors">
+                                                    <MinusIcon className="h-5 w-5"/>
+                                                </button>
+                                                <input 
+                                                    type="number"
+                                                    min="1"
+                                                    value={item.quantity}
+                                                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
+                                                    className="w-16 p-2 bg-transparent text-center focus:outline-none appearance-none"
+                                                    style={{ MozAppearance: 'textfield' }} // Hide spinners in Firefox
+                                                />
+                                                <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-r-lg transition-colors">
+                                                    <PlusIcon className="h-5 w-5"/>
+                                                </button>
+                                            </div>
                                             <button onClick={() => removeFromCart(item.id)} className="text-gray-400 hover:text-red-500 p-2 rounded-full transition-colors duration-300">
                                                 <TrashIcon className="h-6 w-6" />
                                             </button>
