@@ -51,6 +51,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { addToCart } = useCart();
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const getProductsClientSide = async () => {
@@ -83,13 +84,21 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (selectedCategory === 'Все') {
-      setFilteredProducts(allProducts);
-    } else {
-      setFilteredProducts(allProducts.filter(p => p.category === selectedCategory));
+    let products = allProducts;
+
+    if (selectedCategory !== 'Все') {
+      products = products.filter(p => p.category === selectedCategory);
     }
-    setCurrentPage(1); // Reset to first page on category change
-  }, [selectedCategory, allProducts]);
+
+    if (searchQuery) {
+      products = products.filter(p => 
+        p.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredProducts(products);
+    setCurrentPage(1); // Reset to first page on category or search change
+  }, [selectedCategory, allProducts, searchQuery]);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-[60vh] text-white">Загрузка товаров...</div>;
@@ -115,6 +124,15 @@ export default function HomePage() {
             <h2 className="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">
               Наши товары
             </h2>
+            <div className="mb-8 max-w-md mx-auto">
+              <input
+                type="text"
+                placeholder="Поиск по названию..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-500"
+              />
+            </div>
             <div className="flex justify-center gap-3 flex-wrap">
                 {categories.map(category => (
                     <button 
