@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon } from '@heroicons/react/24/solid';
+import { calculateDisplayPrice } from '@/lib/priceLogic';
+
 
 // Define the Product type for strong typing
 type Product = {
@@ -168,7 +170,7 @@ export default function HomePage() {
                       <div className="p-5">
                           <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
                           <p className="text-gray-400 text-sm mb-3">{product.category}</p>
-                          <p className="text-2xl font-semibold text-lime-500">₾{product.price}</p>
+                          <p className="text-2xl font-semibold text-lime-500">₾{calculateDisplayPrice(product.price)}</p>
                       </div>
                   </Link>
                   <div className="p-5 pt-0 mt-auto">

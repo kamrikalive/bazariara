@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { calculateDisplayPrice } from '@/lib/priceLogic';
 
 // This function will fetch the data for a single product.
 async function getProduct(id: string) {
@@ -59,7 +60,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             <h1 className="text-4xl font-bold mb-4">{product.title}</h1>
             <p className="text-gray-400 mb-6 text-lg">{product.category}</p>
             <p className="text-gray-300 mb-6">{product.description}</p>
-            <p className="text-2xl font-semibold mb-6">₾{product.price}</p>
+            <p className="text-2xl font-semibold mb-6">₾{calculateDisplayPrice(product.price)}</p>
             <button className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-600 transition-colors duration-300">
               Add to Cart
             </button>

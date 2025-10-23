@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useRouter } from 'next/navigation';
 import { handlePlaceOrder } from './actions';
+import { calculateDisplayPrice } from '@/lib/priceLogic';
 
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
@@ -14,7 +15,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cartItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -36,7 +37,7 @@ export default function CheckoutPage() {
 
     const orderDetails = {
       customer: { name, phone, telegram },
-      items: cartItems.map(item => ({ product: item, quantity: item.quantity })), 
+      items: cartItems.map(item => ({ product: { ...item, price: calculateDisplayPrice(item.price) }, quantity: item.quantity })), 
       total,
     };
 
@@ -70,10 +71,10 @@ export default function CheckoutPage() {
                     <img src={item.image_url} alt={item.title} className="w-16 h-16 object-cover rounded-md mr-4" />
                     <div>
                       <h3 className="font-semibold">{item.title}</h3>
-                      <p className="text-gray-400">{item.quantity} x ₾{item.price.toFixed(2)}</p>
+                      <p className="text-gray-400">{item.quantity} x ₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
                     </div>
                   </div>
-                  <span className="font-semibold">₾{(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-semibold">₾{(calculateDisplayPrice(item.price) * item.quantity).toFixed(2)}</span>
                 </li>
               ))}
             </ul>

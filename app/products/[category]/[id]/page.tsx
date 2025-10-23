@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
+import { calculateDisplayPrice } from '@/lib/priceLogic';
 
 // Define the Product type for strong typing
 type Product = {
@@ -86,7 +87,7 @@ export default function ProductDetailPage({ params }: { params: { category: stri
                 <p className="text-sm text-lime-400 font-semibold mb-2">{product.category}</p>
                 <h1 className="text-4xl lg:text-5xl font-extrabold mb-4 text-gray-100">{product.title}</h1>
                 
-                <p className="text-4xl font-bold text-lime-500 mb-6">₾{product.price}</p>
+                <p className="text-4xl font-bold text-lime-500 mb-6">₾{calculateDisplayPrice(product.price)}</p>
 
                 {/* === Description Field === */}
                 {product.description && (

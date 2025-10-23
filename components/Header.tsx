@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon } from '@heroicons/react/24/solid';
+import { calculateDisplayPrice } from '@/lib/priceLogic';
 
 export default function Header() {
     const { cartItems } = useCart();
@@ -11,7 +12,7 @@ export default function Header() {
     const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     // Calculate the total price of items in the cart
-    const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const totalPrice = cartItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
 
     return (
         <header className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">

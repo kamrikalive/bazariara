@@ -3,11 +3,12 @@
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
+import { calculateDisplayPrice } from '@/lib/priceLogic';
 
 export default function CartPage() {
     const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
 
-    const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const totalPrice = cartItems.reduce((acc, item) => acc + calculateDisplayPrice(item.price) * item.quantity, 0);
 
     return (
         <div className="bg-gray-900 min-h-screen text-white">
@@ -34,7 +35,7 @@ export default function CartPage() {
                                             <img src={item.image_url} alt={item.title} className="w-20 h-20 object-cover rounded-lg shadow-md"/>
                                             <div className="flex-grow">
                                                 <h2 className="font-bold text-lg text-gray-200 group-hover:text-lime-400 transition-colors duration-300">{item.title}</h2>
-                                                <p className="text-lime-500 font-semibold">₾{item.price.toFixed(2)}</p>
+                                                <p className="text-lime-500 font-semibold">₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2 sm:gap-4">
