@@ -1,11 +1,31 @@
 import admin from 'firebase-admin';
-import { initializeApp } from 'firebase-admin/app';
+import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import products from '../../products.json' assert { type: 'json' };
 
-// Initialize Firebase Admin SDK
+
+// Initialize Firebase Admin SDK using Base64 encoded service account
 try {
   if (!admin.apps.length) {
-    initializeApp();
+    // Ensure the environment variable is set
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable is not set.');
+    }
+
+    // Decode the Base64 encoded service account
+    const serviceAccountString = Buffer.from(
+      process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
+      'base64'
+    ).toString('utf8');
+    
+    const serviceAccount = JSON.parse(serviceAccountString);
+
+    // Initialize the Firebase Admin SDK
+    initializeApp({
+      credential: cert(serviceAccount),
+    });
+    
+    console.log('Firebase Admin SDK initialized successfully for seeding.');
   }
 } catch (error) {
   console.error('Firebase initialization error:', error.message);
@@ -19,8 +39,8 @@ async function seedDatabase() {
     try {
         const batch = firestore.batch();
         products.forEach(product => {
-            const collectionRef = firestore.collection(product.category);
-            const docRef = collectionRef.doc(); // Firestore will auto-generate an ID
+            // Use a consistent collection name for all products
+            const docRef = firestore.collection('products').doc(String(product.id)); 
             batch.set(docRef, product);
         });
         await batch.commit();
