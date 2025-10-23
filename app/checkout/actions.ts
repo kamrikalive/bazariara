@@ -6,9 +6,10 @@ import { FieldValue } from 'firebase-admin/firestore';
 // Interface for a single item in the order from the client
 interface OrderItem {
   product: {
-    id: number; // Corrected type to number
+    id: number; 
     title: string;
     price: number;
+    category: string;
     image_url?: string;
   };
   quantity: number;
@@ -27,7 +28,7 @@ interface OrderDetails {
 
 // This interface is for the data that will be sent to Telegram
 interface EnrichedItemData {
-    id: number; // Corrected type to number
+    id: number; 
     title: string;
     price: number;
     quantity: number;
@@ -118,6 +119,7 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
         title: item.product.title,
         price: item.product.price,
         quantity: item.quantity,
+        category: item.product.category, // Save category with the order
         image_url: item.product.image_url ?? null,
       })),
       total,
@@ -127,18 +129,31 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
     await firestore.collection('orders').add(orderDataForFirestore);
     console.log('Order saved to Firestore.');
 
-    const productIds = items.map(item => item.product.id);
-    // Corrected the query to use the 'id' field (number) instead of the document ID
-    const productsSnapshot = await firestore.collection('garden').where('id', 'in', productIds).get();
-    
-    const productLinks: { [key: number]: string } = {}; // Key is now a number
-    productsSnapshot.forEach(doc => {
-        const data = doc.data();
-        // Use the numeric 'id' field from the document as the key
-        if (data.id && data.link) {
-            productLinks[data.id] = data.link;
+    const productLinks: { [key: number]: string } = {}; 
+
+    const itemsByCategory: { [key:string]: number[] } = {};
+    items.forEach(item => {
+        // Map display category name to collection name
+        const collectionName = item.product.category === 'Сад' ? 'garden' : 'hiking';
+        if (!itemsByCategory[collectionName]) {
+            itemsByCategory[collectionName] = [];
         }
+        itemsByCategory[collectionName].push(item.product.id);
     });
+
+    // Fetch links for each category
+    for (const collectionName in itemsByCategory) {
+        const productIds = itemsByCategory[collectionName];
+        if (productIds.length > 0) {
+            const productsSnapshot = await firestore.collection(collectionName).where('id', 'in', productIds).get();
+            productsSnapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.id && data.link) {
+                    productLinks[data.id] = data.link;
+                }
+            });
+        }
+    }
 
     const enrichedItems: EnrichedItemData[] = items.map(item => ({
       id: item.product.id,

@@ -18,6 +18,12 @@ export default function CheckoutPage() {
   const total = cartItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    const digits = input.replace(/[^0-9]/g, '');
+    setPhone(digits);
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
@@ -35,8 +41,10 @@ export default function CheckoutPage() {
         return;
     }
 
+    const fullPhoneNumber = phone ? `+995${phone}` : '';
+
     const orderDetails = {
-      customer: { name, phone, telegram },
+      customer: { name, phone: fullPhoneNumber, telegram },
       items: cartItems.map(item => ({ product: { ...item, price: calculateDisplayPrice(item.price) }, quantity: item.quantity })), 
       total,
     };
@@ -89,45 +97,54 @@ export default function CheckoutPage() {
         <div className="bg-gray-800 rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-semibold mb-6">Контактные данные</h2>
             <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label htmlFor="name" className="block text-gray-300 mb-2">Имя</label>
+                <div className="mb-6">
+                    <label htmlFor="name" className="block text-gray-300 mb-2 font-medium">Имя</label>
                     <input 
                         type="text" 
                         id="name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lime-500"
+                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lime-500 transition-all duration-300"
                         required
                     />
                 </div>
-                <div className="mb-4">
-                    <label htmlFor="phone" className="block text-gray-300 mb-2">Номер телефона</label>
-                    <input 
-                        type="text" 
-                        id="phone"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lime-500"
-                        placeholder="+995 555 123 456"
-                    />
+                
+                <div className="mb-6">
+                    <label htmlFor="phone" className="block text-gray-300 mb-2 font-medium">Номер телефона (Грузия)</label>
+                    <div className="flex items-center bg-gray-700 border border-gray-600 rounded-lg focus-within:ring-2 focus-within:ring-lime-500 transition-all duration-300">
+                        <div className="flex items-center pl-4 pr-3 pointer-events-none">
+                            <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f1ec-1f1ea.png" alt="Georgia Flag" className="w-6 h-6 mr-2"/>
+                            <span className="text-white font-medium">+995</span>
+                        </div>
+                        <input 
+                            type="tel" 
+                            id="phone"
+                            value={phone}
+                            onChange={handlePhoneChange}
+                            className="flex-1 bg-transparent px-4 py-3 text-white placeholder-gray-400 focus:outline-none"
+                            placeholder="555 123 456"
+                            maxLength={9}
+                        />
+                    </div>
                 </div>
-                 <div className="mb-6">
-                    <label htmlFor="telegram" className="block text-gray-300 mb-2">Telegram</label>
+
+                 <div className="mb-8">
+                    <label htmlFor="telegram" className="block text-gray-300 mb-2 font-medium">Telegram</label>
                     <input 
                         type="text" 
                         id="telegram"
                         value={telegram}
                         onChange={(e) => setTelegram(e.target.value)}
-                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lime-500"
+                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lime-500 transition-all duration-300"
                         placeholder="@username"
                     />
                 </div>
                 
-                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+                {error && <p className="text-red-500 text-center mb-6 p-3 bg-red-900/20 rounded-lg">{error}</p>}
 
                 <button 
                     type="submit" 
-                    className="w-full bg-lime-500 text-gray-900 font-bold py-3 rounded-lg hover:bg-lime-600 transition-colors duration-300 disabled:opacity-50 disabled:cursor-wait"
+                    className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 disabled:opacity-50 disabled:cursor-wait"
                     disabled={isSubmitting || cartItems.length === 0}
                 >
                     {isSubmitting ? 'Обработка...' : 'Отправить заказ'}
