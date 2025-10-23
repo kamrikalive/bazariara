@@ -18,7 +18,7 @@ export default function CartPage() {
 
                 {cartItems.length === 0 ? (
                     <div className="text-center bg-gray-800/50 rounded-xl p-12 shadow-2xl shadow-black/20">
-                        <p className="text-2xl font-semibold mb-6 text-gray-300">Ваша корзина немного пуста.</p>
+                        <p className="text-2xl font-semibold mb-6 text-gray-300">Ваша корзина пока пуста.</p>
                         <Link href="/" className="bg-lime-500 text-gray-900 font-bold py-3 px-8 rounded-full hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
                             Начать покупки
                         </Link>
