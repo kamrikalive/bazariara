@@ -13,10 +13,8 @@ if (!admin.apps.length) {
 
     let serviceAccount;
     try {
-      // Try to parse it as a raw JSON string
       serviceAccount = JSON.parse(serviceAccountKey);
     } catch (e) {
-      // If that fails, assume it's a base64 encoded string
       const decodedKey = Buffer.from(serviceAccountKey, 'base64').toString('utf8');
       serviceAccount = JSON.parse(decodedKey);
     }
@@ -34,13 +32,11 @@ if (!admin.apps.length) {
 const firestore = getFirestore();
 
 async function seedDatabase() {
-    // Define categories to process
     const categories = {
         'Сад': 'garden',
-        'Товары для отдыха': 'hiking'
     };
 
-    console.log('Starting to seed database. Prices will be doubled.');
+    console.log('Starting to seed database for the "garden" collection.');
 
     try {
         for (const [jsonCategory, firestoreCollection] of Object.entries(categories)) {
@@ -57,25 +53,23 @@ async function seedDatabase() {
             console.log(`Found ${categoryProducts.length} products to update/create in "${firestoreCollection}".`);
 
             categoryProducts.forEach(product => {
-                // Destructure to remove old fields and get the price
-                const { link, availability, price, ...rest } = product;
+                const { availability, price, ...rest } = product;
                 const docRef = firestore.collection(firestoreCollection).doc(String(product.id));
 
-                // Double the price
                 const newPrice = price * 2;
 
                 const firestoreProduct = {
-                    ...rest,
+                    ...rest, 
                     price: newPrice, // Set the new, doubled price
-                    in_stock: availability === "В наличии"
+                    in_stock: availability !== "Нет в наличии" // Set in_stock to true unless explicitly out of stock
                 };
 
-                // Use set to either create or overwrite the document
-                batch.set(docRef, firestoreProduct);
+                // Use set with merge to update existing documents or create new ones
+                batch.set(docRef, firestoreProduct, { merge: true });
             });
 
             await batch.commit();
-            console.log(`Successfully seeded ${categoryProducts.length} products in the "${firestoreCollection}" collection with doubled prices.`);
+            console.log(`Successfully seeded ${categoryProducts.length} products in the "${firestoreCollection}" collection.`);
         }
         console.log("Database seeding process completed.");
 

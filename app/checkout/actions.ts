@@ -1,11 +1,12 @@
 'use server';
 
 import { firestore } from '@/lib/firebase/server';
+import { FieldValue } from 'firebase-admin/firestore';
 
-// Updated interface for a single item in the order
+// Interface for a single item in the order from the client
 interface OrderItem {
   product: {
-    id: string | number;
+    id: number; // Corrected type to number
     title: string;
     price: number;
     image_url?: string;
@@ -13,7 +14,7 @@ interface OrderItem {
   quantity: number;
 }
 
-// Updated interface for the incoming order details from the client
+// Interface for the incoming order details from the client
 interface OrderDetails {
   customer: {
     name: string;
@@ -24,60 +25,54 @@ interface OrderDetails {
   total: number;
 }
 
-// Updated interface for the data structure to be saved in Firestore and sent to Telegram
-interface OrderData {
-  customer: {
-    name: string;
-    phone?: string;
-    telegram?: string;
-  };
-  items: Array<{
-    id: string | number;
+// This interface is for the data that will be sent to Telegram
+interface EnrichedItemData {
+    id: number; // Corrected type to number
     title: string;
     price: number;
     quantity: number;
-    image_url?: string | null;
-  }>;
-  total: number;
-  createdAt: Date;
+    link?: string; // The link fetched from the database
 }
 
 // This function sends a formatted message to a Telegram chat
-async function sendTelegramNotification(orderData: OrderData): Promise<boolean> {
+async function sendTelegramNotification(
+    customer: OrderDetails['customer'],
+    items: EnrichedItemData[],
+    total: number,
+    createdAt: Date
+): Promise<boolean> {
   const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
   const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.error('Telegram environment variables (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID) are not set.');
-    return false; // Return false if Telegram is not configured
+    console.error('Telegram environment variables are not set.');
+    return false;
   }
 
-  // Construct the contact details string
   const contactDetails = [
-    orderData.customer.phone && `📞 Телефон: ${orderData.customer.phone}`,
-    orderData.customer.telegram && `💬 Telegram: ${orderData.customer.telegram}`
-  ].filter(Boolean).join('\n'); // Filter out empty values and join
+    customer.phone && `📞 Телефон: ${customer.phone}`,
+    customer.telegram && `💬 Telegram: ${customer.telegram}`
+  ].filter(Boolean).join('\n');
 
-  // Construct the list of items
-  const itemsList = orderData.items
-    .map((item, index) => 
-      `${index + 1}. ${item.title}\n   Кол-во: ${item.quantity} x ₾${item.price.toFixed(2)} = ₾${(item.price * item.quantity).toFixed(2)}`
-    )
+  const itemsList = items
+    .map((item, index) => {
+      const titleWithLink = item.link ? `[${item.title}](${item.link})` : item.title;
+      return `${index + 1}. ${titleWithLink}\n   Кол-во: ${item.quantity} x ₾${item.price.toFixed(2)} = ₾${(item.price * item.quantity).toFixed(2)}`;
+    })
     .join('\n\n');
 
-  // Construct the final message for Telegram
   const message = `
 🛒 *НОВЫЙ ЗАКАЗ* 🛒
 
-👤 *Клиент:* ${orderData.customer.name}
+👤 *Клиент:* ${customer.name}
 ${contactDetails}
 
 📦 *Состав заказа:*
 ${itemsList}
 
-*💰 ИТОГО: ₾${orderData.total.toFixed(2)}*
+*💰 ИТОГО: ₾${total.toFixed(2)}*
 
-📅 *Дата:* ${new Date(orderData.createdAt).toLocaleString('ru-RU', { timeZone: 'Asia/Tbilisi' })}
+📅 *Дата:* ${new Date(createdAt).toLocaleString('ru-RU', { timeZone: 'Asia/Tbilisi' })}
   `.trim();
 
   try {
@@ -86,20 +81,14 @@ ${itemsList}
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: 'Markdown',
-        }),
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'Markdown' }),
       }
     );
-
     const data = await response.json();
     if (!data.ok) {
       console.error('Telegram API Error:', data.description);
       return false;
     }
-
     console.log('Telegram notification sent successfully.');
     return true;
   } catch (error) {
@@ -112,9 +101,8 @@ ${itemsList}
 export async function handlePlaceOrder(orderDetails: OrderDetails) {
   const { customer, items, total } = orderDetails;
 
-  // Server-side validation
   if (!customer || !customer.name || (!customer.phone && !customer.telegram)) {
-    return { success: false, message: 'Необходимо указать имя и хотя бы один контакт (телефон или Telegram).' };
+    return { success: false, message: 'Необходимо указать имя и хотя бы один контакт.' };
   }
 
   if (!items || items.length === 0) {
@@ -122,14 +110,10 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
   }
 
   try {
-    // Prepare the order data for saving and notification
-    const orderData: OrderData = {
-      customer: {
-        name: customer.name,
-        phone: customer.phone || undefined,
-        telegram: customer.telegram || undefined,
-      },
-      items: items.map((item) => ({
+    const createdAt = new Date();
+    const orderDataForFirestore = {
+      customer,
+      items: items.map(item => ({
         id: item.product.id,
         title: item.product.title,
         price: item.product.price,
@@ -137,28 +121,42 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
         image_url: item.product.image_url ?? null,
       })),
       total,
-      createdAt: new Date(),
+      createdAt: FieldValue.serverTimestamp(),
     };
 
-    // Save the order to Firestore
-    await firestore.collection('orders').add(orderData);
-    console.log(`Order ${orderData.createdAt.toISOString()} saved to Firestore.`);
+    await firestore.collection('orders').add(orderDataForFirestore);
+    console.log('Order saved to Firestore.');
 
-    // Send a notification to Telegram
-    const telegramSent = await sendTelegramNotification(orderData);
-    if (!telegramSent) {
-      // Log a warning but don't fail the order if Telegram fails
-      console.warn('Order was saved to Firestore, but the Telegram notification failed to send.');
-    }
+    const productIds = items.map(item => item.product.id);
+    // Corrected the query to use the 'id' field (number) instead of the document ID
+    const productsSnapshot = await firestore.collection('garden').where('id', 'in', productIds).get();
+    
+    const productLinks: { [key: number]: string } = {}; // Key is now a number
+    productsSnapshot.forEach(doc => {
+        const data = doc.data();
+        // Use the numeric 'id' field from the document as the key
+        if (data.id && data.link) {
+            productLinks[data.id] = data.link;
+        }
+    });
 
-    // Return success
+    const enrichedItems: EnrichedItemData[] = items.map(item => ({
+      id: item.product.id,
+      title: item.product.title,
+      price: item.product.price,
+      quantity: item.quantity,
+      link: productLinks[item.product.id] || undefined
+    }));
+
+    await sendTelegramNotification(customer, enrichedItems, total, createdAt);
+
     return { success: true };
 
   } catch (error: any) {
     console.error('Error processing order:', error);
     return { 
       success: false, 
-      message: `На сервере произошла ошибка при обработке вашего заказа. Пожалуйста, попробуйте еще раз. (${error.message})`
+      message: `На сервере произошла ошибка: ${error.message}`
     };
   }
 }
