@@ -1,35 +1,34 @@
 
-import * as admin from 'firebase-admin';
+import admin from 'firebase-admin';
 
-// Initialize the app if it hasn't been already
+// This is the correct way to initialize the Firebase Admin SDK in a serverless environment like Vercel.
+// It uses environment variables to configure the SDK.
+
 if (!admin.apps.length) {
   try {
-    // Ensure the environment variable is set
-    if (!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
-      throw new Error('FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable is not set.');
+    // Ensure all required environment variables are present
+    if (
+      !process.env.FIREBASE_PROJECT_ID ||
+      !process.env.FIREBASE_CLIENT_EMAIL ||
+      !process.env.FIREBASE_PRIVATE_KEY
+    ) {
+      throw new Error('Missing Firebase environment variables (PROJECT_ID, CLIENT_EMAIL, PRIVATE_KEY)');
     }
 
-    // Decode the Base64 encoded service account
-    const serviceAccountString = Buffer.from(
-      process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
-      'base64'
-    ).toString('utf8');
-    
-    const serviceAccount = JSON.parse(serviceAccountString);
-
-    // Initialize the Firebase Admin SDK
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        // The private key must be formatted correctly by replacing escaped newlines.
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\n/g, '\n'),
+      }),
     });
-    
-    console.log('Firebase Admin SDK initialized successfully via Base64 credentials.');
-
-  } catch (error: any) {
-    console.error('Firebase Admin SDK initialization error', {
-      message: error.message,
-    });
+    console.log('Firebase Admin SDK initialized successfully.');
+  } catch (error) {
+    console.error('Firebase Admin SDK initialization error', error);
   }
 }
 
-// Export the initialized admin instance for use in other server-side files
+// Export the initialized admin instance
+export const firestore = admin.firestore();
 export { admin };
