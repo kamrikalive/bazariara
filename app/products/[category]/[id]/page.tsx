@@ -1,10 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useCart, Product } from '@/contexts/CartContext';
+import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
+
+// Define the Product type locally to ensure it has the necessary fields
+type Product = {
+    id: number;
+    title: string;
+    category: string;
+    price: number;
+    description?: string;
+    image_url?: string;
+};
 
 // === Fetch product by ID and Category ===
 async function getProduct(category: string, id: string): Promise<Product> {
@@ -40,7 +50,16 @@ export default function ProductDetailPage({ params }: { params: { category: stri
 
   const handleAddToCart = () => {
     if (product) {
-        addToCart(product);
+        // The addToCart function from context might expect a different Product type.
+        // We need to ensure the object we pass is compatible.
+        const productForCart = {
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            image_url: product.image_url,
+            category: product.category,
+        };
+        addToCart(productForCart);
     }
   };
 
