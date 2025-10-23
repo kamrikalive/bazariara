@@ -2,6 +2,7 @@
 
 import { firestore } from '@/lib/firebase/server';
 
+// Updated interface for a single item in the order
 interface OrderItem {
   product: {
     id: string | number;
@@ -12,19 +13,23 @@ interface OrderItem {
   quantity: number;
 }
 
+// Updated interface for the incoming order details from the client
 interface OrderDetails {
   customer: {
     name: string;
-    contact: string;
+    phone?: string;
+    telegram?: string;
   };
   items: OrderItem[];
   total: number;
 }
 
+// Updated interface for the data structure to be saved in Firestore and sent to Telegram
 interface OrderData {
   customer: {
     name: string;
-    contact: string;
+    phone?: string;
+    telegram?: string;
   };
   items: Array<{
     id: string | number;
@@ -37,33 +42,42 @@ interface OrderData {
   createdAt: Date;
 }
 
+// This function sends a formatted message to a Telegram chat
 async function sendTelegramNotification(orderData: OrderData): Promise<boolean> {
   const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
   const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.error('TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не настроены в переменных окружения');
-    return false;
+    console.error('Telegram environment variables (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID) are not set.');
+    return false; // Return false if Telegram is not configured
   }
 
+  // Construct the contact details string
+  const contactDetails = [
+    orderData.customer.phone && `📞 Телефон: ${orderData.customer.phone}`,
+    orderData.customer.telegram && `💬 Telegram: ${orderData.customer.telegram}`
+  ].filter(Boolean).join('\n'); // Filter out empty values and join
+
+  // Construct the list of items
   const itemsList = orderData.items
     .map((item, index) => 
-      `${index + 1}. ${item.title}\n   Количество: ${item.quantity}\n   Цена: ₾${item.price}\n   Сумма: ₾${(item.price * item.quantity).toFixed(2)}`
+      `${index + 1}. ${item.title}\n   Кол-во: ${item.quantity} x ₾${item.price.toFixed(2)} = ₾${(item.price * item.quantity).toFixed(2)}`
     )
     .join('\n\n');
 
+  // Construct the final message for Telegram
   const message = `
-🛒 *НОВЫЙ ЗАКАЗ*
+🛒 *НОВЫЙ ЗАКАЗ* 🛒
 
 👤 *Клиент:* ${orderData.customer.name}
-📞 *Контакт:* ${orderData.customer.contact}
+${contactDetails}
 
-📦 *Товары:*
+📦 *Состав заказа:*
 ${itemsList}
 
-💰 *ИТОГО: ₾${orderData.total.toFixed(2)}*
+*💰 ИТОГО: ₾${orderData.total.toFixed(2)}*
 
-📅 Дата: ${new Date(orderData.createdAt).toLocaleString('ru-RU', { timeZone: 'Asia/Tbilisi' })}
+📅 *Дата:* ${new Date(orderData.createdAt).toLocaleString('ru-RU', { timeZone: 'Asia/Tbilisi' })}
   `.trim();
 
   try {
@@ -71,9 +85,7 @@ ${itemsList}
       `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: TELEGRAM_CHAT_ID,
           text: message,
@@ -83,36 +95,39 @@ ${itemsList}
     );
 
     const data = await response.json();
-    
     if (!data.ok) {
-      console.error('Ошибка Telegram API:', data);
+      console.error('Telegram API Error:', data.description);
       return false;
     }
 
-    console.log('Уведомление успешно отправлено в Telegram');
+    console.log('Telegram notification sent successfully.');
     return true;
   } catch (error) {
-    console.error('Ошибка при отправке уведомления в Telegram:', error);
+    console.error('Failed to send Telegram notification:', error);
     return false;
   }
 }
 
+// This server action handles placing the order
 export async function handlePlaceOrder(orderDetails: OrderDetails) {
   const { customer, items, total } = orderDetails;
 
-  if (!customer || !customer.name || !customer.contact) {
-    return { success: false, message: 'Отсутствуют данные о клиенте.' };
+  // Server-side validation
+  if (!customer || !customer.name || (!customer.phone && !customer.telegram)) {
+    return { success: false, message: 'Необходимо указать имя и хотя бы один контакт (телефон или Telegram).' };
   }
 
   if (!items || items.length === 0) {
-    return { success: false, message: 'Корзина пуста.' };
+    return { success: false, message: 'Ваша корзина пуста.' };
   }
 
   try {
+    // Prepare the order data for saving and notification
     const orderData: OrderData = {
       customer: {
         name: customer.name,
-        contact: customer.contact,
+        phone: customer.phone || undefined,
+        telegram: customer.telegram || undefined,
       },
       items: items.map((item) => ({
         id: item.product.id,
@@ -125,19 +140,25 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
       createdAt: new Date(),
     };
 
-    // Запись в базу данных временно отключена
-    // await firestore.collection('orders').add(orderData);
+    // Save the order to Firestore
+    await firestore.collection('orders').add(orderData);
+    console.log(`Order ${orderData.createdAt.toISOString()} saved to Firestore.`);
 
+    // Send a notification to Telegram
     const telegramSent = await sendTelegramNotification(orderData);
-    
     if (!telegramSent) {
-      console.warn('Уведомление в Telegram не было отправлено, но заказ бы не был сохранен в любом случае (отладка)');
+      // Log a warning but don't fail the order if Telegram fails
+      console.warn('Order was saved to Firestore, but the Telegram notification failed to send.');
     }
 
+    // Return success
     return { success: true };
+
   } catch (error: any) {
-    console.error('Ошибка при обработке заказа (запись в БД отключена):', error);
-    const errorMessage = error.message || 'Произошла неизвестная ошибка на сервере.';
-    return { success: false, message: `Отладочная ошибка: ${errorMessage}` };
+    console.error('Error processing order:', error);
+    return { 
+      success: false, 
+      message: `На сервере произошла ошибка при обработке вашего заказа. Пожалуйста, попробуйте еще раз. (${error.message})`
+    };
   }
 }

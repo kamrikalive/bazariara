@@ -9,11 +9,11 @@ export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
   const router = useRouter();
   const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
+  const [phone, setPhone] = useState('');
+  const [telegram, setTelegram] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // FIX: Adapted to flat structure: item.price instead of item.product.price
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -22,8 +22,8 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
     setError(null);
 
-    if (!name || !contact) {
-      setError('Имя и контактные данные обязательны.');
+    if (!name || (!phone && !telegram)) {
+      setError('Необходимо указать имя и хотя бы один контакт: телефон или Telegram.');
       setIsSubmitting(false);
       return;
     }
@@ -34,9 +34,8 @@ export default function CheckoutPage() {
         return;
     }
 
-    // Transform flat structure to nested structure for the server action
     const orderDetails = {
-      customer: { name, contact },
+      customer: { name, phone, telegram },
       items: cartItems.map(item => ({ product: item, quantity: item.quantity })), 
       total,
     };
@@ -44,7 +43,7 @@ export default function CheckoutPage() {
     try {
       const result = await handlePlaceOrder(orderDetails);
       if (result.success) {
-        clearCart(); // Clear cart only on success
+        clearCart();
         router.push('/order-success');
       } else {
         throw new Error(result.message || 'Не удалось разместить заказ.');
@@ -68,7 +67,6 @@ export default function CheckoutPage() {
               {cartItems.map(item => (
                 <li key={item.id} className="py-4 flex items-center justify-between">
                   <div className="flex items-center">
-                     {/* FIX: Adapted to flat structure */}
                     <img src={item.image_url} alt={item.title} className="w-16 h-16 object-cover rounded-md mr-4" />
                     <div>
                       <h3 className="font-semibold">{item.title}</h3>
@@ -101,16 +99,26 @@ export default function CheckoutPage() {
                         required
                     />
                 </div>
-                <div className="mb-6">
-                    <label htmlFor="contact" className="block text-gray-300 mb-2">Телефон или Telegram</label>
+                <div className="mb-4">
+                    <label htmlFor="phone" className="block text-gray-300 mb-2">Номер телефона</label>
                     <input 
                         type="text" 
-                        id="contact"
-                        value={contact}
-                        onChange={(e) => setContact(e.target.value)}
+                        id="phone"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lime-500"
-                        placeholder="Напр., +995 555 123 456 или @username"
-                        required
+                        placeholder="+995 555 123 456"
+                    />
+                </div>
+                 <div className="mb-6">
+                    <label htmlFor="telegram" className="block text-gray-300 mb-2">Telegram</label>
+                    <input 
+                        type="text" 
+                        id="telegram"
+                        value={telegram}
+                        onChange={(e) => setTelegram(e.target.value)}
+                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lime-500"
+                        placeholder="@username"
                     />
                 </div>
                 
@@ -121,7 +129,7 @@ export default function CheckoutPage() {
                     className="w-full bg-lime-500 text-gray-900 font-bold py-3 rounded-lg hover:bg-lime-600 transition-colors duration-300 disabled:opacity-50 disabled:cursor-wait"
                     disabled={isSubmitting || cartItems.length === 0}
                 >
-                    {isSubmitting ? 'Обработка...' : 'Отправить заказ (с вами свяжутся)'}
+                    {isSubmitting ? 'Обработка...' : 'Отправить заказ'}
                 </button>
             </form>
         </div>
