@@ -45,7 +45,16 @@ export default function CheckoutPage() {
 
     const orderDetails = {
       customer: { name, phone: fullPhoneNumber, telegram },
-      items: cartItems.map(item => ({ product: { ...item, price: calculateDisplayPrice(item.price) }, quantity: item.quantity })), 
+      items: cartItems.map(item => ({
+        product: {
+          id: item.id,
+          title: item.title,
+          price: calculateDisplayPrice(item.price),
+          category: item.category, // Added missing category field
+          image_url: item.image_url,
+        },
+        quantity: item.quantity,
+      })), 
       total,
     };
 
