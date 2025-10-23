@@ -3,17 +3,26 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Define the types for our context
-type Product = {
+export type ProductInCart = {
     id: number;
     title: string;
     price: number;
     image_url?: string;
     quantity: number;
+    category: string;
+};
+
+export type Product = {
+    id: number;
+    title: string;
+    price: number;
+    image_url?: string;
+    category: string;
 };
 
 type CartContextType = {
-    cartItems: Product[];
-    addToCart: (item: Omit<Product, 'quantity'>) => void;
+    cartItems: ProductInCart[];
+    addToCart: (item: Product) => void;
     removeFromCart: (itemId: number) => void;
     updateQuantity: (itemId: number, quantity: number) => void;
     clearCart: () => void;
@@ -24,14 +33,18 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 // Create a provider component
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-    const [cartItems, setCartItems] = useState<Product[]>([]);
+    const [cartItems, setCartItems] = useState<ProductInCart[]>([]);
 
     // Load cart from localStorage on initial render
     useEffect(() => {
         try {
             const storedCart = localStorage.getItem('cart');
             if (storedCart) {
-                setCartItems(JSON.parse(storedCart));
+                // Basic validation to ensure stored data has the 'category' property
+                const parsedCart = JSON.parse(storedCart);
+                if (Array.isArray(parsedCart) && parsedCart.every(item => 'category' in item)) {
+                    setCartItems(parsedCart);
+                }
             }
         } catch (error) {
             console.error("Failed to parse cart from localStorage", error);
@@ -44,7 +57,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('cart', JSON.stringify(cartItems));
     }, [cartItems]);
 
-    const addToCart = (item: Omit<Product, 'quantity'>) => {
+    const addToCart = (item: Product) => {
         setCartItems(prevItems => {
             const existingItem = prevItems.find(i => i.id === item.id);
             if (existingItem) {
@@ -77,6 +90,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const clearCart = () => {
         setCartItems([]);
+        localStorage.removeItem('cart');
     };
 
     return (

@@ -1,20 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useCart } from '@/contexts/CartContext';
+import { useCart, Product } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
-
-// Define the Product type for strong typing
-type Product = {
-  id: number;
-  title: string;
-  category: string;
-  price: number;
-  description?: string;
-  image_url?: string;
-};
 
 // === Fetch product by ID and Category ===
 async function getProduct(category: string, id: string): Promise<Product> {
@@ -48,6 +38,12 @@ export default function ProductDetailPage({ params }: { params: { category: stri
     fetchProduct();
   }, [params.category, params.id]);
 
+  const handleAddToCart = () => {
+    if (product) {
+        addToCart(product);
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Загрузка...</div>;
   }
@@ -64,7 +60,7 @@ export default function ProductDetailPage({ params }: { params: { category: stri
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+          <Link href={`/${params.category === 'garden' ? 'garden' : 'hiking'}`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ArrowLeftIcon className="h-5 w-5"/>
             Назад к товарам
           </Link>
@@ -101,7 +97,7 @@ export default function ProductDetailPage({ params }: { params: { category: stri
 
               <div className="mt-8">
                 <button 
-                  onClick={() => addToCart(product)}
+                  onClick={handleAddToCart}
                   className="w-full flex items-center justify-center px-4 py-4 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
                   <ShoppingCartIcon className="h-6 w-6 mr-3"/>
                   Добавить в корзину
