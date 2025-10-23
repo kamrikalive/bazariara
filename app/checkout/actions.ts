@@ -125,18 +125,18 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
       createdAt: new Date(),
     };
 
-    await firestore.collection('orders').add(orderData);
+    // Запись в базу данных временно отключена
+    // await firestore.collection('orders').add(orderData);
 
     const telegramSent = await sendTelegramNotification(orderData);
     
     if (!telegramSent) {
-      console.warn('Заказ создан, но уведомление в Telegram не было отправлено');
+      console.warn('Уведомление в Telegram не было отправлено, но заказ бы не был сохранен в любом случае (отладка)');
     }
 
     return { success: true };
   } catch (error: any) {
-    console.error('Ошибка при создании заказа:', error);
-    // Временно возвращаем реальное сообщение об ошибке для отладки
+    console.error('Ошибка при обработке заказа (запись в БД отключена):', error);
     const errorMessage = error.message || 'Произошла неизвестная ошибка на сервере.';
     return { success: false, message: `Отладочная ошибка: ${errorMessage}` };
   }
