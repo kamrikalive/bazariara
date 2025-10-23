@@ -5,10 +5,18 @@ import Link from 'next/link';
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 
+const MIN_ORDER_AMOUNT = 30;
+const FREE_SHIPPING_THRESHOLD = 100;
+const SHIPPING_COST = 5;
+
 export default function CartPage() {
     const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
 
-    const totalPrice = cartItems.reduce((acc, item) => acc + calculateDisplayPrice(item.price) * item.quantity, 0);
+    const subtotal = cartItems.reduce((acc, item) => acc + calculateDisplayPrice(item.price) * item.quantity, 0);
+    
+    const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+    const total = subtotal + shippingCost;
+    const isCheckoutDisabled = subtotal < MIN_ORDER_AMOUNT;
 
     return (
         <div className="bg-gray-900 min-h-screen text-white">
@@ -49,7 +57,7 @@ export default function CartPage() {
                                                     value={item.quantity}
                                                     onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10))}
                                                     className="w-16 p-2 bg-transparent text-center focus:outline-none appearance-none"
-                                                    style={{ MozAppearance: 'textfield' }} // Hide spinners in Firefox
+                                                    style={{ MozAppearance: 'textfield' }}
                                                 />
                                                 <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-r-lg transition-colors">
                                                     <PlusIcon className="h-5 w-5"/>
@@ -69,21 +77,37 @@ export default function CartPage() {
                             <h2 className="text-2xl font-bold border-b border-gray-700 pb-4 mb-4">Сумма заказа</h2>
                             <div className="flex justify-between mb-2 text-gray-300">
                                 <span>Подытог</span>
-                                <span>₾{totalPrice.toFixed(2)}</span>
+                                <span>₾{subtotal.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between mb-6 text-gray-300">
+                            <div className="flex justify-between mb-4 text-gray-300">
                                 <span>Доставка</span>
-                                <span className="font-semibold text-lime-500">БЕСПЛАТНО</span>
+                                {subtotal >= FREE_SHIPPING_THRESHOLD ? (
+                                    <span className="font-semibold text-lime-500">БЕСПЛАТНО</span>
+                                ) : (
+                                    <span>₾{shippingCost.toFixed(2)}</span>
+                                )}
                             </div>
-                            <div className="flex justify-between font-extrabold text-2xl border-t border-gray-700 pt-4 mt-4">
+                            <div className="flex justify-between font-extrabold text-2xl border-t border-gray-700 pt-4">
                                 <span>Итог</span>
-                                <span>₾{totalPrice.toFixed(2)}</span>
+                                <span>₾{total.toFixed(2)}</span>
                             </div>
 
+                            {subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD && (
+                                <p className="text-sm text-center text-gray-400 mt-4 bg-gray-700/50 p-2 rounded-lg">Добавьте товаров еще на ₾{(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)}, чтобы доставка была бесплатной.</p>
+                            )}
+
                             <div className="mt-8 flex flex-col gap-4">
-                                 <Link href="/checkout" className="w-full text-center bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
+                                 <Link href="/checkout" 
+                                    className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform shadow-lg ${isCheckoutDisabled ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 hover:scale-105 shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40'}`}
+                                    onClick={(e) => isCheckoutDisabled && e.preventDefault()}
+                                 >
                                     Перейти к оформлению
                                 </Link>
+
+                                {isCheckoutDisabled && (
+                                    <p className="text-sm text-center text-red-400 font-semibold">Минимальная сумма заказа {MIN_ORDER_AMOUNT} ₾</p>
+                                )}
+
                                 <button onClick={clearCart} className="w-full text-center bg-gray-700 text-gray-300 font-semibold py-2 px-6 rounded-lg hover:bg-red-600 hover:text-white transition-colors duration-300">
                                     Очистить корзину
                                 </button>
