@@ -121,7 +121,7 @@ export default function CheckoutPage() {
                     className="w-full bg-lime-500 text-gray-900 font-bold py-3 rounded-lg hover:bg-lime-600 transition-colors duration-300 disabled:opacity-50 disabled:cursor-wait"
                     disabled={isSubmitting || cartItems.length === 0}
                 >
-                    {isSubmitting ? 'Обработка...' : 'Place Order'}
+                    {isSubmitting ? 'Обработка...' : 'Отправить заказ (с вами свяжутся)'}
                 </button>
             </form>
         </div>
