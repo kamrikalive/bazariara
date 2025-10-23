@@ -18,6 +18,7 @@ export type Product = {
     price: number;
     image_url?: string;
     category: string;
+    description?: string; // Added optional description
 };
 
 type CartContextType = {
