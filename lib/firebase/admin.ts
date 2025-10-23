@@ -1,34 +1,41 @@
-
 import admin from 'firebase-admin';
 
-// This is the correct way to initialize the Firebase Admin SDK in a serverless environment like Vercel.
-// It uses environment variables to configure the SDK.
+const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
-if (!admin.apps.length) {
+if (!admin.apps.length && serviceAccountKey) {
+  let serviceAccount;
   try {
-    // Ensure all required environment variables are present
-    if (
-      !process.env.FIREBASE_PROJECT_ID ||
-      !process.env.FIREBASE_CLIENT_EMAIL ||
-      !process.env.FIREBASE_PRIVATE_KEY
-    ) {
-      throw new Error('Missing Firebase environment variables (PROJECT_ID, CLIENT_EMAIL, PRIVATE_KEY)');
+    // First, try to parse it as a raw JSON string
+    serviceAccount = JSON.parse(serviceAccountKey);
+    console.log('Parsed service account key from raw JSON.');
+  } catch (e) {
+    // If that fails, assume it's a base64 encoded string and decode it
+    try {
+      const decodedKey = Buffer.from(serviceAccountKey, 'base64').toString('utf8');
+      serviceAccount = JSON.parse(decodedKey);
+      console.log('Parsed service account key from Base64 string.');
+    } catch (error) {
+      console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY. Make sure it is either a valid JSON string or a Base64 encoded JSON string.', error);
     }
+  }
 
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // The private key must be formatted correctly by replacing escaped newlines.
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\n/g, '\n'),
-      }),
-    });
-    console.log('Firebase Admin SDK initialized successfully.');
-  } catch (error) {
-    console.error('Firebase Admin SDK initialization error', error);
+  if (serviceAccount) {
+    try {
+      // Явно передаём projectId из ENV
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL || serviceAccount.client_email,
+          privateKey: (process.env.FIREBASE_PRIVATE_KEY || serviceAccount.private_key).replace(/\\n/g, '\n'),
+        }),
+      });
+      console.log('Firebase Admin initialized.');
+    } catch (error) {
+      console.error('Firebase Admin initialization error', error);
+    }
   }
 }
 
-// Export the initialized admin instance
-export const firestore = admin.firestore();
-export { admin };
+const db = admin.apps.length ? admin.firestore() : null;
+
+export { db };
