@@ -108,6 +108,9 @@ export default function HomePage() {
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="text-center py-4">
+            <p className="flashing-slogan text-2xl font-bold text-lime-400">Доставим за 2 часа</p>
+        </div>
         <div className="mb-12 text-center">
             <h2 className="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">
               Наши товары
