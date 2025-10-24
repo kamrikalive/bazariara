@@ -2,29 +2,25 @@
 
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
-import { useOrders } from '@/contexts/OrderContext'; // Import useOrders
+import { useOrders } from '@/contexts/OrderContext';
 import { ShoppingCartIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import Image from 'next/image';
 
 export default function Header() {
     const { cartItems } = useCart();
-    const { orders } = useOrders(); // Get orders from OrderContext
+    const { orders } = useOrders();
 
-    // Calculate total number of items in the cart
     const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-    // Calculate the total price of items in the cart
     const totalPrice = cartItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
-
     const orderCount = orders.length;
 
     return (
         <header className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
             <div className="container mx-auto flex justify-between items-center">
-                <Link href="/" className="text-2xl font-bold text-white hover:text-lime-400 transition-colors duration-300">
-                    MarketGE
-                </Link>
+                    <Link href="/" className="text-2xl font-bold text-white hover:text-lime-400 transition-colors duration-300">
+                        MarketGE
+                    </Link>
                 <nav className="hidden md:flex gap-6 items-center">
                     <Link href="/" className="text-white hover:text-lime-400 transition-colors duration-300">Все товары</Link>
                 </nav>

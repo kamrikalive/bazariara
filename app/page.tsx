@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
+import { database } from '@/lib/firebaseClient'; // Import client-side Firebase
+import { ref, get } from 'firebase/database';
 
 
 // Define the Product type for strong typing
@@ -17,14 +19,19 @@ type Product = {
   image_url?: string;
 };
 
-async function fetchProducts(): Promise<Product[]> {
-  const res = await fetch('/api/products');
-  if (!res.ok) {
-    // Create an error object with the status text
-    throw new Error(`Не удалось загрузить товары: ${res.statusText}`);
-  }
-  const products = await res.json();
-  return products.map((product: any) => ({...product, id: parseInt(product.id, 10)}));
+async function fetchProductsFromFirebase(): Promise<Product[]> {
+  const gardenRef = ref(database, 'products/garden');
+  const hikingRef = ref(database, 'products/hiking');
+
+  const [gardenSnapshot, hikingSnapshot] = await Promise.all([
+    get(gardenRef),
+    get(hikingRef)
+  ]);
+
+  const gardenProducts = gardenSnapshot.exists() ? gardenSnapshot.val() : [];
+  const hikingProducts = hikingSnapshot.exists() ? hikingSnapshot.val() : [];
+
+  return [...gardenProducts, ...hikingProducts];
 }
 
 // Define a mapping for categories
@@ -60,18 +67,13 @@ export default function HomePage() {
       try {
         setLoading(true);
         setError(null);
-        const products = await fetchProducts();
+        const products = await fetchProductsFromFirebase();
         
-        // Map categories and filter out unwanted ones
-        const processedProducts = products
-          .map(p => ({ ...p, category: categoryMap[p.category] || p.category }))
-          .filter(p => displayCategories.includes(p.category));
-
-        setAllProducts(processedProducts);
-        setFilteredProducts(processedProducts);
+        setAllProducts(products);
+        setFilteredProducts(products);
         
         // Get unique categories from the processed products
-        const uniqueCategories = Array.from(new Set(processedProducts.map((p) => p.category)));
+        const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
         setCategories(['Все', ...uniqueCategories]);
 
       } catch (err: any) {
@@ -153,7 +155,7 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {paginatedProducts.map((product) => {
-            const originalCategory = reverseCategoryMap[product.category];
+            const originalCategory = product.category === 'Сад' ? 'garden' : 'hiking';
             return (
               <div 
                 key={product.id} 

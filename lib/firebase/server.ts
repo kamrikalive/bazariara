@@ -44,6 +44,8 @@ const getFirebaseCredentials = () => {
 if (!admin.apps.length) {
   try {
     const credentials = getFirebaseCredentials();
+    // Correct Database URL for the europe-west1 region
+    const databaseURL = "https://bazarge-95f65-default-rtdb.europe-west1.firebasedatabase.app";
 
     admin.initializeApp({
       credential: admin.credential.cert({
@@ -51,16 +53,16 @@ if (!admin.apps.length) {
         clientEmail: credentials.clientEmail,
         privateKey: credentials.privateKey,
       }),
-      // Explicitly setting the projectId here can help prevent detection issues
+      databaseURL: databaseURL,
       projectId: credentials.projectId,
     });
     console.log('Firebase Admin SDK initialized successfully on the server.');
 
   } catch (error) {
     console.error('CRITICAL: Firebase Admin SDK initialization failed.', error);
-    // Subsequent Firestore calls will fail. This is a critical server error.
   }
 }
 
-// Export the initialized firestore instance
+// Export the initialized services
 export const firestore = admin.firestore();
+export const database = admin.database();

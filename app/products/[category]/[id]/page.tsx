@@ -5,8 +5,10 @@ import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
+import { database } from '@/lib/firebaseClient';
+import { ref, get } from 'firebase/database';
 
-// Define the Product type locally to ensure it has the necessary fields
+// Define the Product type locally
 type Product = {
     id: number;
     title: string;
@@ -16,14 +18,23 @@ type Product = {
     image_url?: string;
 };
 
-// === Fetch product by ID and Category ===
-async function getProduct(category: string, id: string): Promise<Product> {
-  const res = await fetch(`/api/products/${category}/${id}`);
-  if (!res.ok) {
-    throw new Error('Failed to fetch product data');
+// === Fetch product by ID and Category from Firebase ===
+async function getProduct(category: string, id: string): Promise<Product | null> {
+  // Reference to the specific category array in Firebase
+  const productsRef = ref(database, `products/${category}`);
+  const snapshot = await get(productsRef);
+
+  if (snapshot.exists()) {
+    const productsArray: Product[] = snapshot.val();
+    const numericId = parseInt(id, 10);
+
+    // Find the product in the array by its ID
+    const product = productsArray.find(p => p.id === numericId);
+    
+    return product || null;
+  } else {
+    return null;
   }
-  const product = await res.json();
-  return {...product, id: parseInt(product.id, 10)};
 }
 
 export default function ProductDetailPage({ params }: { params: { category: string, id: string } }) {
@@ -35,6 +46,8 @@ export default function ProductDetailPage({ params }: { params: { category: stri
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const productData = await getProduct(params.category, params.id);
         setProduct(productData);
       } catch (err) {
@@ -50,8 +63,6 @@ export default function ProductDetailPage({ params }: { params: { category: stri
 
   const handleAddToCart = () => {
     if (product) {
-        // The addToCart function from context might expect a different Product type.
-        // We need to ensure the object we pass is compatible.
         const productForCart = {
             id: product.id,
             title: product.title,
@@ -79,7 +90,7 @@ export default function ProductDetailPage({ params }: { params: { category: stri
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link href={`/${params.category === 'garden' ? 'garden' : 'hiking'}`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+          <Link href={`/`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ArrowLeftIcon className="h-5 w-5"/>
             Назад к товарам
           </Link>
