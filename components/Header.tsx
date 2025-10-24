@@ -2,18 +2,22 @@
 
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
+import { useOrders } from '@/contexts/OrderContext'; // Import useOrders
 import { ShoppingCartIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import Image from 'next/image';
 
 export default function Header() {
     const { cartItems } = useCart();
+    const { orders } = useOrders(); // Get orders from OrderContext
 
     // Calculate total number of items in the cart
     const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     // Calculate the total price of items in the cart
     const totalPrice = cartItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
+
+    const orderCount = orders.length;
 
     return (
         <header className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
@@ -25,9 +29,13 @@ export default function Header() {
                     <Link href="/" className="text-white hover:text-lime-400 transition-colors duration-300">Все товары</Link>
                 </nav>
                 <div className="flex items-center gap-6">
-                    <Link href="/orders" className="flex items-center text-white hover:text-lime-400 transition-colors duration-300">
-                        <ArchiveBoxIcon className="h-8 w-8 mr-2" />
-                        Заказы
+                    <Link href="/orders" className="relative flex items-center text-white hover:text-lime-400 transition-colors duration-300">
+                        <ArchiveBoxIcon className="h-8 w-8" />
+                        {orderCount > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-lime-500 text-gray-900 rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold">
+                                {orderCount}
+                            </span>
+                        )}
                     </Link>
                     <Link href="/cart" className="relative flex items-center text-white hover:text-lime-400 transition-colors duration-300">
                         {
