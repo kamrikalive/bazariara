@@ -24,6 +24,7 @@ interface OrderDetails {
   };
   items: OrderItem[];
   total: number;
+  shippingCost: number;
 }
 
 // This interface is for the data that will be sent to Telegram
@@ -40,6 +41,7 @@ async function sendTelegramNotification(
     customer: OrderDetails['customer'],
     items: EnrichedItemData[],
     total: number,
+    shippingCost: number,
     createdAt: Date
 ): Promise<boolean> {
   const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -61,6 +63,9 @@ async function sendTelegramNotification(
       return `${index + 1}. ${titleWithLink}\n   Кол-во: ${item.quantity} x ₾${item.price.toFixed(2)} = ₾${(item.price * item.quantity).toFixed(2)}`;
     })
     .join('\n\n');
+    
+  const subtotal = total - shippingCost;
+  const shippingText = shippingCost > 0 ? `*🚚 Доставка: ₾${shippingCost.toFixed(2)}*` : '*🚚 Доставка: БЕСПЛАТНО*';
 
   const message = `
 🛒 *НОВЫЙ ЗАКАЗ* 🛒
@@ -71,6 +76,8 @@ ${contactDetails}
 📦 *Состав заказа:*
 ${itemsList}
 
+*Подытог: ₾${subtotal.toFixed(2)}*
+${shippingText}
 *💰 ИТОГО: ₾${total.toFixed(2)}*
 
 📅 *Дата:* ${new Date(createdAt).toLocaleString('ru-RU', { timeZone: 'Asia/Tbilisi' })}
@@ -100,7 +107,7 @@ ${itemsList}
 
 // This server action handles placing the order
 export async function handlePlaceOrder(orderDetails: OrderDetails) {
-  const { customer, items, total } = orderDetails;
+  const { customer, items, total, shippingCost } = orderDetails;
 
   if (!customer || !customer.name || (!customer.phone && !customer.telegram)) {
     return { success: false, message: 'Необходимо указать имя и хотя бы один контакт.' };
@@ -112,6 +119,7 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
 
   try {
     const createdAt = new Date();
+    const subtotal = total - shippingCost;
     const orderDataForFirestore = {
       customer,
       items: items.map(item => ({
@@ -122,6 +130,8 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
         category: item.product.category, // Save category with the order
         image_url: item.product.image_url ?? null,
       })),
+      subtotal,
+      shippingCost,
       total,
       createdAt: FieldValue.serverTimestamp(),
     };
@@ -163,7 +173,7 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
       link: productLinks[item.product.id] || undefined
     }));
 
-    await sendTelegramNotification(customer, enrichedItems, total, createdAt);
+    await sendTelegramNotification(customer, enrichedItems, total, shippingCost, createdAt);
 
     return { success: true };
 

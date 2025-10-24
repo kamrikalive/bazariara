@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
-import { ShoppingCartIcon } from '@heroicons/react/24/solid';
+import { ShoppingCartIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
+import Image from 'next/image';
 
 export default function Header() {
     const { cartItems } = useCart();
@@ -24,6 +25,10 @@ export default function Header() {
                     <Link href="/" className="text-white hover:text-lime-400 transition-colors duration-300">Все товары</Link>
                 </nav>
                 <div className="flex items-center gap-6">
+                    <Link href="/orders" className="flex items-center text-white hover:text-lime-400 transition-colors duration-300">
+                        <ArchiveBoxIcon className="h-8 w-8 mr-2" />
+                        Заказы
+                    </Link>
                     <Link href="/cart" className="relative flex items-center text-white hover:text-lime-400 transition-colors duration-300">
                         {
                             totalPrice > 0 && (

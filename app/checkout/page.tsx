@@ -2,12 +2,17 @@
 
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
+import { useOrders } from '@/contexts/OrderContext';
 import { useRouter } from 'next/navigation';
 import { handlePlaceOrder } from './actions';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 
+const FREE_SHIPPING_THRESHOLD = 100;
+const SHIPPING_COST = 5;
+
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
+  const { addOrder } = useOrders();
   const router = useRouter();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -15,7 +20,9 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const total = cartItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
+  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+  const total = subtotal + shippingCost;
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,19 +57,21 @@ export default function CheckoutPage() {
           id: item.id,
           title: item.title,
           price: calculateDisplayPrice(item.price),
-          category: item.category, // Added missing category field
+          category: item.category,
           image_url: item.image_url,
         },
         quantity: item.quantity,
       })), 
       total,
+      shippingCost,
     };
 
     try {
       const result = await handlePlaceOrder(orderDetails);
       if (result.success) {
+        addOrder(cartItems.map(item => ({...item, shippingCost: shippingCost})));
         clearCart();
-        router.push('/order-success');
+        router.push('/orders');
       } else {
         throw new Error(result.message || 'Не удалось разместить заказ.');
       }
@@ -98,9 +107,24 @@ export default function CheckoutPage() {
           ) : (
             <p className="text-center text-gray-400">Ваша корзина пуста.</p>
           )}
-          <div className="mt-6 pt-4 border-t border-gray-700 text-right">
-            <p className="text-2xl font-bold">Итого: ₾{total.toFixed(2)}</p>
-          </div>
+           <div className="mt-6 pt-4 border-t border-gray-700">
+              <div className="flex justify-between text-gray-400 mb-2">
+                <span>Подытог</span>
+                <span>₾{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-400 mb-4">
+                <span>Доставка</span>
+                {subtotal >= FREE_SHIPPING_THRESHOLD ? (
+                  <span className="font-semibold text-lime-500">БЕСПЛАТНО</span>
+                ) : (
+                  <span>₾{shippingCost.toFixed(2)}</span>
+                )}
+              </div>
+              <div className="flex justify-between font-bold text-2xl">
+                <span>Итого</span>
+                <span>₾{total.toFixed(2)}</span>
+              </div>
+            </div>
         </div>
 
         <div className="bg-gray-800 rounded-lg shadow-lg p-8">
