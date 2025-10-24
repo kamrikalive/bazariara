@@ -1,7 +1,6 @@
 'use server';
 
 import { database } from '@/lib/firebase/server';
-import { ref, set, push } from 'firebase/database';
 
 // Interface for a single item in the order from the client
 interface OrderItem {
@@ -120,8 +119,10 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
   try {
     const createdAt = new Date().toISOString();
     const subtotal = total - shippingCost;
-    const ordersRef = ref(database, 'orders');
-    const newOrderRef = push(ordersRef);
+    
+    // Correct: Use the admin SDK's ref method
+    const ordersRef = database.ref('orders');
+    const newOrderRef = ordersRef.push();
 
     const orderDataForRealtimeDB = {
         customer,
@@ -139,17 +140,48 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
         createdAt: createdAt,
     };
 
-    await set(newOrderRef, orderDataForRealtimeDB);
+    await newOrderRef.set(orderDataForRealtimeDB);
     console.log('Order saved to Realtime Database.');
 
-    // The logic to fetch product links for Telegram notifications would need to be adapted
-    // for Realtime Database. This is a placeholder for that logic.
+    // Fetch product links for Telegram notification
+    const productLinks: { [key: number]: string } = {};
+    const itemsByCategory: { [key: string]: number[] } = {};
+
+    items.forEach(item => {
+        const categoryKey = item.product.category === 'Сад' ? 'garden' : 'hiking';
+        if (!itemsByCategory[categoryKey]) {
+            itemsByCategory[categoryKey] = [];
+        }
+        itemsByCategory[categoryKey].push(item.product.id);
+    });
+
+    for (const categoryKey in itemsByCategory) {
+        const productIds = itemsByCategory[categoryKey];
+        if (productIds.length > 0) {
+            // Correct: Use the admin SDK's ref method
+            const categoryRef = database.ref(`products/${categoryKey}`);
+            const snapshot = await categoryRef.once('value');
+            if (snapshot.exists()) {
+                const productsObject = snapshot.val();
+                const productsArray = Object.values(productsObject);
+
+                const relevantProducts = productsArray.filter((p: any) => p && productIds.includes(p.id));
+                
+                relevantProducts.forEach((product: any) => {
+                    if (product.link) {
+                        productLinks[product.id] = product.link;
+                    }
+                });
+            }
+        }
+    }
+
     const enrichedItems: EnrichedItemData[] = items.map(item => ({
       id: item.product.id,
       title: item.product.title,
       price: item.product.price,
       quantity: item.quantity,
-      // Link fetching logic for Realtime DB would go here
+      link: productLinks[item.product.id] || undefined
     }));
 
     await sendTelegramNotification(customer, enrichedItems, total, shippingCost, new Date(createdAt));
