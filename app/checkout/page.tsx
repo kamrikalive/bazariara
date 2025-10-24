@@ -71,7 +71,7 @@ export default function CheckoutPage() {
       if (result.success) {
         addOrder(cartItems.map(item => ({...item, shippingCost: shippingCost})));
         clearCart();
-        router.push('/orders');
+        router.push('/order-success'); // Corrected redirect
       } else {
         throw new Error(result.message || 'Не удалось разместить заказ.');
       }

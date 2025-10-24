@@ -10,11 +10,16 @@ export default function OrderSuccessPage() {
         <CheckCircleIcon className="w-20 h-20 text-lime-500 mx-auto mb-6" />
         <h1 className="text-3xl font-bold mb-4">Заказ успешно оформлен!</h1>
         <p className="text-gray-300 mb-8">
-          Спасибо за вашу покупку. Наш менеджер скоро свяжется с вами для подтверждения деталей.
+          Спасибо за вашу покупку! Ваш заказ был получен и скоро будет обработан. Вы можете отследить его статус в разделе "Мои заказы".
         </p>
-        <Link href="/" className="inline-block bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-600 transition-colors duration-300">
-            Вернуться на главную
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/orders" className="inline-block bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30">
+                Посмотреть мои заказы
+            </Link>
+            <Link href="/" className="inline-block bg-gray-700 text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors duration-300">
+                На главную
+            </Link>
+        </div>
       </main>
     </div>
   );
