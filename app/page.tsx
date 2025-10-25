@@ -53,8 +53,14 @@ export default function HomePage() {
         setError(null);
         const products = await fetchProductsFromFirebase();
         
-        setAllProducts(products);
-        setFilteredProducts(products);
+        const sortedProducts = products.sort((a, b) => {
+            if (a.in_stock && !b.in_stock) return -1;
+            if (!a.in_stock && b.in_stock) return 1;
+            return 0;
+        });
+        
+        setAllProducts(sortedProducts);
+        setFilteredProducts(sortedProducts);
         
         const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
         setCategories(['Все', ...uniqueCategories]);
