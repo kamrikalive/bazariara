@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import HomePageContent from './page-content';
 import { database } from '@/lib/firebase/server';
 import { ref, get } from 'firebase/database';
+import type { Metadata } from 'next';
 
 type Product = {
   id: number;
@@ -28,6 +29,7 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
 
   return [...gardenProducts, ...hikingProducts];
 }
+
 
 export default async function HomePage() {
   const products = await fetchProductsFromFirebase();

@@ -112,7 +112,7 @@ export default function HomePageContent({ products: initialProducts }: { product
             </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
           {paginatedProducts.map((product) => {
             const originalCategory = product.category === 'Сад' ? 'garden' : 'hiking';
             const cartItem = cartItems.find(item => item.id === product.id);
@@ -154,8 +154,8 @@ export default function HomePageContent({ products: initialProducts }: { product
                           <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
                           <p className="text-gray-400 text-sm mb-3">{product.category}</p>
                            <div className="flex justify-between items-center">
-                              <p className="text-2xl font-semibold text-lime-500">₾{calculateDisplayPrice(product.price)}</p>
-                              {product.in_stock && <span className="text-sm font-semibold text-green-400 bg-green-900/50 rounded-full px-3 py-1">В наличии</span>}
+                              <p className="text-2xl font-semibold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
+                              {product.in_stock && <span className="text-sm font-semibold text-green-400">В наличии</span>}
                           </div>
                       </div>
                   </Link>

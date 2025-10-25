@@ -127,7 +127,7 @@ export default function ProductDetailPage({ params }: { params: { category: stri
                 <h1 className="text-4xl lg:text-5xl font-extrabold mb-4 text-gray-100">{product.title}</h1>
                 
                 <div className="flex justify-between items-center mb-6">
-                    <p className="text-4xl font-bold text-lime-500">₾{calculateDisplayPrice(product.price)}</p>
+                    <p className="text-4xl font-bold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
                     {product.in_stock && <span className="text-sm font-semibold text-green-400 bg-green-900/50 rounded-full px-3 py-1">В наличии</span>}
                 </div>
 
@@ -177,3 +177,5 @@ export default function ProductDetailPage({ params }: { params: { category: stri
     </div>
   );
 }
+
+
