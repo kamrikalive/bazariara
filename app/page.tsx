@@ -2,8 +2,9 @@
 import { Suspense } from 'react';
 import HomePageContent from './page-content';
 import { database } from '@/lib/firebase/server';
-import { ref, get } from 'firebase/database';
 import type { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
 
 type Product = {
   id: number;
@@ -16,16 +17,19 @@ type Product = {
 };
 
 async function fetchProductsFromFirebase(): Promise<Product[]> {
-  const gardenRef = ref(database, 'products/garden');
-  const hikingRef = ref(database, 'products/hiking');
+  const gardenRef = database.ref('products/garden');
+  const hikingRef = database.ref('products/hiking');
 
   const [gardenSnapshot, hikingSnapshot] = await Promise.all([
-    get(gardenRef),
-    get(hikingRef)
+    gardenRef.once('value'),
+    hikingRef.once('value')
   ]);
 
-  const gardenProducts = gardenSnapshot.exists() ? gardenSnapshot.val() : [];
-  const hikingProducts = hikingSnapshot.exists() ? hikingSnapshot.val() : [];
+  const gardenData = gardenSnapshot.val() || {};
+  const hikingData = hikingSnapshot.val() || {};
+
+  const gardenProducts: Product[] = Object.keys(gardenData).map(key => ({ ...gardenData[key], id: parseInt(key, 10) }));
+  const hikingProducts: Product[] = Object.keys(hikingData).map(key => ({ ...hikingData[key], id: parseInt(key, 10) }));
 
   return [...gardenProducts, ...hikingProducts];
 }

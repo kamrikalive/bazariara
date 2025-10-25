@@ -5,9 +5,8 @@ import { db } from '../../../../../lib/firebaseAdmin';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request, { params }: { params: { category: string, id: string } }) {
-  // If db is not initialized (e.g., during build), return a 404 error.
   if (!db) {
-    return new NextResponse('Database not initialized', { status: 500 });
+    return new NextResponse('Firebase Admin SDK not initialized', { status: 503, headers: { 'Retry-After': '30' } });
   }
 
   try {
@@ -24,7 +23,6 @@ export async function GET(request: Request, { params }: { params: { category: st
     }
   } catch (error) {
     console.error('Error fetching product from Firestore:', error);
-    // Check if the error is due to invalid category
     if (error instanceof Error && error.message.includes('Invalid collection id')) {
         return new NextResponse(`Invalid category: ${params.category}`, { status: 400 });
     }

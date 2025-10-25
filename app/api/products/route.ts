@@ -1,25 +1,24 @@
-
+import { database } from '@/lib/firebase/server';
 import { NextResponse } from 'next/server';
-import { db } from '../../../lib/firebaseAdmin';
 
 export async function GET() {
-  // If db is not initialized (e.g., during build), return an empty array.
-  if (!db) {
-    return NextResponse.json([]);
-  }
-
   try {
-    const hikingSnapshot = await db.collection('hiking').get();
-    const gardenSnapshot = await db.collection('garden').get();
+    const productsRef = database.ref('products');
+    const snapshot = await productsRef.once('value');
+    const products = snapshot.val();
 
-    const hikingProducts = hikingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const gardenProducts = gardenSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    const allProducts = [...hikingProducts, ...gardenProducts];
-
-    return NextResponse.json(allProducts);
+    if (products) {
+      // Convert the products object to an array if needed
+      const productsArray = Object.keys(products).map(key => ({
+        id: key,
+        ...products[key]
+      }));
+      return NextResponse.json(productsArray);
+    } else {
+      return NextResponse.json([]);
+    }
   } catch (error) {
-    console.error('Error fetching products from Firestore:', error);
+    console.error('Error fetching products:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 'use server'
 
-import { firestore } from '@/lib/firebase/server';
+import { database } from '@/lib/firebase/server';
 import { redirect } from 'next/navigation';
 
 export async function createOrder(cartItems: any[], formData: FormData) {
@@ -8,7 +8,6 @@ export async function createOrder(cartItems: any[], formData: FormData) {
     const phone = formData.get('phone') as string;
 
     if (!name || !phone) {
-        // Handle error: name or phone is missing
         return { success: false, message: 'Имя и телефон обязательны для заполнения.' };
     }
 
@@ -21,10 +20,11 @@ export async function createOrder(cartItems: any[], formData: FormData) {
                 title: item.title,
                 price: item.price
             })),
-            createdAt: new Date(),
+            createdAt: new Date().toISOString(),
         };
 
-        await firestore.collection('orders').add(orderData);
+        const newOrderRef = database.ref('orders').push();
+        await newOrderRef.set(orderData);
 
     } catch (error) {
         console.error('Error creating order:', error);
