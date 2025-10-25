@@ -19,7 +19,7 @@ interface OrderDetails {
   customer: {
     name: string;
     phone?: string;
-    telegram?: string;
+    social?: { [key: string]: string };
   };
   items: OrderItem[];
   total: number;
@@ -51,9 +51,15 @@ async function sendTelegramNotification(
     return false;
   }
 
+  const socialContacts = customer.social ? 
+    Object.entries(customer.social)
+        .map(([platform, value]) => `💬 ${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${value}`)
+        .join('\n') 
+    : '';
+
   const contactDetails = [
     customer.phone && `📞 Телефон: ${customer.phone}`,
-    customer.telegram && `💬 Telegram: ${customer.telegram}`
+    socialContacts
   ].filter(Boolean).join('\n');
 
   const itemsList = items
@@ -108,7 +114,9 @@ ${shippingText}
 export async function handlePlaceOrder(orderDetails: OrderDetails) {
   const { customer, items, total, shippingCost } = orderDetails;
 
-  if (!customer || !customer.name || (!customer.phone && !customer.telegram)) {
+  const hasSocialContact = customer.social && Object.keys(customer.social).length > 0;
+
+  if (!customer || !customer.name || (!customer.phone && !hasSocialContact)) {
     return { success: false, message: 'Необходимо указать имя и хотя бы один контакт.' };
   }
 
@@ -120,7 +128,6 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
     const createdAt = new Date().toISOString();
     const subtotal = total - shippingCost;
     
-    // Correct: Use the admin SDK's ref method
     const ordersRef = database.ref('orders');
     const newOrderRef = ordersRef.push();
 
@@ -143,7 +150,6 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
     await newOrderRef.set(orderDataForRealtimeDB);
     console.log('Order saved to Realtime Database.');
 
-    // Fetch product links for Telegram notification
     const productLinks: { [key: number]: string } = {};
     const itemsByCategory: { [key: string]: number[] } = {};
 
@@ -158,7 +164,6 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
     for (const categoryKey in itemsByCategory) {
         const productIds = itemsByCategory[categoryKey];
         if (productIds.length > 0) {
-            // Correct: Use the admin SDK's ref method
             const categoryRef = database.ref(`products/${categoryKey}`);
             const snapshot = await categoryRef.once('value');
             if (snapshot.exists()) {

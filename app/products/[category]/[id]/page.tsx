@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
-import { ShoppingCartIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { ShoppingCartIcon, ArrowLeftIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { database } from '@/lib/firebaseClient';
@@ -42,7 +42,7 @@ export default function ProductDetailPage({ params }: { params: { category: stri
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { addToCart } = useCart();
+  const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -62,19 +62,30 @@ export default function ProductDetailPage({ params }: { params: { category: stri
     fetchProduct();
   }, [params.category, params.id]);
 
+  const cartItem = product ? cartItems.find(item => item.id === product.id) : undefined;
+
   const handleAddToCart = () => {
     if (product) {
-        const productForCart = {
-            id: product.id,
-            title: product.title,
-            price: product.price,
-            image_url: product.image_url,
-            category: product.category,
-            in_stock: product.in_stock,
-        };
-        addToCart(productForCart);
+        addToCart({ ...product, quantity: 1 });
     }
   };
+
+  const handleIncreaseQuantity = () => {
+    if (cartItem) {
+      updateQuantity(cartItem.id, cartItem.quantity + 1);
+    }
+  };
+
+  const handleDecreaseQuantity = () => {
+    if (cartItem) {
+        if (cartItem.quantity > 1) {
+            updateQuantity(cartItem.id, cartItem.quantity - 1);
+        } else {
+            removeFromCart(cartItem.id);
+        }
+    }
+  };
+
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Загрузка...</div>;
@@ -131,12 +142,33 @@ export default function ProductDetailPage({ params }: { params: { category: stri
               </div>
 
               <div className="mt-8">
-                <button 
-                  onClick={handleAddToCart}
-                  className="w-full flex items-center justify-center px-4 py-4 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
-                  <ShoppingCartIcon className="h-6 w-6 mr-3"/>
-                  Добавить в корзину
-                </button>
+                {cartItem ? (
+                    <div className="flex items-center gap-4">
+                        <p className="text-lg font-semibold">В корзине:</p>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handleDecreaseQuantity}
+                                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                            >
+                                <MinusIcon className="h-5 w-5" />
+                            </button>
+                            <span className="text-xl font-bold w-12 text-center">{cartItem.quantity}</span>
+                            <button
+                                onClick={handleIncreaseQuantity}
+                                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                            >
+                                <PlusIcon className="h-5 w-5" />
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <button 
+                      onClick={handleAddToCart}
+                      className="w-full flex items-center justify-center px-4 py-4 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
+                      <ShoppingCartIcon className="h-6 w-6 mr-3"/>
+                      Добавить в корзину
+                    </button>
+                )}
               </div>
             </div>
           </div>

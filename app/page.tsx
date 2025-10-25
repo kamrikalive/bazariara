@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
-import { ShoppingCartIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import { ShoppingCartIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { database } from '@/lib/firebaseClient';
 import { ref, get } from 'firebase/database';
@@ -43,7 +43,7 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { addToCart } = useCart();
+  const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -148,6 +148,28 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {paginatedProducts.map((product) => {
             const originalCategory = product.category === 'Сад' ? 'garden' : 'hiking';
+            const cartItem = cartItems.find(item => item.id === product.id);
+
+            const handleAddToCart = () => {
+                addToCart({ ...product, quantity: 1 });
+            };
+
+            const handleIncreaseQuantity = () => {
+                if(cartItem) {
+                    updateQuantity(cartItem.id, cartItem.quantity + 1);
+                }
+            };
+
+            const handleDecreaseQuantity = () => {
+                if(cartItem) {
+                    if (cartItem.quantity > 1) {
+                        updateQuantity(cartItem.id, cartItem.quantity - 1);
+                    } else {
+                        removeFromCart(cartItem.id);
+                    }
+                }
+            };
+
             return (
               <div 
                 key={product.id} 
@@ -171,13 +193,31 @@ export default function HomePage() {
                       </div>
                   </Link>
                   <div className="p-5 pt-0 mt-auto">
-                      <button 
-                          onClick={() => addToCart(product)} 
-                          className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
-                      >
-                          <ShoppingCartIcon className="h-5 w-5 mr-2"/>
-                          Добавить в корзину
-                      </button>
+                      {cartItem ? (
+                        <div className="flex items-center justify-center gap-2">
+                            <button
+                                onClick={handleDecreaseQuantity}
+                                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                            >
+                                <MinusIcon className="h-5 w-5" />
+                            </button>
+                            <span className="text-xl font-bold w-12 text-center">{cartItem.quantity}</span>
+                            <button
+                                onClick={handleIncreaseQuantity}
+                                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                            >
+                                <PlusIcon className="h-5 w-5" />
+                            </button>
+                        </div>
+                      ) : (
+                        <button 
+                            onClick={handleAddToCart} 
+                            className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
+                        >
+                            <ShoppingCartIcon className="h-5 w-5 mr-2"/>
+                            Добавить в корзину
+                        </button>
+                      )}
                   </div>
               </div>
             )

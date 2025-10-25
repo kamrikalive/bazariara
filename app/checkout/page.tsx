@@ -16,7 +16,12 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [telegram, setTelegram] = useState('');
+  const [socialMedia, setSocialMedia] = useState({
+    telegram: '',
+    whatsapp: '',
+    facebook: '',
+  });
+  const [selectedSocial, setSelectedSocial] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,13 +36,27 @@ export default function CheckoutPage() {
     setPhone(digits);
   };
 
+  const handleSocialMediaInputChange = (platform: string, value: string) => {
+    setSocialMedia(prev => ({ ...prev, [platform]: value }));
+  };
+
+  const handleSocialCheckboxChange = (platform: string) => {
+    setSelectedSocial(prev => 
+      prev.includes(platform) 
+        ? prev.filter(p => p !== platform) 
+        : [...prev, platform]
+    );
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
-    if (!name || (!phone && !telegram)) {
-      setError('Необходимо указать имя и хотя бы один контакт: телефон или Telegram.');
+    const socialContactProvided = selectedSocial.some(p => socialMedia[p as keyof typeof socialMedia]);
+
+    if (!name || (!phone && !socialContactProvided)) {
+      setError('Укажите имя и хотя бы один контакт: телефон или соцсеть.');
       setIsSubmitting(false);
       return;
     }
@@ -49,9 +68,15 @@ export default function CheckoutPage() {
     }
 
     const fullPhoneNumber = phone ? `+995${phone}` : '';
+    const socialContacts = selectedSocial.reduce((acc, p) => {
+        if (socialMedia[p as keyof typeof socialMedia]) {
+            acc[p] = socialMedia[p as keyof typeof socialMedia];
+        }
+        return acc;
+    }, {} as Record<string, string>);
 
     const orderDetails = {
-      customer: { name, phone: fullPhoneNumber, telegram },
+      customer: { name, phone: fullPhoneNumber, social: socialContacts },
       items: cartItems.map(item => ({
         product: {
           id: item.id,
@@ -71,7 +96,7 @@ export default function CheckoutPage() {
       if (result.success) {
         addOrder(cartItems.map(item => ({...item, shippingCost: shippingCost})));
         clearCart();
-        router.push('/order-success'); // Corrected redirect
+        router.push('/order-success');
       } else {
         throw new Error(result.message || 'Не удалось разместить заказ.');
       }
@@ -128,7 +153,8 @@ export default function CheckoutPage() {
         </div>
 
         <div className="bg-gray-800 rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-semibold mb-6">Контактные данные</h2>
+            <h2 className="text-2xl font-semibold mb-2">Контактные данные</h2>
+            <p className="text-sm text-gray-400 mb-6">Укажите имя и хотя бы один контакт: телефон или соцсеть</p>
             <form onSubmit={handleSubmit}>
                 <div className="mb-6">
                     <label htmlFor="name" className="block text-gray-300 mb-2 font-medium">Имя</label>
@@ -161,16 +187,39 @@ export default function CheckoutPage() {
                     </div>
                 </div>
 
-                 <div className="mb-8">
-                    <label htmlFor="telegram" className="block text-gray-300 mb-2 font-medium">Telegram</label>
-                    <input 
-                        type="text" 
-                        id="telegram"
-                        value={telegram}
-                        onChange={(e) => setTelegram(e.target.value)}
-                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lime-500 transition-all duration-300"
-                        placeholder="@username"
-                    />
+                <div className="mb-6">
+                    <label className="block text-gray-300 mb-2 font-medium">Соцсети для связи</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                        {['telegram', 'whatsapp', 'facebook'].map(p => (
+                            <label key={p} className="flex items-center gap-2 cursor-pointer p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedSocial.includes(p)}
+                                    onChange={() => handleSocialCheckboxChange(p)}
+                                    className="h-5 w-5 rounded bg-gray-600 border-gray-500 text-lime-500 focus:ring-lime-500"
+                                />
+                                <span className="text-white capitalize">{p}</span>
+                            </label>
+                        ))}
+                    </div>
+
+                    {selectedSocial.map(p => (
+                        <div key={`${p}-input`} className="mb-4">
+                            <label htmlFor={p} className="block text-gray-300 mb-2 font-medium capitalize">{p}</label>
+                             <input 
+                                type="text" 
+                                id={p}
+                                value={socialMedia[p as keyof typeof socialMedia]}
+                                onChange={(e) => handleSocialMediaInputChange(p, e.target.value)}
+                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lime-500 transition-all duration-300"
+                                placeholder={
+                                    p === 'telegram' ? '@username' :
+                                    p === 'whatsapp' ? 'Номер телефона' :
+                                    'Ссылка на профиль'
+                                }
+                            />
+                        </div>
+                    ))}
                 </div>
                 
                 {error && <p className="text-red-500 text-center mb-6 p-3 bg-red-900/20 rounded-lg">{error}</p>}
