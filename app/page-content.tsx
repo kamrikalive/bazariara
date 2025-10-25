@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
-import { database } from '@/lib/firebaseClient';
-import { ref, get } from 'firebase/database';
 import { useSearchParams } from 'next/navigation';
 
 type Product = {
@@ -19,31 +17,14 @@ type Product = {
   image_url?: string;
 };
 
-async function fetchProductsFromFirebase(): Promise<Product[]> {
-  const gardenRef = ref(database, 'products/garden');
-  const hikingRef = ref(database, 'products/hiking');
-
-  const [gardenSnapshot, hikingSnapshot] = await Promise.all([
-    get(gardenRef),
-    get(hikingRef)
-  ]);
-
-  const gardenProducts = gardenSnapshot.exists() ? gardenSnapshot.val() : [];
-  const hikingProducts = hikingSnapshot.exists() ? hikingSnapshot.val() : [];
-
-  return [...gardenProducts, ...hikingProducts];
-}
-
 const ITEMS_PER_PAGE = 20;
 
-export default function HomePageContent() {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+export default function HomePageContent({ products: initialProducts }: { products: Product[] }) {
+  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>('Все');
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
@@ -54,33 +35,15 @@ export default function HomePageContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    const getProductsClientSide = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const products = await fetchProductsFromFirebase();
-        
-        const sortedProducts = products.sort((a, b) => {
-            if (a.in_stock && !b.in_stock) return -1;
-            if (!a.in_stock && b.in_stock) return 1;
-            return 0;
-        });
-        
-        setAllProducts(sortedProducts);
-
-        const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
-        setCategories(['Все', ...uniqueCategories]);
-
-      } catch (err: any) {
-        setError(err.message);
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getProductsClientSide();
-  }, []);
+    const sortedProducts = initialProducts.sort((a, b) => {
+        if (a.in_stock && !b.in_stock) return -1;
+        if (!a.in_stock && b.in_stock) return 1;
+        return 0;
+    });
+    setAllProducts(sortedProducts);
+    const uniqueCategories = Array.from(new Set(initialProducts.map((p) => p.category)));
+    setCategories(['Все', ...uniqueCategories]);
+  }, [initialProducts]);
 
   useEffect(() => {
     let products = allProducts;
@@ -107,14 +70,6 @@ export default function HomePageContent() {
       behavior: 'smooth',
     });
   };
-
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-[60vh] text-white">Загрузка товаров...</div>;
-  }
-
-  if (error) {
-    return <div className="flex items-center justify-center min-h-[60vh] text-red-500">Ошибка: {error}</div>;
-  }
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
@@ -227,7 +182,7 @@ export default function HomePageContent() {
                             className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
                         >
                             <ShoppingCartIcon className="h-5 w-5 mr-2"/>
-                            Добавить в корзину
+                            В корзину
                         </button>
                       )}
                   </div>
