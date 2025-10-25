@@ -66,7 +66,7 @@ export default function ProductDetailPage({ params }: { params: { category: stri
 
   const handleAddToCart = () => {
     if (product) {
-        addToCart({ ...product, quantity: 1 });
+        addToCart(product);
     }
   };
 
