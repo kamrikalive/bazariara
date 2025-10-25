@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon } from '@heroicons/react/24/solid';
 import { database } from '@/lib/firebaseClient';
 import { ref, get } from 'firebase/database';
 
@@ -61,14 +61,32 @@ export default function SidebarMenu() {
 
   return (
     <div>
-      <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
-        <Bars3Icon className="h-6 w-6" />
-      </button>
+        <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="relative w-10 h-10 flex flex-col justify-between items-center p-2 group z-50"
+        >
+            {['top', 'mid', 'bottom'].map((pos, i) => (
+            <span
+                key={pos}
+                className={`block w-7 h-[3px] bg-lime-400 rounded-sm transition-all duration-300 ease-in-out
+                    group-hover:shadow-[0_0_10px_#a3e635]
+                    ${
+                    isOpen
+                        ? i === 0
+                        ? 'rotate-45 translate-y-[8px]'
+                        : i === 1
+                        ? 'opacity-0'
+                        : '-rotate-45 -translate-y-[8px]'
+                        : ''
+                    }`}
+            ></span>
+            ))}
+        </button>
 
       <div 
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-900 bg-opacity-95 backdrop-blur-sm w-72 shadow-2xl p-6 z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
+        className={`fixed top-0 left-0 h-full bg-gray-900 bg-opacity-95 backdrop-blur-sm w-72 shadow-2xl p-6 z-40 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex justify-between items-center mb-8 border-b border-gray-700 pb-4 mt-2">
           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">Категории</h2>
           <button onClick={() => setIsOpen(false)} className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
             <XMarkIcon className="h-7 w-7" />
@@ -90,7 +108,7 @@ export default function SidebarMenu() {
           </ul>
         </nav>
       </div>
-      {isOpen && <div className="fixed inset-0 bg-black opacity-60 z-40" onClick={() => setIsOpen(false)}></div>}
+      {isOpen && <div className="fixed inset-0 bg-black opacity-60 z-30" onClick={() => setIsOpen(false)}></div>}
     </div>
   );
 }

@@ -10,6 +10,12 @@ import { calculateDisplayPrice } from '@/lib/priceLogic';
 const FREE_SHIPPING_THRESHOLD = 100;
 const SHIPPING_COST = 5;
 
+const socialOptions = [
+    { key: 'telegram', label: 'Telegram', selectedColor: 'bg-sky-500', hoverColor: 'hover:bg-sky-600' },
+    { key: 'whatsapp', label: 'WhatsApp', selectedColor: 'bg-green-500', hoverColor: 'hover:bg-green-600' },
+    { key: 'facebook', label: 'Facebook', selectedColor: 'bg-blue-600', hoverColor: 'hover:bg-blue-700' },
+];
+
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
   const { addOrder } = useOrders();
@@ -154,7 +160,7 @@ export default function CheckoutPage() {
 
         <div className="bg-gray-800 rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-semibold mb-2">Контактные данные</h2>
-            <p className="text-sm text-gray-400 mb-6">Укажите имя и хотя бы один контакт: телефон или соцсеть</p>
+            <p className="text-sm text-gray-400 mb-6">Укажите имя и хотя бы один контакт: телефон или/и соцсеть</p>
             <form onSubmit={handleSubmit}>
                 <div className="mb-6">
                     <label htmlFor="name" className="block text-gray-300 mb-2 font-medium">Имя</label>
@@ -188,19 +194,29 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="mb-6">
-                    <label className="block text-gray-300 mb-2 font-medium">Соцсети для связи</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                        {['telegram', 'whatsapp', 'facebook'].map(p => (
-                            <label key={p} className="flex items-center gap-2 cursor-pointer p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                    <label className="block text-gray-300 mb-4 font-medium text-center">Соцсети для связи</label>
+                    <div className="flex justify-center flex-wrap gap-3 mb-4">
+                        {socialOptions.map(({ key, label, selectedColor, hoverColor }) => {
+                            const isSelected = selectedSocial.includes(key);
+                            return (
+                            <label
+                                key={key}
+                                className={`flex items-center justify-center px-4 py-2 rounded-full cursor-pointer border-2 transition-all duration-200 
+                                ${isSelected
+                                    ? `${selectedColor} border-transparent text-white font-bold`
+                                    : `bg-gray-700 border-gray-600 ${hoverColor} hover:border-transparent`
+                                }`}
+                            >
                                 <input
                                     type="checkbox"
-                                    checked={selectedSocial.includes(p)}
-                                    onChange={() => handleSocialCheckboxChange(p)}
-                                    className="h-5 w-5 rounded bg-gray-600 border-gray-500 text-lime-500 focus:ring-lime-500"
+                                    checked={isSelected}
+                                    onChange={() => handleSocialCheckboxChange(key)}
+                                    className="absolute opacity-0 pointer-events-none"
                                 />
-                                <span className="text-white capitalize">{p}</span>
+                                <span className="text-sm select-none">{label}</span>
                             </label>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     {selectedSocial.map(p => (
