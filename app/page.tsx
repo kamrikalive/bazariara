@@ -157,7 +157,7 @@ export default function HomePage() {
             const cartItem = cartItems.find(item => item.id === product.id);
 
             const handleAddToCart = () => {
-                addToCart({ ...product, quantity: 1 });
+                addToCart(product);
             };
 
             const handleIncreaseQuantity = () => {
