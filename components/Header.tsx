@@ -6,6 +6,7 @@ import { useOrders } from '@/contexts/OrderContext';
 import { ShoppingCartIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import Image from 'next/image';
+import SidebarMenu from './SidebarMenu';
 
 export default function Header() {
     const { cartItems } = useCart();
@@ -16,11 +17,14 @@ export default function Header() {
     const orderCount = orders.length;
 
     return (
-        <header className="bg-gray-800 p-4 shadow-md sticky top-0 z-10">
+        <header className="bg-gray-800 p-4 shadow-md sticky top-0 z-20">
             <div className="container mx-auto flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                    <SidebarMenu />
                     <Link href="/" className="text-2xl font-bold text-white hover:text-lime-400 transition-colors duration-300">
                         MarketGE
                     </Link>
+                </div>
                 <nav className="hidden md:flex gap-6 items-center">
                     <Link href="/" className="text-white hover:text-lime-400 transition-colors duration-300">Все товары</Link>
                 </nav>

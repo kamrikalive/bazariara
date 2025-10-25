@@ -7,6 +7,7 @@ import { ShoppingCartIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, MinusIco
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { database } from '@/lib/firebaseClient';
 import { ref, get } from 'firebase/database';
+import { useSearchParams } from 'next/navigation';
 
 type Product = {
   id: number;
@@ -45,6 +46,12 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const category = searchParams.get('category');
+    setSelectedCategory(category || 'Все');
+  }, [searchParams]);
 
   useEffect(() => {
     const getProductsClientSide = async () => {
@@ -60,8 +67,7 @@ export default function HomePage() {
         });
         
         setAllProducts(sortedProducts);
-        setFilteredProducts(sortedProducts);
-        
+
         const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
         setCategories(['Все', ...uniqueCategories]);
 
@@ -79,7 +85,7 @@ export default function HomePage() {
   useEffect(() => {
     let products = allProducts;
 
-    if (selectedCategory !== 'Все') {
+    if (selectedCategory && selectedCategory !== 'Все') {
       products = products.filter(p => p.category === selectedCategory);
     }
 
@@ -124,7 +130,7 @@ export default function HomePage() {
         </div>
         <div className="mb-12 text-center">
             <h2 className="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">
-              Наши товары
+              {selectedCategory === 'Все' ? 'Все товары' : selectedCategory}
             </h2>
             <div className="mb-8 max-w-md mx-auto">
               <input
