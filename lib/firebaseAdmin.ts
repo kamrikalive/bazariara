@@ -1,4 +1,3 @@
-
 import admin from 'firebase-admin';
 
 const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
@@ -8,13 +7,11 @@ if (!admin.apps.length && serviceAccountKey) {
   try {
     // First, try to parse it as a raw JSON string
     serviceAccount = JSON.parse(serviceAccountKey);
-    console.log('Parsed service account key from raw JSON.');
   } catch (e) {
     // If that fails, assume it's a base64 encoded string and decode it
     try {
       const decodedKey = Buffer.from(serviceAccountKey, 'base64').toString('utf8');
       serviceAccount = JSON.parse(decodedKey);
-      console.log('Parsed service account key from Base64 string.');
     } catch (error) {
       console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY. Make sure it is either a valid JSON string or a Base64 encoded JSON string.', error);
     }

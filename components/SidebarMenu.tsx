@@ -86,7 +86,7 @@ export default function SidebarMenu() {
       <div 
         ref={sidebarRef}
         className={`fixed top-0 left-0 h-full bg-gray-900 bg-opacity-95 backdrop-blur-sm w-72 shadow-2xl p-6 z-40 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex justify-between items-center mb-8 border-b border-gray-700 pb-4 mt-2">
+        <div className="flex justify-between items-center mb-8 border-b border-gray-700 pb-2 mt-2">
           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">Категории</h2>
           <button onClick={() => setIsOpen(false)} className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
             <XMarkIcon className="h-7 w-7" />
