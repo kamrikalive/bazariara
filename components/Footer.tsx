@@ -1,8 +1,9 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-white py-8 mt-auto">
+    <footer className="bg-gray-800 text-white py-4 mt-auto">
       <div className="container mx-auto px-4 text-center">
         <div className="flex justify-center space-x-4 mb-4">
           <a href="tel:+995591017495">
@@ -21,7 +22,9 @@ const Footer = () => {
         </div>
         <div className="text-center mt-4 text-xs text-gray-500">
           <p>&copy; 2025 MarketGE. Все права защищены.</p>
-          <p className="underline">Политика конфиденциальности</p>
+          <Link href="/privacy-policy" className="underline">
+            Политика конфиденциальности
+          </Link>
         </div>
       </div>
     </footer>

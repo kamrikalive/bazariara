@@ -14,6 +14,7 @@ type Product = {
     title: string;
     category: string;
     price: number;
+    in_stock: boolean;
     description?: string;
     image_url?: string;
 };
@@ -69,6 +70,7 @@ export default function ProductDetailPage({ params }: { params: { category: stri
             price: product.price,
             image_url: product.image_url,
             category: product.category,
+            in_stock: product.in_stock,
         };
         addToCart(productForCart);
     }
@@ -113,7 +115,10 @@ export default function ProductDetailPage({ params }: { params: { category: stri
                 <p className="text-sm text-lime-400 font-semibold mb-2">{product.category}</p>
                 <h1 className="text-4xl lg:text-5xl font-extrabold mb-4 text-gray-100">{product.title}</h1>
                 
-                <p className="text-4xl font-bold text-lime-500 mb-6">₾{calculateDisplayPrice(product.price)}</p>
+                <div className="flex justify-between items-center mb-6">
+                    <p className="text-4xl font-bold text-lime-500">₾{calculateDisplayPrice(product.price)}</p>
+                    {product.in_stock && <span className="text-sm font-semibold text-green-400 bg-green-900/50 rounded-full px-3 py-1">В наличии</span>}
+                </div>
 
                 {/* === Description Field === */}
                 {product.description && (

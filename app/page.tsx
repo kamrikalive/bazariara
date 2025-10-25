@@ -3,18 +3,17 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
-import { ShoppingCartIcon } from '@heroicons/react/24/solid';
+import { ShoppingCartIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
-import { database } from '@/lib/firebaseClient'; // Import client-side Firebase
+import { database } from '@/lib/firebaseClient';
 import { ref, get } from 'firebase/database';
 
-
-// Define the Product type for strong typing
 type Product = {
-  id: number; // Changed to number to match data
+  id: number;
   title: string;
   category: string;
   price: number;
+  in_stock: boolean;
   description?: string;
   image_url?: string;
 };
@@ -33,21 +32,6 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
 
   return [...gardenProducts, ...hikingProducts];
 }
-
-// Define a mapping for categories
-const categoryMap: { [key: string]: string } = {
-    'hiking': 'Товары для отдыха',
-    'garden': 'Сад',
-};
-
-// Create a reverse mapping
-const reverseCategoryMap: { [key: string]: string } = Object.fromEntries(
-  Object.entries(categoryMap).map(([key, value]) => [value, key])
-);
-
-
-// Define the categories to be displayed
-const displayCategories = ['Товары для отдыха', 'Сад'];
 
 const ITEMS_PER_PAGE = 20;
 
@@ -72,12 +56,11 @@ export default function HomePage() {
         setAllProducts(products);
         setFilteredProducts(products);
         
-        // Get unique categories from the processed products
         const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
         setCategories(['Все', ...uniqueCategories]);
 
       } catch (err: any) {
-        setError(err.message); // Set the error message to be displayed
+        setError(err.message);
         console.error(err);
       } finally {
         setLoading(false);
@@ -101,8 +84,17 @@ export default function HomePage() {
     }
 
     setFilteredProducts(products);
-    setCurrentPage(1); // Reset to first page on category or search change
+    setCurrentPage(1);
   }, [selectedCategory, allProducts, searchQuery]);
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-[60vh] text-white">Загрузка товаров...</div>;
@@ -172,12 +164,15 @@ export default function HomePage() {
                       <div className="p-5">
                           <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
                           <p className="text-gray-400 text-sm mb-3">{product.category}</p>
-                          <p className="text-2xl font-semibold text-lime-500">₾{calculateDisplayPrice(product.price)}</p>
+                           <div className="flex justify-between items-center">
+                              <p className="text-2xl font-semibold text-lime-500">₾{calculateDisplayPrice(product.price)}</p>
+                              {product.in_stock && <span className="text-sm font-semibold text-green-400 bg-green-900/50 rounded-full px-3 py-1">В наличии</span>}
+                          </div>
                       </div>
                   </Link>
                   <div className="p-5 pt-0 mt-auto">
                       <button 
-                          onClick={() => addToCart(product)} // Add product to cart
+                          onClick={() => addToCart(product)} 
                           className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
                       >
                           <ShoppingCartIcon className="h-5 w-5 mr-2"/>
@@ -189,23 +184,27 @@ export default function HomePage() {
           })}
         </div>
 
-        <div className="mt-16 flex justify-center items-center gap-4">
-            <button 
-                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 font-semibold rounded-lg bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors duration-300"
-            >
-                Назад
-            </button>
-            <span className="text-lg font-medium text-gray-300">Страница {currentPage} из {totalPages}</span>
-            <button 
-                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 font-semibold rounded-lg bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors duration-300"
-            >
-                Вперед
-            </button>
-        </div>
+        {totalPages > 1 && (
+            <div className="mt-16 flex justify-center items-center gap-4">
+                <button 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="p-3 rounded-full bg-lime-500 text-gray-900 font-bold hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none"
+                >
+                    <ChevronLeftIcon className="h-6 w-6" />
+                </button>
+
+                <span className="text-lg font-semibold text-white bg-gray-800/80 rounded-full px-5 py-2 shadow-inner">Страница {currentPage} из {totalPages}</span>
+
+                <button 
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="p-3 rounded-full bg-lime-500 text-gray-900 font-bold hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none"
+                >
+                    <ChevronRightIcon className="h-6 w-6" />
+                </button>
+            </div>
+        )}
 
       </main>
     </div>
