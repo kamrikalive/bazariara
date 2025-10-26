@@ -1,6 +1,6 @@
 
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, set } from 'firebase/database';
+import { getDatabase, ref, set, get } from 'firebase/database';
 import fs from 'fs';
 
 const firebaseConfig = {
@@ -15,13 +15,18 @@ async function uploadProducts() {
         const data = fs.readFileSync('products.json', 'utf8');
         const allProducts = JSON.parse(data);
 
-        const gardenProducts = allProducts.filter(product => product.category === 'Сад');
+        const hikingProducts = allProducts.filter(product => product.category === 'Товары для отдыха');
 
-        const dbRef = ref(database, 'products/garden');
+        const dbRef = ref(database, 'products/hiking');
 
-        await set(dbRef, gardenProducts);
+        const snapshot = await get(dbRef);
+        const existingProducts = snapshot.val() || [];
 
-        console.log("✅ Товары успешно загружены в /products/garden!");
+        const combinedProducts = [...existingProducts, ...hikingProducts];
+
+        await set(dbRef, combinedProducts);
+
+        console.log("✅ Товары успешно добавлены в /products/hiking!");
         process.exit(0);
     } catch (err) {
         console.error("❌ Ошибка при загрузке:", err);

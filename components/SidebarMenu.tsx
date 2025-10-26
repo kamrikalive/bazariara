@@ -6,31 +6,53 @@ import { XMarkIcon } from '@heroicons/react/24/solid';
 import { database } from '@/lib/firebaseClient';
 import { ref, get } from 'firebase/database';
 
+// Иконка для категории
+const CategoryIcon = () => (
+  <svg className="w-5 h-5 mr-3 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7"></path>
+  </svg>
+);
+
 type Product = {
   id: number;
   category: string;
 };
 
-async function fetchCategoriesFromFirebase(): Promise<string[]> {
-  const gardenRef = ref(database, 'products/garden');
-  const hikingRef = ref(database, 'products/hiking');
+type CategoryInfo = {
+  name: string;
+  count: number;
+};
 
-  const [gardenSnapshot, hikingSnapshot] = await Promise.all([
-    get(gardenRef),
-    get(hikingRef)
-  ]);
+async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
+    const gardenRef = ref(database, 'products/garden');
+    const hikingRef = ref(database, 'products/hiking');
 
-  const gardenProducts = gardenSnapshot.exists() ? gardenSnapshot.val() : [];
-  const hikingProducts = hikingSnapshot.exists() ? hikingSnapshot.val() : [];
+    const [gardenSnapshot, hikingSnapshot] = await Promise.all([
+        get(gardenRef),
+        get(hikingRef)
+    ]);
 
-  const allProducts: Product[] = [...gardenProducts, ...hikingProducts];
-  const uniqueCategories = Array.from(new Set(allProducts.map((p) => p.category)));
-  return ['Все', ...uniqueCategories];
+    const gardenProducts: Product[] = gardenSnapshot.exists() ? Object.values(gardenSnapshot.val()) : [];
+    const hikingProducts: Product[] = hikingSnapshot.exists() ? Object.values(hikingSnapshot.val()) : [];
+
+    const allProducts = [...gardenProducts, ...hikingProducts];
+
+    const categoryCounts = allProducts.reduce((acc, product) => {
+        acc[product.category] = (acc[product.category] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const categories: CategoryInfo[] = Object.entries(categoryCounts).map(([name, count]) => ({ name, count }));
+
+    // Добавляем категорию "Все" с общим количеством товаров
+    categories.unshift({ name: 'Все', count: allProducts.length });
+
+    return categories;
 }
 
 export default function SidebarMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -86,22 +108,26 @@ export default function SidebarMenu() {
       <div 
         ref={sidebarRef}
         className={`fixed top-0 left-0 h-full bg-gray-900 bg-opacity-95 backdrop-blur-sm w-72 shadow-2xl p-6 z-40 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex justify-between items-center mb-8 border-b border-gray-700 pb-2 mt-2">
-          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">Категории</h2>
+        <div className="flex justify-end items-center mb-4 border-b border-gray-700 pb-2 mt-2">
           <button onClick={() => setIsOpen(false)} className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
             <XMarkIcon className="h-7 w-7" />
           </button>
         </div>
+        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500 mb-8">Категории</h2>
         <nav>
           <ul>
             {categories.map(category => (
-              <li key={category} className="mb-3">
+              <li key={category.name} className="mb-3">
                 <Link 
-                  href={category === 'Все' ? '/' : `/?category=${encodeURIComponent(category)}`}
+                  href={category.name === 'Все' ? '/' : `/?category=${encodeURIComponent(category.name)}`}
                   onClick={() => setIsOpen(false)}
-                  className="block px-4 py-3 rounded-lg text-lg text-gray-300 hover:bg-lime-500/10 hover:text-lime-300 border border-transparent hover:border-lime-500/30 transition-all duration-200"
+                  className="flex items-center justify-between px-4 py-3 rounded-lg text-lg text-gray-300 hover:bg-lime-500/10 hover:text-lime-300 border border-transparent hover:border-lime-500/30 transition-all duration-200"
                 >
-                  {category}
+                  <div className="flex items-center">
+                    <CategoryIcon />
+                    <span>{category.name}</span>
+                  </div>
+                  <span className="text-sm font-mono bg-lime-500/20 text-lime-300 rounded-full px-2 py-0.5">{category.count}</span>
                 </Link>
               </li>
             ))}
