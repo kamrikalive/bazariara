@@ -4,6 +4,7 @@ import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ArrowLeftIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
+import { useSearchParams } from 'next/navigation';
 
 type Product = {
     id: number;
@@ -17,6 +18,8 @@ type Product = {
 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
+  const searchParams = useSearchParams();
+  const page = searchParams.get('page') || '1';
   const cartItem = cartItems.find(item => item.id === product.id);
 
   const handleAddToCart = () => {
@@ -43,7 +46,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link href={`/`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+          <Link href={`/?page=${page}`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ArrowLeftIcon className="h-5 w-5"/>
             Назад к товарам
           </Link>

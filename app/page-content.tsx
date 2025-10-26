@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
 type Product = {
   id: number;
@@ -28,10 +28,16 @@ export default function HomePageContent({ products: initialProducts }: { product
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const category = searchParams.get('category');
+    const page = searchParams.get('page');
     setSelectedCategory(category || 'Все');
+    if (page) {
+      setCurrentPage(parseInt(page, 10));
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -59,17 +65,33 @@ export default function HomePageContent({ products: initialProducts }: { product
     }
 
     setFilteredProducts(products);
-    setCurrentPage(1);
-  }, [selectedCategory, allProducts, searchQuery]);
+    if (!searchParams.has('page')) {
+        setCurrentPage(1);
+    }
+  }, [selectedCategory, allProducts, searchQuery, searchParams]);
 
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
+  useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', page.toString());
+    router.push(`${pathname}?${params.toString()}`);
   };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    const params = new URLSearchParams(window.location.search);
+    params.set('category', category);
+    params.delete('page');
+    router.push(`${pathname}?${params.toString()}`);
+  }
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
@@ -100,7 +122,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                 {categories.map(category => (
                     <button 
                         key={category}
-                        onClick={() => setSelectedCategory(category)} 
+                        onClick={() => handleCategoryChange(category)} 
                         className={`px-5 py-2 font-medium rounded-full text-sm transition-all duration-300 ease-in-out ${
                             selectedCategory === category 
                             ? 'bg-lime-500 text-gray-900 shadow-lg shadow-lime-500/30'
@@ -142,7 +164,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                 key={product.id} 
                 className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
               >
-                  <Link href={`/products/${originalCategory}/${product.id}`} className="flex-grow">
+                  <Link href={`/products/${originalCategory}/${product.id}?page=${currentPage}`} className="flex-grow">
                       <div className="overflow-hidden">
                         <img 
                           src={product.image_url} 
