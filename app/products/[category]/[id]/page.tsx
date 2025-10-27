@@ -11,6 +11,8 @@ type Product = {
   description?: string;
   image_url?: string;
   categoryKey: string;
+  image_urls?: string[];
+  links?: string[];
 };
 
 async function getProduct(category: string, id: string): Promise<Product | null> {

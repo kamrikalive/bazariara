@@ -15,6 +15,8 @@ type Product = {
   description?: string;
   image_url?: string;
   categoryKey: string;
+  image_urls?: string[];
+  links?: string[];
 };
 
 async function fetchProductsFromFirebase(): Promise<Product[]> {

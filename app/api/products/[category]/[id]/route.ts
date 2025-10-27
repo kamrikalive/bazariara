@@ -1,31 +1,34 @@
 
+import { database } from '@/lib/firebase/server';
 import { NextResponse } from 'next/server';
-import { db } from '../../../../../lib/firebaseAdmin';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(request: Request, { params }: { params: { category: string, id: string } }) {
-  if (!db) {
-    return new NextResponse('Firebase Admin SDK not initialized', { status: 503, headers: { 'Retry-After': '30' } });
-  }
-
+export async function GET(
+  request: Request,
+  { params }: { params: { category: string; id: string } }
+) {
   try {
     const { category, id } = params;
-    
-    const docRef = db.collection(category).doc(id);
-    const doc = await docRef.get();
+    if (!category || !id) {
+      return NextResponse.json({ message: 'Category and ID are required' }, { status: 400 });
+    }
 
-    if (doc.exists) {
-      const product = { id: doc.id, ...doc.data() };
-      return NextResponse.json(product);
-    } else {
-      return new NextResponse(`Product with ID ${id} in category ${category} not found`, { status: 404 });
+    const productRef = database.ref(`products/${category}/${id}`);
+    const snapshot = await productRef.once('value');
+
+    if (!snapshot.exists()) {
+      return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
+
+    const productData = snapshot.val();
+    const product = {
+      ...productData,
+      id: parseInt(id, 10),
+      categoryKey: category,
+    };
+
+    return NextResponse.json(product);
   } catch (error) {
-    console.error('Error fetching product from Firestore:', error);
-    if (error instanceof Error && error.message.includes('Invalid collection id')) {
-        return new NextResponse(`Invalid category: ${params.category}`, { status: 400 });
-    }
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error('Error fetching product:', error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -5,6 +5,7 @@ import { ShoppingCartIcon, ArrowLeftIcon, PlusIcon, MinusIcon } from '@heroicons
 import Link from 'next/link';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 type Product = {
     id: number;
@@ -15,13 +16,58 @@ type Product = {
     description?: string;
     image_url?: string;
     categoryKey: string;
+    image_urls?: string[];
+    links?: string[];
 };
+
+async function fetchProduct(category: string, id: string): Promise<Product | null> {
+    try {
+        const response = await fetch(`/api/products/${category}/${id}`);
+        if (!response.ok) {
+            return null;
+        }
+        return response.json();
+    } catch (error) {
+        console.error('Failed to fetch related product', error);
+        return null;
+    }
+}
+
+function RelatedProductCard({ category, id }: { category: string; id: string }) {
+    const [product, setProduct] = useState<Product | null>(null);
+
+    useEffect(() => {
+        fetchProduct(category, id).then(setProduct);
+    }, [category, id]);
+
+    if (!product) {
+        return (
+            <div className="bg-gray-800 rounded-lg shadow-md p-4 text-center">
+                <div className="w-full h-32 bg-gray-700 animate-pulse rounded-lg mb-4"></div>
+                <div className="w-3/4 h-4 bg-gray-700 animate-pulse rounded-md mx-auto"></div>
+            </div>
+        );
+    }
+
+    return (
+        <Link href={`/products/${product.categoryKey}/${product.id}`} className="block bg-gray-800 rounded-lg shadow-md hover:shadow-lime-500/20 transition-shadow duration-300">
+            <img src={product.image_url} alt={product.title} className="w-full h-32 object-cover rounded-t-lg" />
+            <div className="p-4">
+                <h4 className="font-bold text-md truncate text-white">{product.title}</h4>
+                <p className="text-lime-400 font-semibold">{calculateDisplayPrice(product.price)} ₾</p>
+            </div>
+        </Link>
+    );
+}
 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const searchParams = useSearchParams();
   const page = searchParams.get('page') || '1';
   const cartItem = cartItems.find(item => item.id === product.id);
+  const [mainImage, setMainImage] = useState(product.image_url);
+
+  const allImages = [product.image_url, ...(product.image_urls || [])].filter(Boolean) as string[];
 
   const handleAddToCart = () => {
     addToCart(product);
@@ -55,13 +101,22 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
         <div className="bg-gray-800/40 rounded-xl shadow-2xl overflow-hidden backdrop-blur-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-            {/* === Product Image === */}
+            {/* === Product Image Gallery === */}
             <div className="p-4">
               <img
-                src={product.image_url}
+                src={mainImage}
                 alt={product.title}
-                className="w-full h-full object-cover rounded-lg shadow-lg"
+                className="w-full h-[400px] object-cover rounded-lg shadow-lg mb-4"
               />
+              {allImages.length > 1 && (
+                <div className="grid grid-cols-5 gap-2">
+                  {allImages.map((url, index) => (
+                    <button key={index} onClick={() => setMainImage(url)} className={`rounded-lg overflow-hidden border-2 ${mainImage === url ? 'border-lime-500' : 'border-transparent'}`}>
+                      <img src={url} alt={`Thumbnail ${index + 1}`} className="w-full h-24 object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* === Product Info === */}
@@ -75,7 +130,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     {product.in_stock && <span className="text-sm font-semibold text-green-400 bg-green-900/50 rounded-full px-3 py-1">В наличии</span>}
                 </div>
 
-                {/* === Description Field === */}
                 {product.description && (
                   <div className="text-gray-300 leading-relaxed space-y-4 whitespace-pre-line">
                     {product.description.split('\n').map((paragraph, index) => (
@@ -88,35 +142,33 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <div className="mt-8">
                 {cartItem ? (
                     <div className="flex items-center gap-4">
-                        <p className="text-lg font-semibold">В корсине:</p>
+                        <p className="text-lg font-semibold">В корзине:</p>
                         <div className="flex items-center gap-2">
-                            <button
-                                onClick={handleDecreaseQuantity}
-                                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
-                            >
-                                <MinusIcon className="h-5 w-5" />
-                            </button>
+                            <button onClick={handleDecreaseQuantity} className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"><MinusIcon className="h-5 w-5" /></button>
                             <span className="text-xl font-bold w-12 text-center">{cartItem.quantity}</span>
-                            <button
-                                onClick={handleIncreaseQuantity}
-                                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
-                            >
-                                <PlusIcon className="h-5 w-5" />
-                            </button>
+                            <button onClick={handleIncreaseQuantity} className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"><PlusIcon className="h-5 w-5" /></button>
                         </div>
                     </div>
                 ) : (
-                    <button 
-                      onClick={handleAddToCart}
-                      className="w-full flex items-center justify-center px-4 py-4 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
-                      <ShoppingCartIcon className="h-6 w-6 mr-3"/>
-                      Добавить в корзину
-                    </button>
+                    <button onClick={handleAddToCart} className="w-full flex items-center justify-center px-4 py-4 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"><ShoppingCartIcon className="h-6 w-6 mr-3"/>Добавить в корзину</button>
                 )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* === Related Products === */}
+        {product.links && product.links.length > 0 && (
+            <div className="mt-16">
+                <h3 className="text-2xl font-bold mb-6 text-white">С этим покупают:</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {product.links.map((link, index) => {
+                        const [_, category, id] = link.split('/');
+                        return <RelatedProductCard key={index} category={category} id={id} />
+                    })}
+                </div>
+            </div>
+        )}
       </main>
     </div>
   );
