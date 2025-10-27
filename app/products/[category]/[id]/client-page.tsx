@@ -112,7 +112,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <div className="grid grid-cols-5 gap-2">
                   {allImages.map((url, index) => (
                     <button key={index} onClick={() => setMainImage(url)} className={`rounded-lg overflow-hidden border-2 ${mainImage === url ? 'border-lime-500' : 'border-transparent'}`}>
-                      <img src={url} alt={`Thumbnail ${index + 1}`} className="w-full h-24 object-cover" />
+                      <img src={url} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
