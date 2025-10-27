@@ -15,12 +15,13 @@ type Product = {
   in_stock: boolean;
   description?: string;
   image_url?: string;
+  categoryKey: string;
 };
 
 const ITEMS_PER_PAGE = 20;
 
 export default function HomePageContent({ products: initialProducts }: { products: Product[] }) {
-  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>('Все');
@@ -41,13 +42,15 @@ export default function HomePageContent({ products: initialProducts }: { product
   }, [searchParams]);
 
   useEffect(() => {
-    const sortedProducts = initialProducts.sort((a, b) => {
+    const productsWithImages = initialProducts.filter(p => p.image_url && p.image_url.trim() !== '');
+
+    const sortedProducts = productsWithImages.sort((a, b) => {
         if (a.in_stock && !b.in_stock) return -1;
         if (!a.in_stock && b.in_stock) return 1;
         return 0;
     });
     setAllProducts(sortedProducts);
-    const uniqueCategories = Array.from(new Set(initialProducts.map((p) => p.category)));
+    const uniqueCategories = Array.from(new Set(productsWithImages.map((p) => p.category)));
     setCategories(['Все', ...uniqueCategories]);
   }, [initialProducts]);
 
@@ -136,7 +139,6 @@ export default function HomePageContent({ products: initialProducts }: { product
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
           {paginatedProducts.map((product) => {
-            const originalCategory = product.category === 'Сад' ? 'garden' : 'hiking';
             const cartItem = cartItems.find(item => item.id === product.id);
 
             const handleAddToCart = () => {
@@ -164,7 +166,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                 key={product.id} 
                 className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
               >
-                  <Link href={`/products/${originalCategory}/${product.id}?page=${currentPage}`} className="flex-grow">
+                  <Link href={`/products/${product.categoryKey}/${product.id}?page=${currentPage}`} className="flex-grow">
                       <div className="overflow-hidden">
                         <img 
                           src={product.image_url} 

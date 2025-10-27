@@ -14,26 +14,52 @@ type Product = {
   in_stock: boolean;
   description?: string;
   image_url?: string;
+  categoryKey: string;
 };
 
 async function fetchProductsFromFirebase(): Promise<Product[]> {
-  const gardenRef = database.ref('products/garden');
-  const hikingRef = database.ref('products/hiking');
+  const productsRef = database.ref('products');
+  const snapshot = await productsRef.once('value');
+  const categoriesData = snapshot.val() || {};
 
-  const [gardenSnapshot, hikingSnapshot] = await Promise.all([
-    gardenRef.once('value'),
-    hikingRef.once('value')
-  ]);
+  const allProducts: Product[] = [];
 
-  const gardenData = gardenSnapshot.val() || {};
-  const hikingData = hikingSnapshot.val() || {};
+  Object.keys(categoriesData).forEach(categoryKey => {
+    const productsInCategory = categoriesData[categoryKey];
+    if (productsInCategory && typeof productsInCategory === 'object') {
+      Object.keys(productsInCategory).forEach(productId => {
+        const productData = productsInCategory[productId];
+        if (productData && typeof productData === 'object' && productData.title) {
+          allProducts.push({
+            ...productData,
+            id: parseInt(productId, 10),
+            categoryKey: categoryKey,
+          });
+        }
+      });
+    }
+  });
 
-  const gardenProducts: Product[] = Object.keys(gardenData).map(key => ({ ...gardenData[key], id: parseInt(key, 10) }));
-  const hikingProducts: Product[] = Object.keys(hikingData).map(key => ({ ...hikingData[key], id: parseInt(key, 10) }));
-
-  return [...gardenProducts, ...hikingProducts];
+  return allProducts;
 }
 
+
+export const metadata: Metadata = {
+    title: 'Онлайн-магазин для сада и отдыха',
+    description: 'Лучшие товары для сада и отдыха с доставкой за 2 часа. Широкий ассортимент, высокое качество и быстрая доставка по всему городу. Заказывайте онлайн!',
+    openGraph: {
+        title: 'Онлайн-магазин для сада и отдыха',
+        description: 'Быстрая доставка за 2 часа.',
+        images: [
+            {
+                url: '/og-image.png',
+                width: 1200,
+                height: 630,
+                alt: 'Онлайн-магазин для сада и отдыха',
+            },
+        ],
+    },
+};
 
 export default async function HomePage() {
   const products = await fetchProductsFromFirebase();

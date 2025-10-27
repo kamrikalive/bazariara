@@ -24,29 +24,31 @@ type CategoryInfo = {
 };
 
 async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
-    const gardenRef = ref(database, 'products/garden');
-    const hikingRef = ref(database, 'products/hiking');
+    const productsRef = ref(database, 'products');
+    const snapshot = await get(productsRef);
+    const productsData = snapshot.val();
 
-    const [gardenSnapshot, hikingSnapshot] = await Promise.all([
-        get(gardenRef),
-        get(hikingRef)
-    ]);
+    if (!productsData) return [{ name: 'Все', count: 0 }];
 
-    const gardenProducts: Product[] = gardenSnapshot.exists() ? Object.values(gardenSnapshot.val()) : [];
-    const hikingProducts: Product[] = hikingSnapshot.exists() ? Object.values(hikingSnapshot.val()) : [];
-
-    const allProducts = [...gardenProducts, ...hikingProducts];
-
+    let allProducts: Product[] = [];
+    for (const categoryKey in productsData) {
+        const categoryProducts = productsData[categoryKey];
+        const productList = Object.values(categoryProducts) as Omit<Product, 'id'>[];
+        allProducts = allProducts.concat(productList.map((p, i) => ({ ...p, id: i, category: p.category || categoryKey })));
+    }
+    
     const categoryCounts = allProducts.reduce((acc, product) => {
-        acc[product.category] = (acc[product.category] || 0) + 1;
+        const categoryName = product.category;
+        if (categoryName) {
+            acc[categoryName] = (acc[categoryName] || 0) + 1;
+        }
         return acc;
     }, {} as Record<string, number>);
 
     const categories: CategoryInfo[] = Object.entries(categoryCounts).map(([name, count]) => ({ name, count }));
-
-    // Добавляем категорию "Все" с общим количеством товаров
+    
     categories.unshift({ name: 'Все', count: allProducts.length });
-
+    
     return categories;
 }
 

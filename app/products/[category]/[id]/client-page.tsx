@@ -14,6 +14,7 @@ type Product = {
     in_stock: boolean;
     description?: string;
     image_url?: string;
+    categoryKey: string;
 };
 
 export default function ProductDetailClient({ product }: { product: Product }) {
@@ -46,7 +47,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link href={`/?page=${page}`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+          <Link href={`/?category=${product.category}&page=${page}`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ArrowLeftIcon className="h-5 w-5"/>
             Назад к товарам
           </Link>
@@ -87,7 +88,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <div className="mt-8">
                 {cartItem ? (
                     <div className="flex items-center gap-4">
-                        <p className="text-lg font-semibold">В корзине:</p>
+                        <p className="text-lg font-semibold">В корсине:</p>
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={handleDecreaseQuantity}

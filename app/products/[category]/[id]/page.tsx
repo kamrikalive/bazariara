@@ -10,6 +10,7 @@ type Product = {
   in_stock: boolean;
   description?: string;
   image_url?: string;
+  categoryKey: string;
 };
 
 async function getProduct(category: string, id: string): Promise<Product | null> {
@@ -18,7 +19,11 @@ async function getProduct(category: string, id: string): Promise<Product | null>
 
   if (snapshot.exists()) {
     const productData = snapshot.val();
-    return { ...productData, id: parseInt(id, 10) };
+    return { 
+      ...productData, 
+      id: parseInt(id, 10),
+      categoryKey: category
+    };
   } else {
     return null;
   }
