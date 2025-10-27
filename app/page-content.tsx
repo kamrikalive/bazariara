@@ -6,6 +6,7 @@ import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import CategoryCarousel from '@/components/CategoryCarousel';
 
 type Product = {
   id: number;
@@ -18,13 +19,19 @@ type Product = {
   categoryKey: string;
 };
 
+type Category = {
+    name: string;
+    key: string;
+    imageUrl: string;
+};
+
 const ITEMS_PER_PAGE = 20;
 
 export default function HomePageContent({ products: initialProducts }: { products: Product[] }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>('Все');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +42,7 @@ export default function HomePageContent({ products: initialProducts }: { product
   useEffect(() => {
     const category = searchParams.get('category');
     const page = searchParams.get('page');
-    setSelectedCategory(category || 'Все');
+    setSelectedCategory(category || 'all');
     if (page) {
       setCurrentPage(parseInt(page, 10));
     }
@@ -44,21 +51,41 @@ export default function HomePageContent({ products: initialProducts }: { product
   useEffect(() => {
     const productsWithImages = initialProducts.filter(p => p.image_url && p.image_url.trim() !== '');
 
-    const sortedProducts = productsWithImages.sort((a, b) => {
+    const sortedProducts = [...productsWithImages].sort((a, b) => {
         if (a.in_stock && !b.in_stock) return -1;
         if (!a.in_stock && b.in_stock) return 1;
         return 0;
     });
     setAllProducts(sortedProducts);
-    const uniqueCategories = Array.from(new Set(productsWithImages.map((p) => p.category)));
-    setCategories(['Все', ...uniqueCategories]);
+
+    const categoryMap = new Map<string, { name: string; imageUrl: string }>();
+    sortedProducts.forEach(product => {
+        if (!categoryMap.has(product.categoryKey)) {
+            categoryMap.set(product.categoryKey, {
+                name: product.category,
+                imageUrl: product.image_url!,
+            });
+        }
+    });
+
+    const uniqueCategories = [
+        { name: 'Все', key: 'all', imageUrl: sortedProducts[0]?.image_url || '' },
+        ...Array.from(categoryMap.entries()).map(([key, { name, imageUrl }]) => ({
+            key,
+            name,
+            imageUrl,
+        }))
+    ];
+
+    setCategories(uniqueCategories);
+
   }, [initialProducts]);
 
   useEffect(() => {
     let products = allProducts;
 
-    if (selectedCategory && selectedCategory !== 'Все') {
-      products = products.filter(p => p.category === selectedCategory);
+    if (selectedCategory && selectedCategory !== 'all') {
+      products = products.filter(p => p.categoryKey === selectedCategory);
     }
 
     if (searchQuery) {
@@ -108,11 +135,8 @@ export default function HomePageContent({ products: initialProducts }: { product
         <div className="text-center py-4">
             <p className="flashing-slogan text-2xl font-bold text-lime-400">Доставим за 2 часа</p>
         </div>
-        <div className="mb-12 text-center">
-            <h2 className="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">
-              {selectedCategory === 'Все' ? 'Все товары' : selectedCategory}
-            </h2>
-            <div className="mb-8 max-w-md mx-auto">
+        <div className="mb-2">
+            <div className="mb-2 max-w-md mx-auto">
               <input
                 type="text"
                 placeholder="Поиск по названию..."
@@ -121,20 +145,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                 className="w-full px-4 py-2 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-500"
               />
             </div>
-            <div className="flex justify-center gap-3 flex-wrap">
-                {categories.map(category => (
-                    <button 
-                        key={category}
-                        onClick={() => handleCategoryChange(category)} 
-                        className={`px-5 py-2 font-medium rounded-full text-sm transition-all duration-300 ease-in-out ${
-                            selectedCategory === category 
-                            ? 'bg-lime-500 text-gray-900 shadow-lg shadow-lime-500/30'
-                            : 'bg-gray-800 hover:bg-gray-700'
-                        }`}>
-                        {category}
-                    </button>
-                ))}
-            </div>
+            <CategoryCarousel categories={categories} selectedCategory={selectedCategory} onSelectCategory={handleCategoryChange} />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
