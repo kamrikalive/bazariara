@@ -14,12 +14,12 @@ const CategoryIcon = () => (
 );
 
 type Product = {
-  id: number;
   category: string;
 };
 
 type CategoryInfo = {
   name: string;
+  key: string; // e.g. 'sad', 'dom'
   count: number;
 };
 
@@ -28,26 +28,28 @@ async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
     const snapshot = await get(productsRef);
     const productsData = snapshot.val();
 
-    if (!productsData) return [{ name: 'Все', count: 0 }];
+    if (!productsData) return [{ name: 'Все', key: 'all', count: 0 }];
 
-    let allProducts: Product[] = [];
+    const categories: CategoryInfo[] = [];
+    let totalProducts = 0;
+
     for (const categoryKey in productsData) {
         const categoryProducts = productsData[categoryKey];
-        const productList = Object.values(categoryProducts) as Omit<Product, 'id'>[];
-        allProducts = allProducts.concat(productList.map((p, i) => ({ ...p, id: i, category: p.category || categoryKey })));
+        if (typeof categoryProducts === 'object' && categoryProducts !== null) {
+            const productList = Object.values(categoryProducts) as Product[];
+            const count = productList.length;
+            totalProducts += count;
+            
+            if (count > 0) {
+                const categoryName = productList[0].category || categoryKey;
+                categories.push({ name: categoryName, key: categoryKey, count });
+            }
+        }
     }
     
-    const categoryCounts = allProducts.reduce((acc, product) => {
-        const categoryName = product.category;
-        if (categoryName) {
-            acc[categoryName] = (acc[categoryName] || 0) + 1;
-        }
-        return acc;
-    }, {} as Record<string, number>);
+    categories.sort((a, b) => a.name.localeCompare(b.name));
 
-    const categories: CategoryInfo[] = Object.entries(categoryCounts).map(([name, count]) => ({ name, count }));
-    
-    categories.unshift({ name: 'Все', count: allProducts.length });
+    categories.unshift({ name: 'Все', key: 'all', count: totalProducts });
     
     return categories;
 }
@@ -119,9 +121,9 @@ export default function SidebarMenu() {
         <nav>
           <ul>
             {categories.map(category => (
-              <li key={category.name} className="mb-3">
+              <li key={category.key} className="mb-3">
                 <Link 
-                  href={category.name === 'Все' ? '/' : `/?category=${encodeURIComponent(category.name)}`}
+                  href={category.key === 'all' ? '/' : `/?category=${encodeURIComponent(category.key)}`}
                   onClick={() => setIsOpen(false)}
                   className="flex items-center justify-between px-4 py-3 rounded-lg text-lg text-gray-300 hover:bg-lime-500/10 hover:text-lime-300 border border-transparent hover:border-lime-500/30 transition-all duration-200"
                 >
