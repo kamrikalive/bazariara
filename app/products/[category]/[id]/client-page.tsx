@@ -159,12 +159,22 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
         {/* === Related Products === */}
         {product.links && product.links.length > 0 && (
-            <div className="mt-16">
-                <h3 className="text-2xl font-bold mb-6 text-white">С этим покупают:</h3>
+            <div className="mt-2">
+                <h3 className="text-2xl font-bold mb-2 text-white">С этим покупают:</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {product.links.map((link, index) => {
-                        const [_, category, id] = link.split('/');
-                        return <RelatedProductCard key={index} category={category} id={id} />
+                        try {
+                            const url = new URL(link);
+                            const pathnameParts = url.pathname.split('/');
+                            if (pathnameParts.length >= 4) {
+                                const category = pathnameParts[2];
+                                const id = pathnameParts[3];
+                                return <RelatedProductCard key={index} category={category} id={id} />
+                            }
+                        } catch (error) {
+                            console.error("Invalid URL in product links", link, error);
+                        }
+                        return null;
                     })}
                 </div>
             </div>
