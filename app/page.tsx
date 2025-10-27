@@ -42,6 +42,17 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
     }
   });
 
+  // Sort products to show 'top' category first
+  allProducts.sort((a, b) => {
+    if (a.categoryKey === 'top' && b.categoryKey !== 'top') {
+      return -1; // a comes first
+    }
+    if (a.categoryKey !== 'top' && b.categoryKey === 'top') {
+      return 1; // b comes first
+    }
+    return 0; // maintain original order for other categories
+  });
+
   return allProducts;
 }
 
