@@ -66,6 +66,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const page = searchParams.get('page') || '1';
   const cartItem = cartItems.find(item => item.id === product.id);
   const [mainImage, setMainImage] = useState(product.image_url);
+  const [inputValue, setInputValue] = useState<string | number>('');
+
+  useEffect(() => {
+    if (cartItem) {
+        setInputValue(cartItem.quantity);
+    }
+  }, [cartItem]);
 
   const allImages = [product.image_url, ...(product.image_urls || [])].filter(Boolean) as string[];
 
@@ -75,27 +82,37 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   const handleIncreaseQuantity = () => {
     if (cartItem) {
-      updateQuantity(cartItem.id, cartItem.quantity + 1);
+      const newQuantity = cartItem.quantity + 1;
+      setInputValue(newQuantity);
+      updateQuantity(cartItem.id, newQuantity);
     }
   };
 
   const handleDecreaseQuantity = () => {
     if (cartItem) {
         if (cartItem.quantity > 1) {
-            updateQuantity(cartItem.id, cartItem.quantity - 1);
+            const newQuantity = cartItem.quantity - 1;
+            setInputValue(newQuantity);
+            updateQuantity(cartItem.id, newQuantity);
         } else {
             removeFromCart(cartItem.id);
         }
     }
   };
 
-  const handleQuantityChange = (newQuantity: number) => {
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleBlur = () => {
     if (cartItem) {
-      if (newQuantity > 0) {
-        updateQuantity(cartItem.id, newQuantity);
-      } else {
-        removeFromCart(cartItem.id);
-      }
+        const newQuantity = parseInt(inputValue.toString(), 10);
+        if (!isNaN(newQuantity) && newQuantity > 0) {
+            updateQuantity(cartItem.id, newQuantity);
+        } else {
+            // If input is invalid or empty, reset to original quantity
+            setInputValue(cartItem.quantity);
+        }
     }
   };
 
@@ -157,8 +174,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                             <button onClick={handleDecreaseQuantity} className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"><MinusIcon className="h-5 w-5" /></button>
                             <input
                                 type="number"
-                                value={cartItem.quantity}
-                                onChange={(e) => handleQuantityChange(parseInt(e.target.value, 10))}
+                                value={inputValue}
+                                onChange={handleQuantityChange}
+                                onBlur={handleBlur}
                                 className="text-xl font-bold w-12 text-center bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-lime-500 rounded-md"
                                 min="1"
                             />

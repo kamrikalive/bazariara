@@ -10,6 +10,7 @@ export type ProductInCart = {
     image_url?: string;
     quantity: number;
     category: string;
+    categoryKey: string;
 };
 
 export type Product = {
@@ -18,7 +19,8 @@ export type Product = {
     price: number;
     image_url?: string;
     category: string;
-    description?: string; // Added optional description
+    categoryKey: string;
+    description?: string;
 };
 
 type CartContextType = {
@@ -41,9 +43,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         try {
             const storedCart = localStorage.getItem('cart');
             if (storedCart) {
-                // Basic validation to ensure stored data has the 'category' property
                 const parsedCart = JSON.parse(storedCart);
-                if (Array.isArray(parsedCart) && parsedCart.every(item => 'category' in item)) {
+                if (Array.isArray(parsedCart) && parsedCart.every(item => 'categoryKey' in item)) {
                     setCartItems(parsedCart);
                 }
             }
@@ -62,12 +63,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         setCartItems(prevItems => {
             const existingItem = prevItems.find(i => i.id === item.id);
             if (existingItem) {
-                // Increase quantity if item already exists
                 return prevItems.map(i => 
                     i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
                 );
             } else {
-                // Add new item with quantity 1
                 return [...prevItems, { ...item, quantity: 1 }];
             }
         });

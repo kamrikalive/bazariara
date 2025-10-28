@@ -7,6 +7,7 @@ import { ShoppingCartIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, MinusIco
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import CategoryCarousel from '@/components/CategoryCarousel';
+import QuantityInput from '@/components/QuantityInput'; // Import the new component
 
 type Product = {
   id: number;
@@ -33,7 +34,6 @@ export default function HomePageContent({ products: initialProducts }: { product
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -123,14 +123,6 @@ export default function HomePageContent({ products: initialProducts }: { product
     router.push(`${pathname}?${params.toString()}`);
   }
 
-  const handleQuantityChange = (productId: number, newQuantity: number) => {
-    if (newQuantity > 0) {
-      updateQuantity(productId, newQuantity);
-    } else {
-      removeFromCart(productId);
-    }
-  };
-
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -157,30 +149,7 @@ export default function HomePageContent({ products: initialProducts }: { product
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-          {paginatedProducts.map((product) => {
-            const cartItem = cartItems.find(item => item.id === product.id);
-
-            const handleAddToCart = () => {
-                addToCart(product);
-            };
-
-            const handleIncreaseQuantity = () => {
-                if(cartItem) {
-                    updateQuantity(cartItem.id, cartItem.quantity + 1);
-                }
-            };
-
-            const handleDecreaseQuantity = () => {
-                if(cartItem) {
-                    if (cartItem.quantity > 1) {
-                        updateQuantity(cartItem.id, cartItem.quantity - 1);
-                    } else {
-                        removeFromCart(cartItem.id);
-                    }
-                }
-            };
-
-            return (
+          {paginatedProducts.map((product) => (
               <div 
                 key={product.id} 
                 className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
@@ -203,41 +172,11 @@ export default function HomePageContent({ products: initialProducts }: { product
                       </div>
                   </Link>
                   <div className="p-5 pt-0 mt-auto">
-                      {cartItem ? (
-                        <div className="flex items-center justify-center gap-2">
-                            <button
-                                onClick={handleDecreaseQuantity}
-                                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
-                            >
-                                <MinusIcon className="h-5 w-5" />
-                            </button>
-                            <input
-                                type="number"
-                                value={cartItem.quantity}
-                                onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value, 10))}
-                                className="text-xl font-bold w-12 text-center bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-lime-500 rounded-md"
-                                min="1"
-                            />
-                            <button
-                                onClick={handleIncreaseQuantity}
-                                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
-                            >
-                                <PlusIcon className="h-5 w-5" />
-                            </button>
-                        </div>
-                      ) : (
-                        <button 
-                            onClick={handleAddToCart} 
-                            className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
-                        >
-                            <ShoppingCartIcon className="h-5 w-5 mr-2"/>
-                            В корзину
-                        </button>
-                      )}
+                      <QuantityInput product={product} />
                   </div>
               </div>
             )
-          })}
+          )}
         </div>
 
         {totalPages > 1 && (
