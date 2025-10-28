@@ -39,13 +39,13 @@ export default function CartPage() {
                             <ul className="divide-y divide-gray-700/50">
                                 {cartItems.map(item => (
                                     <li key={item.id} className="flex flex-col sm:flex-row justify-between items-center p-5 gap-4">
-                                        <div className="flex items-center gap-5 w-full sm:w-auto">
+                                        <Link href={`/products/${item.categoryKey}/${item.id}`} className="flex items-center gap-5 w-full sm:w-auto group">
                                             <img src={item.image_url} alt={item.title} className="w-20 h-20 object-cover rounded-lg shadow-md"/>
                                             <div className="flex-grow">
                                                 <h2 className="font-bold text-lg text-gray-200 group-hover:text-lime-400 transition-colors duration-300">{item.title}</h2>
                                                 <p className="text-lime-500 font-semibold">₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
                                             </div>
-                                        </div>
+                                        </Link>
                                         <div className="flex items-center gap-2 sm:gap-4">
                                             <div className="flex items-center rounded-lg bg-gray-700/50 border border-gray-600">
                                                 <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-l-lg transition-colors">
@@ -97,12 +97,12 @@ export default function CartPage() {
                             )}
 
                             <div className="mt-8 flex flex-col gap-4">
-                                 <Link href="/checkout" 
-                                    className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform shadow-lg ${isCheckoutDisabled ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 hover:scale-105 shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40'}`}
-                                    onClick={(e) => isCheckoutDisabled && e.preventDefault()}
-                                 >
+                                <Link href="/checkout" 
+                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform shadow-lg ${isCheckoutDisabled ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 hover:scale-105 shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40'}`}
+                                   onClick={(e) => isCheckoutDisabled && e.preventDefault()}
+                                >
                                     Перейти к оформлению
-                                </Link>
+                               </Link>
 
                                 {isCheckoutDisabled && (
                                     <p className="text-sm text-center text-red-400 font-semibold">Минимальная сумма заказа {MIN_ORDER_AMOUNT} ₾</p>
