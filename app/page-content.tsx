@@ -117,37 +117,33 @@ export default function HomePageContent({ products: initialProducts }: { product
     return products;
   }, [allProducts, selectedCategory, selectedSubCategory, searchQuery]);
 
-  useEffect(() => {
-    if(searchParams.has('page')) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [currentPage, searchParams]);
-
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
     router.push(`${pathname}?${params.toString()}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCategoryChange = (category: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('category', category);
     params.delete('subcategory');
-    params.delete('page');
-    router.push(`${pathname}?${params.toString()}`);
+    params.set('page', '1');
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
   const handleSubCategoryChange = (subCategory: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('subcategory', subCategory);
-    params.delete('page');
-    router.push(`${pathname}?${params.toString()}`);
+    params.set('page', '1');
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('search', e.target.value);
-    router.push(`${pathname}?${params.toString()}`);
+    params.set('page', '1');
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
