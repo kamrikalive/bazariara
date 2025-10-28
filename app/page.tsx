@@ -17,6 +17,8 @@ type Product = {
   categoryKey: string;
   image_urls?: string[];
   links?: string[];
+  sub_category?: string;
+  subCategoryKey?: string;
 };
 
 async function fetchProductsFromFirebase(): Promise<Product[]> {
@@ -26,17 +28,29 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
 
   const allProducts: Product[] = [];
 
+  const generateKey = (name: string) => {
+    if (!name) return '';
+    // Simplified key generation that handles Cyrillic characters
+    return name.trim().toLowerCase().replace(/\s+/g, '-');
+  };
+
   Object.keys(categoriesData).forEach(categoryKey => {
     const productsInCategory = categoriesData[categoryKey];
     if (productsInCategory && typeof productsInCategory === 'object') {
       Object.keys(productsInCategory).forEach(productId => {
         const productData = productsInCategory[productId];
         if (productData && typeof productData === 'object' && productData.title) {
-          allProducts.push({
+          const newProduct: Product = {
             ...productData,
             id: parseInt(productId, 10),
             categoryKey: categoryKey,
-          });
+          };
+
+          if (productData.sub_category) {
+            newProduct.subCategoryKey = generateKey(productData.sub_category);
+          }
+          
+          allProducts.push(newProduct);
         }
       });
     }

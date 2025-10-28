@@ -4,7 +4,7 @@ import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ArrowLeftIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation'; // Import useRouter
 import { useState, useEffect } from 'react';
 
 type Product = {
@@ -18,6 +18,8 @@ type Product = {
     categoryKey: string;
     image_urls?: string[];
     links?: string[];
+    sub_category?: string;
+    subCategoryKey?: string;
 };
 
 async function fetchProduct(category: string, id: string): Promise<Product | null> {
@@ -62,8 +64,7 @@ function RelatedProductCard({ category, id }: { category: string; id: string }) 
 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
-  const searchParams = useSearchParams();
-  const page = searchParams.get('page') || '1';
+  const router = useRouter();
   const cartItem = cartItems.find(item => item.id === product.id);
   const [mainImage, setMainImage] = useState(product.image_url);
   const [inputValue, setInputValue] = useState<string | number>('');
@@ -120,10 +121,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link href={`/?category=${product.categoryKey}&page=${page}`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+          <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ArrowLeftIcon className="h-5 w-5"/>
             Назад к товарам
-          </Link>
+          </button>
         </div>
 
         <div className="bg-gray-800/40 rounded-xl shadow-2xl overflow-hidden backdrop-blur-sm">
@@ -149,7 +150,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             {/* === Product Info === */}
             <div className="p-8 flex flex-col justify-center">
               <div>
-                <p className="text-sm text-lime-400 font-semibold mb-2">{product.category}</p>
+                <p className="text-sm text-lime-400 font-semibold mb-2">{product.category}{product.sub_category && ` / ${product.sub_category}`}</p>
                 <h1 className="text-4xl lg:text-5xl font-extrabold mb-4 text-gray-100">{product.title}</h1>
                 
                 <div className="flex justify-between items-center mb-6">

@@ -11,6 +11,8 @@ export type ProductInCart = {
     quantity: number;
     category: string;
     categoryKey: string;
+    sub_category?: string;
+    subCategoryKey?: string;
 };
 
 export type Product = {
@@ -21,6 +23,8 @@ export type Product = {
     category: string;
     categoryKey: string;
     description?: string;
+    sub_category?: string;
+    subCategoryKey?: string;
 };
 
 type CartContextType = {

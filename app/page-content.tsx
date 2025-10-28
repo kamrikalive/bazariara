@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
-import { ShoppingCartIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import CategoryCarousel from '@/components/CategoryCarousel';
-import QuantityInput from '@/components/QuantityInput'; // Import the new component
+import QuantityInput from '@/components/QuantityInput';
 
 type Product = {
   id: number;
@@ -18,6 +18,8 @@ type Product = {
   description?: string;
   image_url?: string;
   categoryKey: string;
+  sub_category?: string;
+  subCategoryKey?: string;
 };
 
 type Category = {
@@ -30,27 +32,19 @@ const ITEMS_PER_PAGE = 20;
 
 export default function HomePageContent({ products: initialProducts }: { products: Product[] }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
-  const searchParams = useSearchParams();
+  
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const category = searchParams.get('category');
-    const page = searchParams.get('page');
-    setSelectedCategory(category || 'all');
-    if (page) {
-      setCurrentPage(parseInt(page, 10));
-    }
-  }, [searchParams]);
+  const selectedCategory = searchParams.get('category') || 'all';
+  const selectedSubCategory = searchParams.get('subcategory') || 'all';
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     const productsWithImages = initialProducts.filter(p => p.image_url && p.image_url.trim() !== '');
-
     const sortedProducts = [...productsWithImages].sort((a, b) => {
         if (a.in_stock && !b.in_stock) return -1;
         if (!a.in_stock && b.in_stock) return 1;
@@ -70,22 +64,48 @@ export default function HomePageContent({ products: initialProducts }: { product
 
     const uniqueCategories = [
         { name: 'Все', key: 'all', imageUrl: sortedProducts[0]?.image_url || '' },
-        ...Array.from(categoryMap.entries()).map(([key, { name, imageUrl }]) => ({
-            key,
-            name,
-            imageUrl,
-        }))
+        ...Array.from(categoryMap.entries()).map(([key, { name, imageUrl }]) => ({ key, name, imageUrl }))
     ];
-
     setCategories(uniqueCategories);
 
   }, [initialProducts]);
 
-  useEffect(() => {
+  const subCategories = useMemo(() => {
+    if (selectedCategory === 'all') {
+      return [];
+    }
+    const categoryProducts = allProducts.filter(p => p.categoryKey === selectedCategory);
+    const subCategoryMap = new Map<string, { name: string; key: string; imageUrl: string }>();
+    
+    categoryProducts.forEach(product => {
+      if (product.sub_category && product.subCategoryKey && !subCategoryMap.has(product.subCategoryKey)) {
+        subCategoryMap.set(product.subCategoryKey, {
+          name: product.sub_category,
+          key: product.subCategoryKey,
+          imageUrl: product.image_url!, 
+        });
+      }
+    });
+
+    if (subCategoryMap.size === 0) {
+      return [];
+    }
+
+    return [
+      { name: 'Все', key: 'all', imageUrl: categoryProducts[0]?.image_url || '' },
+      ...Array.from(subCategoryMap.values()),
+    ];
+  }, [allProducts, selectedCategory]);
+
+  const filteredProducts = useMemo(() => {
     let products = allProducts;
 
-    if (selectedCategory && selectedCategory !== 'all') {
+    if (selectedCategory !== 'all') {
       products = products.filter(p => p.categoryKey === selectedCategory);
+    }
+
+    if (selectedSubCategory !== 'all') {
+      products = products.filter(p => p.subCategoryKey === selectedSubCategory);
     }
 
     if (searchQuery) {
@@ -94,40 +114,48 @@ export default function HomePageContent({ products: initialProducts }: { product
       );
     }
 
-    setFilteredProducts(products);
-    if (!searchParams.has('page')) {
-        setCurrentPage(1);
-    }
-  }, [selectedCategory, allProducts, searchQuery, searchParams]);
+    return products;
+  }, [allProducts, selectedCategory, selectedSubCategory, searchQuery]);
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  }, [currentPage]);
+    if(searchParams.has('page')) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPage, searchParams]);
 
   const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
     router.push(`${pathname}?${params.toString()}`);
   };
 
   const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('category', category);
+    params.delete('subcategory');
     params.delete('page');
     router.push(`${pathname}?${params.toString()}`);
   }
 
+  const handleSubCategoryChange = (subCategory: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('subcategory', subCategory);
+    params.delete('page');
+    router.push(`${pathname}?${params.toString()}`);
+  }
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('search', e.target.value);
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, end);
+  }, [filteredProducts, currentPage]);
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
@@ -141,11 +169,16 @@ export default function HomePageContent({ products: initialProducts }: { product
                 type="text"
                 placeholder="Поиск по названию..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full px-4 py-2 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-500"
               />
             </div>
             <CategoryCarousel categories={categories} selectedCategory={selectedCategory} onSelectCategory={handleCategoryChange} />
+            {subCategories.length > 0 && (
+                <div className="mt-4">
+                    <CategoryCarousel categories={subCategories} selectedCategory={selectedSubCategory} onSelectCategory={handleSubCategoryChange} />
+                </div>
+            )}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
@@ -154,7 +187,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                 key={product.id} 
                 className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
               >
-                  <Link href={`/products/${product.categoryKey}/${product.id}?page=${currentPage}`} className="flex-grow">
+                  <Link href={`/products/${product.categoryKey}/${product.id}?page=${currentPage}&category=${selectedCategory}${selectedSubCategory !== 'all' ? `&subcategory=${selectedSubCategory}` : ''}`} className="flex-grow">
                       <div className="overflow-hidden">
                         <img 
                           src={product.image_url} 
@@ -164,7 +197,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                       </div>
                       <div className="p-5">
                           <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
-                          <p className="text-gray-400 text-sm mb-3">{product.category}</p>
+                          <p className="text-gray-400 text-sm mb-3">{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</p>
                            <div className="flex justify-between items-center">
                               <p className="text-2xl font-semibold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
                               {product.in_stock && <span className="text-sm font-semibold text-green-400">В наличии</span>}
