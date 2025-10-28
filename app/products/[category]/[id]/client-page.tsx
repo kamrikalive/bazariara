@@ -89,6 +89,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     }
   };
 
+  const handleQuantityChange = (newQuantity: number) => {
+    if (cartItem) {
+      if (newQuantity > 0) {
+        updateQuantity(cartItem.id, newQuantity);
+      } else {
+        removeFromCart(cartItem.id);
+      }
+    }
+  };
+
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -145,7 +155,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                         <p className="text-lg font-semibold">В корзине:</p>
                         <div className="flex items-center gap-2">
                             <button onClick={handleDecreaseQuantity} className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"><MinusIcon className="h-5 w-5" /></button>
-                            <span className="text-xl font-bold w-12 text-center">{cartItem.quantity}</span>
+                            <input
+                                type="number"
+                                value={cartItem.quantity}
+                                onChange={(e) => handleQuantityChange(parseInt(e.target.value, 10))}
+                                className="text-xl font-bold w-12 text-center bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-lime-500 rounded-md"
+                                min="1"
+                            />
                             <button onClick={handleIncreaseQuantity} className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"><PlusIcon className="h-5 w-5" /></button>
                         </div>
                     </div>

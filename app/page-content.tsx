@@ -123,6 +123,14 @@ export default function HomePageContent({ products: initialProducts }: { product
     router.push(`${pathname}?${params.toString()}`);
   }
 
+  const handleQuantityChange = (productId: number, newQuantity: number) => {
+    if (newQuantity > 0) {
+      updateQuantity(productId, newQuantity);
+    } else {
+      removeFromCart(productId);
+    }
+  };
+
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -203,7 +211,13 @@ export default function HomePageContent({ products: initialProducts }: { product
                             >
                                 <MinusIcon className="h-5 w-5" />
                             </button>
-                            <span className="text-xl font-bold w-12 text-center">{cartItem.quantity}</span>
+                            <input
+                                type="number"
+                                value={cartItem.quantity}
+                                onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value, 10))}
+                                className="text-xl font-bold w-12 text-center bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-lime-500 rounded-md"
+                                min="1"
+                            />
                             <button
                                 onClick={handleIncreaseQuantity}
                                 className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
