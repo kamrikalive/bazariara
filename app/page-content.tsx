@@ -62,10 +62,7 @@ export default function HomePageContent({ products: initialProducts }: { product
         }
     });
 
-    const uniqueCategories = [
-        { name: 'Все', key: 'all', imageUrl: sortedProducts[0]?.image_url || '' },
-        ...Array.from(categoryMap.entries()).map(([key, { name, imageUrl }]) => ({ key, name, imageUrl }))
-    ];
+    const uniqueCategories = Array.from(categoryMap.entries()).map(([key, { name, imageUrl }]) => ({ key, name, imageUrl }));
     setCategories(uniqueCategories);
 
   }, [initialProducts]);
@@ -91,10 +88,7 @@ export default function HomePageContent({ products: initialProducts }: { product
       return [];
     }
 
-    return [
-      { name: 'Все', key: 'all', imageUrl: categoryProducts[0]?.image_url || '' },
-      ...Array.from(subCategoryMap.values()),
-    ];
+    return Array.from(subCategoryMap.values());
   }, [allProducts, selectedCategory]);
 
   const filteredProducts = useMemo(() => {
@@ -124,17 +118,30 @@ export default function HomePageContent({ products: initialProducts }: { product
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCategoryChange = (category: string) => {
+  const handleCategoryChange = (categoryKey: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('category', category);
-    params.delete('subcategory');
+    
+    if (selectedCategory === categoryKey) {
+        params.delete('category');
+        params.delete('subcategory');
+    } else {
+        params.set('category', categoryKey);
+        params.delete('subcategory');
+    }
+    
     params.set('page', '1');
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
-  const handleSubCategoryChange = (subCategory: string) => {
+  const handleSubCategoryChange = (subCategoryKey: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('subcategory', subCategory);
+
+    if (selectedSubCategory === subCategoryKey) {
+        params.delete('subcategory');
+    } else {
+        params.set('subcategory', subCategoryKey);
+    }
+    
     params.set('page', '1');
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
@@ -170,6 +177,7 @@ export default function HomePageContent({ products: initialProducts }: { product
               />
             </div>
             <CategoryCarousel categories={categories} selectedCategory={selectedCategory} onSelectCategory={handleCategoryChange} />
+            
             {subCategories.length > 0 && (
                 <div className="mt-4">
                     <CategoryCarousel categories={subCategories} selectedCategory={selectedSubCategory} onSelectCategory={handleSubCategoryChange} />
