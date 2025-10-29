@@ -56,7 +56,6 @@ export async function generateMetadata({ params }: { params: { category: string,
           alt: product.title,
         },
       ],
-      type: 'product',
       siteName: 'Bazar Iara',
     },
   };
