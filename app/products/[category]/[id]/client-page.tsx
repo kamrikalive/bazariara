@@ -4,8 +4,14 @@ import { useCart } from '@/contexts/CartContext';
 import { ShoppingCartIcon, ArrowLeftIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+
+// Swiper imports
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 type Product = {
     id: number;
@@ -66,7 +72,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
   const cartItem = cartItems.find(item => item.id === product.id);
-  const [mainImage, setMainImage] = useState(product.image_url);
   const [inputValue, setInputValue] = useState<string | number>('');
 
   useEffect(() => {
@@ -76,6 +81,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   }, [cartItem]);
 
   const allImages = [product.image_url, ...(product.image_urls || [])].filter(Boolean) as string[];
+  const uniqueImageUrls = [...new Set(allImages)];
+  const hasMultipleImages = uniqueImageUrls.length > 1;
+
 
   const handleAddToCart = () => {
     addToCart(product);
@@ -155,20 +163,30 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
             {/* === Product Image Gallery === */}
             <div className="p-4">
-              <img
-                src={mainImage}
-                alt={product.title}
-                className="w-full h-[400px] object-cover rounded-lg shadow-lg mb-4"
-              />
-              {allImages.length > 1 && (
-                <div className="grid grid-cols-5 gap-2">
-                  {allImages.map((url, index) => (
-                    <button key={index} onClick={() => setMainImage(url)} className={`rounded-lg overflow-hidden border-2 ${mainImage === url ? 'border-lime-500' : 'border-transparent'}`}>
-                      <img src={url} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
+                {hasMultipleImages ? (
+                  <Swiper
+                    modules={[Pagination]}
+                    pagination={{ clickable: true }}
+                    className="w-full h-[400px] rounded-lg shadow-lg"
+                    loop={true}
+                  >
+                    {uniqueImageUrls.map((url, index) => (
+                      <SwiperSlide key={index}>
+                        <img 
+                          src={url} 
+                          alt={`${product.title} - фото ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                ) : (
+                  <img
+                    src={product.image_url}
+                    alt={product.title}
+                    className="w-full h-[400px] object-cover rounded-lg shadow-lg"
+                  />
+                )}
             </div>
 
             {/* === Product Info === */}

@@ -9,6 +9,12 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import CategoryCarousel from '@/components/CategoryCarousel';
 import QuantityInput from '@/components/QuantityInput';
 
+// Swiper imports
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+
 type Product = {
   id: number;
   title: string;
@@ -20,6 +26,7 @@ type Product = {
   categoryKey: string;
   sub_category?: string;
   subCategoryKey?: string;
+  image_urls?: string[]; // Added for the slider
 };
 
 type Category = {
@@ -186,34 +193,61 @@ export default function HomePageContent({ products: initialProducts }: { product
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-          {paginatedProducts.map((product) => (
-              <div 
-                key={product.id} 
-                className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
-              >
-                  <Link href={`/products/${product.categoryKey}/${product.id}?page=${currentPage}&category=${selectedCategory}${selectedSubCategory !== 'all' ? `&subcategory=${selectedSubCategory}` : ''}`} className="flex-grow">
-                      <div className="overflow-hidden">
-                        <img 
-                          src={product.image_url} 
-                          alt={product.title} 
-                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
-                        />
-                      </div>
-                      <div className="p-5">
-                          <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
-                          <p className="text-gray-400 text-sm mb-3">{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</p>
-                           <div className="flex justify-between items-center">
-                              <p className="text-2xl font-semibold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
-                              {product.in_stock && <span className="text-sm font-semibold text-green-400">В наличии</span>}
+          {paginatedProducts.map((product) => {
+              const imageUrls = [product.image_url, ...(product.image_urls || [])].filter(url => url && url.trim() !== '');
+              const uniqueImageUrls = [...new Set(imageUrls)];
+              const hasMultipleImages = uniqueImageUrls.length > 1;
+
+              return (
+                <div 
+                  key={product.id} 
+                  className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
+                >
+                    <div className="relative flex-grow">
+                      <Link href={`/products/${product.categoryKey}/${product.id}?page=${currentPage}&category=${selectedCategory}${selectedSubCategory !== 'all' ? `&subcategory=${selectedSubCategory}` : ''}`} className="block h-full">
+                          <div className="overflow-hidden h-64">
+                            {hasMultipleImages ? (
+                              <Swiper
+                                modules={[Pagination]}
+                                pagination={{ clickable: true }}
+                                className="w-full h-full"
+                                loop={true}
+                              >
+                                {uniqueImageUrls.map((url, index) => (
+                                  <SwiperSlide key={index}>
+                                    <img 
+                                      src={url} 
+                                      alt={`${product.title} - фото ${index + 1}`}
+                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
+                                    />
+                                  </SwiperSlide>
+                                ))}
+                              </Swiper>
+                            ) : (
+                              <img 
+                                src={product.image_url} 
+                                alt={product.title} 
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
+                              />
+                            )}
                           </div>
-                      </div>
-                  </Link>
-                  <div className="p-5 pt-0 mt-auto">
-                      <QuantityInput product={product} />
-                  </div>
-              </div>
-            )
-          )}
+                          <div className="p-5">
+                              <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
+                              <p className="text-gray-400 text-sm mb-3">{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</p>
+                               <div className="flex justify-between items-center">
+                                  <p className="text-2xl font-semibold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
+                                  {product.in_stock && <span className="text-sm font-semibold text-green-400">В наличии</span>}
+                              </div>
+                          </div>
+                      </Link>
+                    </div>
+                    <div className="p-5 pt-0 mt-auto">
+                        <QuantityInput product={product} />
+                    </div>
+                </div>
+              )
+            })
+          }
         </div>
 
         {totalPages > 1 && (
