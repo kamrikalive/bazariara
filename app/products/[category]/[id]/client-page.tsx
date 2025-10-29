@@ -116,9 +116,33 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         }
     }
   };
+  
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    image: product.image_url,
+    description: product.description,
+    sku: product.id.toString(),
+    offers: {
+        "@type": "Offer",
+        price: product.price.toFixed(2),
+        priceCurrency: "GEL",
+        availability: product.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        url: `https://bazariara.ge/products/${product.categoryKey}/${product.id}`
+    },
+    brand: {
+        "@type": "Brand",
+        name: "BazarIara"
+    }
+  };
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
