@@ -65,7 +65,6 @@ export async function generateMetadata({ params }: { params: { category: string;
       canonical: url,
     },
     openGraph: {
-      type: 'product',
       locale: 'ru_RU',
       url,
       siteName: 'BazarIara',
@@ -85,11 +84,6 @@ export async function generateMetadata({ params }: { params: { category: string;
       title,
       description,
       images: [image],
-    },
-    other: {
-      'og:price:amount': product.price.toString(),
-      'og:price:currency': 'GEL',
-      'product:availability': product.in_stock ? 'in stock' : 'out of stock',
     },
   };
 }
