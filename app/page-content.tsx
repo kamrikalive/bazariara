@@ -26,7 +26,7 @@ type Product = {
   categoryKey: string;
   sub_category?: string;
   subCategoryKey?: string;
-  image_urls?: string[]; // Added for the slider
+  image_urls?: string[];
 };
 
 type Category = {
@@ -193,14 +193,14 @@ export default function HomePageContent({ products: initialProducts }: { product
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-          {paginatedProducts.map((product) => {
+          {paginatedProducts.map((product, idx) => {
               const imageUrls = [product.image_url, ...(product.image_urls || [])].filter(url => url && url.trim() !== '');
               const uniqueImageUrls = [...new Set(imageUrls)];
               const hasMultipleImages = uniqueImageUrls.length > 1;
 
               return (
                 <div 
-                  key={product.id} 
+                  key={`product-${product.id}-${currentPage}-${idx}`} 
                   className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
                 >
                     <div className="relative flex-grow">
@@ -214,7 +214,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                                 loop={true}
                               >
                                 {uniqueImageUrls.map((url, index) => (
-                                  <SwiperSlide key={index}>
+                                  <SwiperSlide key={`${product.id}-${index}-${url}`}>
                                     <img 
                                       src={url} 
                                       alt={`${product.title} - фото ${index + 1}`}
