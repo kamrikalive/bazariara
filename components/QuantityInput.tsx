@@ -13,14 +13,44 @@ export default function QuantityInput({ product }: QuantityInputProps) {
     const cartItem = cartItems.find(item => item.id === product.id);
 
     const [inputValue, setInputValue] = useState<string | number>('');
+    const [isInputActive, setIsInputActive] = useState(false);
 
     useEffect(() => {
         if (cartItem) {
             setInputValue(cartItem.quantity);
         } else {
-            setInputValue(''); // Clear input if item is removed from cart
+            setInputValue('');
         }
     }, [cartItem]);
+
+    useEffect(() => {
+        if (!isInputActive) return;
+
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('input[type="number"]') && !target.closest('button')) {
+                setIsInputActive(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isInputActive]);
+
+    useEffect(() => {
+        if (!isInputActive) return;
+
+        const handleLinkClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'A' || target.closest('a')) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        };
+
+        document.addEventListener('click', handleLinkClick, true);
+        return () => document.removeEventListener('click', handleLinkClick, true);
+    }, [isInputActive]);
 
     const handleIncreaseQuantity = () => {
         if (cartItem) {
@@ -46,7 +76,12 @@ export default function QuantityInput({ product }: QuantityInputProps) {
         setInputValue(e.target.value);
     };
 
+    const handleFocus = () => {
+        setIsInputActive(true);
+    };
+
     const handleBlur = () => {
+        setIsInputActive(false);
         if (cartItem) {
             const newQuantity = parseInt(inputValue.toString(), 10);
             if (!isNaN(newQuantity) && newQuantity > 0) {
@@ -54,7 +89,6 @@ export default function QuantityInput({ product }: QuantityInputProps) {
             } else if (newQuantity <= 0) {
                 removeFromCart(cartItem.id);
             } else {
-                // If input is invalid or empty, reset to original quantity
                 setInputValue(cartItem.quantity);
             }
         }
@@ -73,27 +107,33 @@ export default function QuantityInput({ product }: QuantityInputProps) {
     }
 
     return (
-        <div className="flex items-center justify-center gap-2">
-            <button
-                onClick={handleDecreaseQuantity}
-                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
-            >
-                <MinusIcon className="h-5 w-5" />
-            </button>
-            <input
-                type="number"
-                value={inputValue}
-                onChange={handleQuantityChange}
-                onBlur={handleBlur}
-                className="text-xl font-bold w-12 text-center bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-lime-500 rounded-md"
-                min="1"
-            />
-            <button
-                onClick={handleIncreaseQuantity}
-                className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
-            >
-                <PlusIcon className="h-5 w-5" />
-            </button>
-        </div>
+        <>
+            {isInputActive && (
+                <div className="fixed inset-0 z-40" />
+            )}
+            <div className={`flex items-center justify-center gap-2 ${isInputActive ? 'relative z-50' : ''}`}>
+                <button
+                    onClick={handleDecreaseQuantity}
+                    className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                >
+                    <MinusIcon className="h-5 w-5" />
+                </button>
+                <input
+                    type="number"
+                    value={inputValue}
+                    onChange={handleQuantityChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    className="text-xl font-bold w-12 text-center bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-lime-500 rounded-md"
+                    min="1"
+                />
+                <button
+                    onClick={handleIncreaseQuantity}
+                    className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                >
+                    <PlusIcon className="h-5 w-5" />
+                </button>
+            </div>
+        </>
     );
 }
