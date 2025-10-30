@@ -35,6 +35,18 @@ export default function CategoryCarousel({
         return () => el.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Новый useEffect для прокрутки к выбранной категории
+    useEffect(() => {
+        const el = scrollRef.current;
+ if (el && selectedCategory) {
+ // Ищем элемент по ID
+ const selectedButton = el.querySelector<HTMLButtonElement>(`#category-${selectedCategory}`);
+ if (selectedButton) {
+ selectedButton.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+ }
+        }
+    }, [selectedCategory, categories]); // Зависимости: выбранная категория и список категорий
+
     return (
         <div className="w-full px-2 sm:px-4">
             {/* Горизонтальная лента категорий */}
@@ -46,6 +58,7 @@ export default function CategoryCarousel({
                 {categories.map((category) => (
                     <button 
                         key={category.key}
+                        id={`category-${category.key}`} // Добавляем id для прямого поиска
                         onClick={() => onSelectCategory(category.key)}
                         className={`flex flex-col items-center justify-between flex-shrink-0 w-40 sm:w-48 md:w-52 rounded-2xl overflow-hidden snap-start transition-all duration-300
                             ${selectedCategory === category.key 
