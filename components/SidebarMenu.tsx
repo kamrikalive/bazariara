@@ -75,12 +75,15 @@ export default function SidebarMenu() {
     };
 
     if (isOpen) {
+      document.body.style.overflow = 'hidden';
       document.addEventListener('mousedown', handleClickOutside);
     } else {
+      document.body.style.overflow = 'auto';
       document.removeEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
+      document.body.style.overflow = 'auto';
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
@@ -111,7 +114,7 @@ export default function SidebarMenu() {
 
       <div 
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-900 bg-opacity-95 backdrop-blur-sm w-72 shadow-2xl p-6 z-40 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        className={`fixed top-0 left-0 h-full bg-gray-900 bg-opacity-95 backdrop-blur-sm w-72 shadow-2xl p-6 z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex justify-end items-center mb-4 border-b border-gray-700 pb-2 mt-2">
           <button onClick={() => setIsOpen(false)} className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
             <XMarkIcon className="h-7 w-7" />
