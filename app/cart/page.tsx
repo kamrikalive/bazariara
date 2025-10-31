@@ -1,16 +1,136 @@
 'use client';
 
-import { useCart } from '@/contexts/CartContext';
+import { useCart, Product } from '@/contexts/CartContext';
 import Link from 'next/link';
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
+import { useState, useEffect, useRef } from 'react';
 
 const MIN_ORDER_AMOUNT = 30;
 const FREE_SHIPPING_THRESHOLD = 100;
 const SHIPPING_COST = 5;
 
+function CartItemQuantityInput({ item, startRemoval }: { item: Product, startRemoval: (itemId: string) => void }) {
+    const { updateQuantity } = useCart();
+    const [inputValue, setInputValue] = useState<string | number>(item.quantity);
+    const [isInputActive, setIsInputActive] = useState(false);
+
+    useEffect(() => {
+        if (!isInputActive) {
+            setInputValue(item.quantity);
+        }
+    }, [item.quantity, isInputActive]);
+
+    useEffect(() => {
+        if (isInputActive) {
+            document.body.classList.add('cart-updating');
+        } else {
+            document.body.classList.remove('cart-updating');
+        }
+        return () => {
+            document.body.classList.remove('cart-updating');
+        };
+    }, [isInputActive]);
+
+    const handleFocus = () => {
+        setIsInputActive(true);
+    };
+
+    const handleBlur = () => {
+        setIsInputActive(false);
+        const newQuantity = parseInt(inputValue.toString(), 10);
+
+        if (!isNaN(newQuantity) && newQuantity > 0) {
+            if (newQuantity !== item.quantity) {
+                updateQuantity(item.id, newQuantity);
+            }
+        } else if (newQuantity <= 0) {
+            startRemoval(item.id);
+        } else {
+            setInputValue(item.quantity);
+        }
+    };
+
+    const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value);
+    };
+
+    const handleDecrease = () => {
+        const newQuantity = item.quantity - 1;
+        if (newQuantity > 0) {
+            setInputValue(newQuantity);
+            updateQuantity(item.id, newQuantity);
+        } else {
+            startRemoval(item.id);
+        }
+    };
+
+    const handleIncrease = () => {
+        const newQuantity = item.quantity + 1;
+        setInputValue(newQuantity);
+        updateQuantity(item.id, newQuantity);
+    };
+
+    return (
+        <div className={`flex items-center h-10 font-medium rounded-xl bg-gray-700/80 border border-transparent shadow-inner transition-all ${isInputActive ? 'relative z-20 ring-2 ring-lime-500 border-lime-500/80 shadow-lime-500/20' : ''}`}>
+            <button 
+                onClick={handleDecrease} 
+                onMouseDown={(e) => e.preventDefault()}
+                className="px-3 h-full rounded-l-xl text-gray-300 hover:text-white hover:bg-gray-600/70 transition-colors focus:outline-none">
+                <MinusIcon className="h-5 w-5"/>
+            </button>
+            <input 
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={inputValue}
+                onChange={handleQuantityChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                className="w-10 h-full bg-transparent text-center text-lg font-bold text-white focus:outline-none"
+            />
+            <button 
+                onClick={handleIncrease} 
+                onMouseDown={(e) => e.preventDefault()}
+                className="px-3 h-full rounded-r-xl text-gray-300 hover:text-white hover:bg-gray-600/70 transition-colors focus:outline-none">
+                <PlusIcon className="h-5 w-5"/>
+            </button>
+        </div>
+    );
+}
+
 export default function CartPage() {
-    const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
+    const { cartItems, removeFromCart, clearCart } = useCart();
+    const [pendingRemoval, setPendingRemoval] = useState<string[]>([]);
+    const removalTimers = useRef(new Map<string, NodeJS.Timeout>());
+
+    useEffect(() => {
+        // Cleanup timers on component unmount
+        return () => {
+            removalTimers.current.forEach(timer => clearTimeout(timer));
+        };
+    }, []);
+
+    const startRemoval = (itemId: string) => {
+        // Don't start a new timer if one is already running
+        if (removalTimers.current.has(itemId)) return;
+
+        setPendingRemoval(prev => [...prev, itemId]);
+        const timer = setTimeout(() => {
+            removeFromCart(itemId);
+            setPendingRemoval(prev => prev.filter(id => id !== itemId));
+            removalTimers.current.delete(itemId);
+        }, 5000);
+        removalTimers.current.set(itemId, timer);
+    };
+
+    const cancelRemoval = (itemId: string) => {
+        if (removalTimers.current.has(itemId)) {
+            clearTimeout(removalTimers.current.get(itemId));
+            removalTimers.current.delete(itemId);
+            setPendingRemoval(prev => prev.filter(id => id !== itemId));
+        }
+    };
 
     const subtotal = cartItems.reduce((acc, item) => acc + calculateDisplayPrice(item.price) * item.quantity, 0);
     
@@ -25,7 +145,7 @@ export default function CartPage() {
                     Ваша корзина
                 </h1>
 
-                {cartItems.length === 0 ? (
+                {cartItems.length === 0 && pendingRemoval.length === 0 ? (
                     <div className="text-center bg-gray-800/50 rounded-xl p-12 shadow-2xl shadow-black/20">
                         <p className="text-2xl font-semibold mb-6 text-gray-300">Ваша корзина пока пуста.</p>
                         <Link href="/" className="bg-lime-500 text-gray-900 font-bold py-3 px-8 rounded-full hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
@@ -34,38 +154,34 @@ export default function CartPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                        {/* Cart Items List */}
                         <div className="lg:col-span-2 bg-gray-800/40 rounded-xl shadow-lg backdrop-blur-sm">
                             <ul className="divide-y divide-gray-700/50">
                                 {cartItems.map(item => (
                                     <li key={item.id} className="flex flex-col sm:flex-row justify-between items-center p-5 gap-4">
-                                        <Link href={`/products/${item.categoryKey}/${item.id}`} className="flex items-center gap-5 w-full sm:w-auto group">
-                                            <img src={item.image_url} alt={item.title} className="w-20 h-20 object-cover rounded-lg shadow-md"/>
-                                            <div className="flex-grow">
+                                        <Link href={`/products/${item.categoryKey}/${item.id}`} className={`flex items-center gap-5 w-full sm:w-auto group self-start ${pendingRemoval.includes(item.id) ? 'pointer-events-none opacity-50' : ''}`}>
+                                            <img src={item.image_url} alt={item.title} className="w-20 h-20 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"/>
+                                            <div>
                                                 <h2 className="font-bold text-lg text-gray-200 group-hover:text-lime-400 transition-colors duration-300">{item.title}</h2>
-                                                <p className="text-lime-500 font-semibold">₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
+                                                <p className="text-lime-500 font-semibold mt-1">₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
                                             </div>
                                         </Link>
-                                        <div className="flex items-center gap-2 sm:gap-4">
-                                            <div className="flex items-center rounded-lg bg-gray-700/50 border border-gray-600">
-                                                <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-l-lg transition-colors">
-                                                    <MinusIcon className="h-5 w-5"/>
-                                                </button>
-                                                <input 
-                                                    type="number"
-                                                    min="1"
-                                                    value={item.quantity}
-                                                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10))}
-                                                    className="w-16 p-2 bg-transparent text-center focus:outline-none appearance-none"
-                                                    style={{ MozAppearance: 'textfield' }}
-                                                />
-                                                <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-r-lg transition-colors">
-                                                    <PlusIcon className="h-5 w-5"/>
-                                                </button>
-                                            </div>
-                                            <button onClick={() => removeFromCart(item.id)} className="text-gray-400 hover:text-red-500 p-2 rounded-full transition-colors duration-300">
-                                                <TrashIcon className="h-6 w-6" />
-                                            </button>
+                                        
+                                        <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-center w-full sm:w-auto">
+                                            {pendingRemoval.includes(item.id) ? (
+                                                <div className="relative h-10 font-medium rounded-xl bg-gray-800/80 border border-transparent shadow-inner flex items-center justify-center overflow-hidden w-[116px]">
+                                                    <div className="undo-progress-bar absolute top-0 left-0 h-full"></div>
+                                                    <button onClick={() => cancelRemoval(item.id)} className="text-white font-bold z-10">
+                                                        Вернуть
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <CartItemQuantityInput item={item} startRemoval={startRemoval} />
+                                                    <button id={`remove-btn-${item.id}`} onClick={() => startRemoval(item.id)} className="text-gray-400 hover:text-red-500 p-2 rounded-full transition-colors duration-300 hover:bg-red-500/10">
+                                                        <TrashIcon className="h-6 w-6" />
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
                                     </li>
                                 ))}
@@ -74,7 +190,7 @@ export default function CartPage() {
 
                         {/* Order Summary */}
                         <div className="lg:col-span-1 bg-gray-800/60 rounded-xl shadow-xl p-6 backdrop-blur-sm top-20 sticky">
-                            <h2 className="text-2xl font-bold border-b border-gray-700 pb-4 mb-4">Сумма заказа</h2>
+                           <h2 className="text-2xl font-bold border-b border-gray-700 pb-4 mb-4">Сумма заказа</h2>
                             <div className="flex justify-between mb-2 text-gray-300">
                                 <span>Подытог</span>
                                 <span>₾{subtotal.toFixed(2)}</span>
@@ -98,8 +214,8 @@ export default function CartPage() {
 
                             <div className="mt-8 flex flex-col gap-4">
                                 <Link href="/checkout" 
-                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform shadow-lg ${isCheckoutDisabled ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 hover:scale-105 shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40'}`}
-                                   onClick={(e) => isCheckoutDisabled && e.preventDefault()}
+                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform shadow-lg ${isCheckoutDisabled || pendingRemoval.length > 0 ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 hover:scale-105 shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40'}`}
+                                   onClick={(e) => (isCheckoutDisabled || pendingRemoval.length > 0) && e.preventDefault()}
                                 >
                                     Перейти к оформлению
                                </Link>
@@ -108,7 +224,9 @@ export default function CartPage() {
                                     <p className="text-sm text-center text-red-400 font-semibold">Минимальная сумма заказа {MIN_ORDER_AMOUNT} ₾</p>
                                 )}
 
-                                <button onClick={clearCart} className="w-full text-center bg-gray-700 text-gray-300 font-semibold py-2 px-6 rounded-lg hover:bg-red-600 hover:text-white transition-colors duration-300">
+                                <button onClick={() => {
+                                    cartItems.forEach(item => startRemoval(item.id));
+                                }} className="w-full text-center bg-gray-700 text-gray-300 font-semibold py-2 px-6 rounded-lg hover:bg-red-600 hover:text-white transition-colors duration-300">
                                     Очистить корзину
                                 </button>
                             </div>

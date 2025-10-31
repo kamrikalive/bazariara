@@ -47,3 +47,17 @@ body.cart-updating a {
   scrollbar-width: thin;
   scrollbar-color: #a3e635 rgba(0, 0, 0, 0.1);
 }
+
+@keyframes slide-out-width {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.undo-progress-bar {
+  animation: slide-out-width 5s linear forwards;
+  background-color: rgba(130, 192, 41, 0.7);
+}
