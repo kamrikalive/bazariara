@@ -2890,3 +2890,71 @@
 [debug] [2025-10-31T04:30:14.754Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebaseapphosting.googleapis.com [omitted]
 [debug] [2025-10-31T04:30:14.765Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com 200
 [debug] [2025-10-31T04:30:14.765Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-31T04:47:09.942Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-31T04:47:09.945Z] > authorizing via signed-in user (sat.open.world@gmail.com)
+[debug] [2025-10-31T04:47:09.953Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:09.954Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:09.955Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:09.955Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:09.965Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:09.966Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:09.966Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-31T04:47:09.967Z] > authorizing via signed-in user (sat.open.world@gmail.com)
+[debug] [2025-10-31T04:47:09.969Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-31T04:47:09.969Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/bazarge-95f65
+[debug] [2025-10-31T04:47:10.027Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-10-31T04:47:10.027Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/bazarge-95f65
+[debug] [2025-10-31T04:47:10.030Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-10-31T04:47:10.030Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/bazarge-95f65
+[debug] [2025-10-31T04:47:10.033Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:10.033Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:10.033Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:10.034Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:10.035Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:10.036Z] Checked if tokens are valid: true, expires at: 1761887225596
+[debug] [2025-10-31T04:47:10.036Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-31T04:47:10.036Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/bazarge-95f65
+[debug] [2025-10-31T04:47:10.039Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-10-31T04:47:10.039Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/bazarge-95f65
+[debug] [2025-10-31T04:47:10.042Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-10-31T04:47:10.042Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/bazarge-95f65
+[debug] [2025-10-31T04:47:10.854Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-10-31T04:47:10.855Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-10-31T04:47:10.878Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-31T04:47:10.878Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-31T04:47:10.910Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-10-31T04:47:10.910Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-10-31T04:47:10.916Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com 200
+[debug] [2025-10-31T04:47:10.916Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-31T04:47:10.928Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-31T04:47:10.928Z] > authorizing via signed-in user (sat.open.world@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-31T04:47:10.932Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-31T04:47:10.932Z] > authorizing via signed-in user (sat.open.world@gmail.com)
+[debug] [2025-10-31T04:47:10.940Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-31T04:47:10.941Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-31T04:47:10.947Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com 200
+[debug] [2025-10-31T04:47:10.947Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/bazarge-95f65/services/cloudfunctions.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-31T04:47:10.986Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-31T04:47:10.988Z] > authorizing via signed-in user (sat.open.world@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-31T04:47:10.993Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-31T04:47:10.993Z] > authorizing via signed-in user (sat.open.world@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-31T04:47:11.002Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-31T04:47:11.002Z] > authorizing via signed-in user (sat.open.world@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-31T04:47:11.003Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-31T04:47:11.004Z] > authorizing via signed-in user (sat.open.world@gmail.com)

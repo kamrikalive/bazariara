@@ -24,32 +24,15 @@ export default function QuantityInput({ product }: QuantityInputProps) {
     }, [cartItem]);
 
     useEffect(() => {
-        if (!isInputActive) return;
+        if (isInputActive) {
+            document.body.classList.add('cart-updating');
+        } else {
+            document.body.classList.remove('cart-updating');
+        }
 
-        const handleClickOutside = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (!target.closest('input[type="number"]') && !target.closest('button')) {
-                setIsInputActive(false);
-            }
+        return () => {
+            document.body.classList.remove('cart-updating');
         };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isInputActive]);
-
-    useEffect(() => {
-        if (!isInputActive) return;
-
-        const handleLinkClick = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (target.tagName === 'A' || target.closest('a')) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        };
-
-        document.addEventListener('click', handleLinkClick, true);
-        return () => document.removeEventListener('click', handleLinkClick, true);
     }, [isInputActive]);
 
     const handleIncreaseQuantity = () => {
@@ -111,9 +94,10 @@ export default function QuantityInput({ product }: QuantityInputProps) {
             {isInputActive && (
                 <div className="fixed inset-0 z-40" />
             )}
-            <div className={`flex items-center justify-center gap-2 ${isInputActive ? 'relative z-50' : ''}`}>
+            <div className={`quantity-input-container flex items-center justify-center gap-2 ${isInputActive ? 'relative z-50' : ''}`}>
                 <button
                     onClick={handleDecreaseQuantity}
+                    onMouseDown={(e) => e.preventDefault()}
                     className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
                 >
                     <MinusIcon className="h-5 w-5" />
@@ -129,6 +113,7 @@ export default function QuantityInput({ product }: QuantityInputProps) {
                 />
                 <button
                     onClick={handleIncreaseQuantity}
+                    onMouseDown={(e) => e.preventDefault()}
                     className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
                 >
                     <PlusIcon className="h-5 w-5" />
