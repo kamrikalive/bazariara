@@ -30,8 +30,8 @@ export type Product = {
 type CartContextType = {
     cartItems: ProductInCart[];
     addToCart: (item: Product) => void;
-    removeFromCart: (itemId: number) => void;
-    updateQuantity: (itemId: number, quantity: number) => void;
+    removeFromCart: (itemId: number, category: string) => void;
+    updateQuantity: (itemId: number, quantity: number, category: string) => void;
     clearCart: () => void;
 };
 
@@ -65,10 +65,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const addToCart = (item: Product) => {
         setCartItems(prevItems => {
-            const existingItem = prevItems.find(i => i.id === item.id);
+            const existingItem = prevItems.find(i => i.id === item.id && i.category === item.category);
             if (existingItem) {
                 return prevItems.map(i => 
-                    i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+                    i.id === item.id && i.category === item.category ? { ...i, quantity: i.quantity + 1 } : i
                 );
             } else {
                 return [...prevItems, { ...item, quantity: 1 }];
@@ -76,17 +76,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    const removeFromCart = (itemId: number) => {
-        setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
+    const removeFromCart = (itemId: number, category: string) => {
+        setCartItems(prevItems => prevItems.filter(item => !(item.id === itemId && item.category === category)));
     };
 
-    const updateQuantity = (itemId: number, quantity: number) => {
+    const updateQuantity = (itemId: number, quantity: number, category: string) => {
         if (quantity <= 0) {
-            removeFromCart(itemId);
+            removeFromCart(itemId, category);
         } else {
             setCartItems(prevItems => 
                 prevItems.map(item => 
-                    item.id === itemId ? { ...item, quantity } : item
+                    item.id === itemId && item.category === category ? { ...item, quantity } : item
                 )
             );
         }

@@ -10,7 +10,7 @@ interface QuantityInputProps {
 
 export default function QuantityInput({ product }: QuantityInputProps) {
     const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
-    const cartItem = cartItems.find(item => item.id === product.id);
+    const cartItem = cartItems.find(item => item.id === product.id && item.category === product.category);
 
     const [inputValue, setInputValue] = useState<string | number>('');
     const [isInputActive, setIsInputActive] = useState(false);
@@ -39,7 +39,7 @@ export default function QuantityInput({ product }: QuantityInputProps) {
         if (cartItem) {
             const newQuantity = cartItem.quantity + 1;
             setInputValue(newQuantity);
-            updateQuantity(cartItem.id, newQuantity);
+            updateQuantity(cartItem.id, newQuantity, cartItem.category);
         }
     };
 
@@ -48,9 +48,9 @@ export default function QuantityInput({ product }: QuantityInputProps) {
             if (cartItem.quantity > 1) {
                 const newQuantity = cartItem.quantity - 1;
                 setInputValue(newQuantity);
-                updateQuantity(cartItem.id, newQuantity);
+                updateQuantity(cartItem.id, newQuantity, cartItem.category);
             } else {
-                removeFromCart(cartItem.id);
+                removeFromCart(cartItem.id, cartItem.category);
             }
         }
     };
@@ -68,9 +68,9 @@ export default function QuantityInput({ product }: QuantityInputProps) {
         if (cartItem) {
             const newQuantity = parseInt(inputValue.toString(), 10);
             if (!isNaN(newQuantity) && newQuantity > 0) {
-                updateQuantity(cartItem.id, newQuantity);
+                updateQuantity(cartItem.id, newQuantity, cartItem.category);
             } else if (newQuantity <= 0) {
-                removeFromCart(cartItem.id);
+                removeFromCart(cartItem.id, cartItem.category);
             } else {
                 setInputValue(cartItem.quantity);
             }
