@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 60; // 🔁 обновление данных каждые 60 секунд
 
 type Product = {
-  id: number;
+  id: string;
   title: string;
   category: string;
   price: number;
@@ -38,13 +38,14 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
     Object.keys(categoriesData).forEach(categoryKey => {
       const productsInCategory = categoriesData[categoryKey];
       if (productsInCategory && typeof productsInCategory === 'object') {
-        Object.keys(productsInCategory).forEach(productId => {
-          const productData = productsInCategory[productId];
+        Object.keys(productsInCategory).forEach(firebaseDocumentKey => {
+          const productData = productsInCategory[firebaseDocumentKey];
           if (productData && typeof productData === 'object' && productData.title) {
             const newProduct: Product = {
               ...productData,
-              id: parseInt(productId, 10),
+              id: firebaseDocumentKey, // ← Сохраняем оригинальный Firebase ключ
               categoryKey: categoryKey,
+              firebaseKey: firebaseDocumentKey, // ← Опционально, для ясности
             };
 
             if (productData.sub_category) {

@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 
 // === 🔸 Тип товара ===
 type Product = {
-  id: number;
+  id: string;
   title: string;
   category: string;
   price: number;

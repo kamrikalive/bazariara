@@ -16,7 +16,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 
 type Product = {
-  id: number;
+  id: string;
   title: string;
   category: string;
   price: number;

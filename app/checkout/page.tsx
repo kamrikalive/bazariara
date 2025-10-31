@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useOrders } from '@/contexts/OrderContext';
 import { useRouter } from 'next/navigation';
@@ -31,10 +31,21 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const subtotal = cartItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
+  // Create a stable copy of cartItems for this render
+  const [checkoutItems, setCheckoutItems] = useState(cartItems);
+
+  useEffect(() => {
+    // When the component mounts, or when cartItems changes,
+    // update our stable local copy. This freezes the cart state for this checkout attempt.
+    setCheckoutItems(cartItems);
+    console.log("--- CLIENT-SIDE: CHECKOUT PAGE INITIALIZED/UPDATED ---");
+    console.log("Stable checkoutItems set:", JSON.stringify(cartItems, null, 2));
+  }, [cartItems]);
+
+  const subtotal = checkoutItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
   const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
   const total = subtotal + shippingCost;
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -56,6 +67,10 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    
+    console.log("--- CLIENT-SIDE: SUBMITTING ORDER ---");
+    console.log("Using stable checkoutItems for submission:", JSON.stringify(checkoutItems, null, 2));
+
     setIsSubmitting(true);
     setError(null);
 
@@ -67,7 +82,7 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (cartItems.length === 0) {
+    if (checkoutItems.length === 0) {
         setError('Ваша корзина пуста.');
         setIsSubmitting(false);
         return;
@@ -83,12 +98,13 @@ export default function CheckoutPage() {
 
     const orderDetails = {
       customer: { name, phone: fullPhoneNumber, social: socialContacts },
-      items: cartItems.map(item => ({
+      items: checkoutItems.map(item => ({
         product: {
           id: item.id,
           title: item.title,
           price: calculateDisplayPrice(item.price),
           category: item.category,
+          categoryKey: item.categoryKey,
           image_url: item.image_url,
         },
         quantity: item.quantity,
@@ -97,10 +113,12 @@ export default function CheckoutPage() {
       shippingCost,
     };
 
+    console.log("Sending this final payload to server:", JSON.stringify(orderDetails, null, 2));
+
     try {
       const result = await handlePlaceOrder(orderDetails);
       if (result.success) {
-        addOrder(cartItems.map(item => ({...item, shippingCost: shippingCost})));
+        addOrder(checkoutItems.map(item => ({...item, shippingCost: shippingCost})));
         clearCart();
         router.push('/order-success');
       } else {
@@ -120,10 +138,10 @@ export default function CheckoutPage() {
         
         <div className="bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4">Ваш заказ ({cartCount} поз.)</h2>
-          {cartItems.length > 0 ? (
+          {checkoutItems.length > 0 ? (
             <ul className="divide-y divide-gray-700">
-              {cartItems.map(item => (
-                <li key={item.id} className="py-4 flex items-center justify-between">
+              {checkoutItems.map((item, idx) => (
+                <li key={`${item.categoryKey}-${item.id}-${idx}`} className="py-4 flex items-center justify-between">
                   <div className="flex items-center">
                     <img src={item.image_url} alt={item.title} className="w-16 h-16 object-cover rounded-md mr-4" />
                     <div>
@@ -243,7 +261,7 @@ export default function CheckoutPage() {
                 <button 
                     type="submit" 
                     className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 disabled:opacity-50 disabled:cursor-wait"
-                    disabled={isSubmitting || cartItems.length === 0}
+                    disabled={isSubmitting || checkoutItems.length === 0}
                 >
                     {isSubmitting ? 'Обработка...' : 'Отправить заказ'}
                 </button>

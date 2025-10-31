@@ -2,19 +2,18 @@
 
 import { database } from '@/lib/firebase/server';
 
-// Interface for a single item in the order from the client
 interface OrderItem {
   product: {
     id: number; 
     title: string;
     price: number;
     category: string;
+    categoryKey: string;
     image_url?: string;
   };
   quantity: number;
 }
 
-// Interface for the incoming order details from the client
 interface OrderDetails {
   customer: {
     name: string;
@@ -26,16 +25,14 @@ interface OrderDetails {
   shippingCost: number;
 }
 
-// This interface is for the data that will be sent to Telegram
 interface EnrichedItemData {
     id: number; 
     title: string;
     price: number;
     quantity: number;
-    link?: string; // The link fetched from the database
+    link?: string;
 }
 
-// This function sends a formatted message to a Telegram chat
 async function sendTelegramNotification(
     customer: OrderDetails['customer'],
     items: EnrichedItemData[],
@@ -110,7 +107,6 @@ ${shippingText}
   }
 }
 
-// This server action handles placing the order
 export async function handlePlaceOrder(orderDetails: OrderDetails) {
   const { customer, items, total, shippingCost } = orderDetails;
 
@@ -139,6 +135,7 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
             price: item.product.price,
             quantity: item.quantity,
             category: item.product.category,
+            categoryKey: item.product.categoryKey,
             image_url: item.product.image_url ?? null,
         })),
         subtotal,
@@ -150,44 +147,51 @@ export async function handlePlaceOrder(orderDetails: OrderDetails) {
     await newOrderRef.set(orderDataForRealtimeDB);
     console.log('Order saved to Realtime Database.');
 
-    const productLinks: { [key: number]: string } = {};
-    const itemsByCategory: { [key: string]: number[] } = {};
+    // --- FINAL, ROBUST LINK FETCHING LOGIC ---
+    // item.product.id is the Firebase document key
+    const enrichedItems: EnrichedItemData[] = await Promise.all(
+        items.map(async (item) => {
+            const categoryKey = item.product.categoryKey || item.product.category;
+            const firebaseDocumentKey = item.product.id; // Firebase document key
+            const title = item.product.title;
+            let finalLink: string | undefined = undefined;
 
-    items.forEach(item => {
-        const categoryKey = item.product.category === 'Сад' ? 'garden' : 'hiking';
-        if (!itemsByCategory[categoryKey]) {
-            itemsByCategory[categoryKey] = [];
-        }
-        itemsByCategory[categoryKey].push(item.product.id);
-    });
+            console.log(`\n🔍 SEARCHING for product: FirebaseKey="${firebaseDocumentKey}", Title="${title}", Category=${categoryKey}`);
 
-    for (const categoryKey in itemsByCategory) {
-        const productIds = itemsByCategory[categoryKey];
-        if (productIds.length > 0) {
-            const categoryRef = database.ref(`products/${categoryKey}`);
-            const snapshot = await categoryRef.once('value');
-            if (snapshot.exists()) {
-                const productsObject = snapshot.val();
-                const productsArray = Object.values(productsObject);
+            try {
+                const productRef = database.ref(`products/${categoryKey}/${firebaseDocumentKey}`);
+                const snapshot = await productRef.once('value');
 
-                const relevantProducts = productsArray.filter((p: any) => p && productIds.includes(p.id));
-                
-                relevantProducts.forEach((product: any) => {
+                if (snapshot.exists()) {
+                    const product = snapshot.val();
+                    console.log(`✅ Product found at products/${categoryKey}/${firebaseDocumentKey}`);
+                    console.log(`   Full product:`, JSON.stringify(product, null, 2));
+                    
                     if (product.link) {
-                        productLinks[product.id] = product.link;
+                        finalLink = product.link;
+                        console.log(`✅ Link extracted: ${finalLink}`);
+                    } else {
+                        console.log(`⚠️ No link field in product`);
                     }
-                });
+                } else {
+                    console.log(`❌ Product not found at path: products/${categoryKey}/${firebaseDocumentKey}`);
+                }
+            } catch (err) {
+                console.error(`[FATAL] Database error fetching link for product "${title}":`, err);
             }
-        }
-    }
-
-    const enrichedItems: EnrichedItemData[] = items.map(item => ({
-      id: item.product.id,
-      title: item.product.title,
-      price: item.product.price,
-      quantity: item.quantity,
-      link: productLinks[item.product.id] || undefined
-    }));
+            
+            console.log(`✅ Final result for "${title}": link="${finalLink}"\n`);
+            
+            return {
+                id: item.product.id,
+                title: item.product.title,
+                price: item.product.price,
+                quantity: item.quantity,
+                link: finalLink
+            };
+        })
+    );
+    // --- END OF LOGIC ---
 
     await sendTelegramNotification(customer, enrichedItems, total, shippingCost, new Date(createdAt));
 

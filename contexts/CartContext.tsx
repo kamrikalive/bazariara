@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 // Define the types for our context
 export type ProductInCart = {
-    id: number;
+    id: string;
     title: string;
     price: number;
     image_url?: string;
@@ -16,7 +16,7 @@ export type ProductInCart = {
 };
 
 export type Product = {
-    id: number;
+    id: string;
     title: string;
     price: number;
     image_url?: string;
@@ -30,8 +30,8 @@ export type Product = {
 type CartContextType = {
     cartItems: ProductInCart[];
     addToCart: (item: Product) => void;
-    removeFromCart: (itemId: number, category: string) => void;
-    updateQuantity: (itemId: number, quantity: number, category: string) => void;
+    removeFromCart: (itemId: string, category: string) => void;
+    updateQuantity: (itemId: string, quantity: string, category: string) => void;
     clearCart: () => void;
 };
 
@@ -76,11 +76,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    const removeFromCart = (itemId: number, category: string) => {
+    const removeFromCart = (itemId: string, category: string) => {
         setCartItems(prevItems => prevItems.filter(item => !(item.id === itemId && item.category === category)));
     };
 
-    const updateQuantity = (itemId: number, quantity: number, category: string) => {
+    const updateQuantity = (itemId: string, quantity: number, category: string) => {
         if (quantity <= 0) {
             removeFromCart(itemId, category);
         } else {
