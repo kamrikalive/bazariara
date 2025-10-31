@@ -48,7 +48,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       <header className="py-12 bg-gray-800 text-center">
-        <a href="/" className="text-5xl font-bold">BAZARIara</a>
+        <a href="/" className="text-5xl font-bold">BAZARI ARA</a>
         <p className="text-xl mt-2">Your One-Stop Shop</p>
       </header>
       <main className="p-12">

@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata = {
-  title: 'BAZARIara',
+  title: 'BAZARI ARA',
   description: 'A one-stop shop for all your needs',
   icons: {
     icon: '/favicon-32x32.png',

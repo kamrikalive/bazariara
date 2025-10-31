@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { database } from '@/lib/firebase/server';
 
-const URL = 'https://BAZARIara.ge';
+const URL = 'https://BAZARI ARA.ge';
 
 type Product = {
   id: string;

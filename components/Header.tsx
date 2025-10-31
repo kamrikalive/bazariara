@@ -27,7 +27,7 @@ export default function Header() {
                 <div className="flex items-center gap-4">
                     <SidebarMenu />
                     <Link href="/" className="text-2xl font-bold text-white hover:text-lime-400 transition-colors duration-300">
-                        BAZARIara
+                        BAZARI ARA
                     </Link>
                 </div>
                 <div className="flex items-center gap-6">

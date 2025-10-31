@@ -21,7 +21,7 @@ const Footer = () => {
           </a>
         </div>
         <div className="text-center mt-4 text-xs text-gray-500">
-          <p>&copy; 2025 BAZARIara. Все права защищены.</p>
+          <p>&copy; 2025 BAZARI ARA. Все права защищены.</p>
           <Link href="/privacy-policy" className="underline">
             Политика конфиденциальности
           </Link>

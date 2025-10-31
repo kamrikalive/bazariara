@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: { params: { category: string;
 
   if (!product) {
     return {
-      title: 'Товар не найден — BAZARIara',
+      title: 'Товар не найден — BAZARI ARA',
       description: 'Запрошенный товар не существует или был удалён.',
       openGraph: {
         title: 'Товар не найден',
@@ -50,15 +50,15 @@ export async function generateMetadata({ params }: { params: { category: string;
     };
   }
 
-  const title = `${product.title} — купить в Тбилиси с доставкой | BAZARIara`;
+  const title = `${product.title} — купить в Тбилиси с доставкой | BAZARI ARA`;
   const description = product.description
     ? `${product.description} Быстрая доставка по Тбилиси. Цена: ${product.price} ₾.`
     : `Купите ${product.title} по выгодной цене ${product.price} ₾ с быстрой доставкой по Тбилиси.`;
   const image = product.image_url || '/default-product.png';
-  const url = `https://BAZARIara.ge/${product.categoryKey}/${product.id}`;
+  const url = `https://BAZARI ARA.ge/${product.categoryKey}/${product.id}`;
 
   return {
-    metadataBase: new URL('https://BAZARIara.ge'),
+    metadataBase: new URL('https://BAZARI ARA.ge'),
     title,
     description,
     alternates: {
@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: { params: { category: string;
     openGraph: {
       locale: 'ru_RU',
       url,
-      siteName: 'BAZARIara',
+      siteName: 'BAZARI ARA',
       title,
       description,
       images: [
@@ -116,10 +116,10 @@ export default async function ProductDetailPage({ params }: { params: { category
       availability: product.in_stock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
-      url: `https://BAZARIara.ge/${product.categoryKey}/${product.id}`,
+      url: `https://BAZARI ARA.ge/${product.categoryKey}/${product.id}`,
       seller: {
         '@type': 'Organization',
-        name: 'BAZARIara',
+        name: 'BAZARI ARA',
       },
     },
   };

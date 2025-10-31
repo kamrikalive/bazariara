@@ -13,7 +13,7 @@ export default function OrderSuccessPage() {
           Спасибо за вашу покупку! Мы получили ваш заказ.
         </p>
         <p className="text-gray-400 mb-10">
-          Наш менеджер свяжется с вами в ближайшее время, чтобы уточнить детали доставки.
+          Наш менеджер свяжется с вами в ближайшее время, чтобы уточнить детали оплаты и доставки.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
