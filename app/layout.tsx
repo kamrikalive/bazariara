@@ -8,7 +8,7 @@ export const metadata = {
   title: 'BAZARI ARA',
   description: 'A one-stop shop for all your needs',
   icons: {
-    icon: '/favicon-32x32.png',
+    icon: '/favicon.ico',
   },
 };
 
