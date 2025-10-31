@@ -1,6 +1,6 @@
 'use client';
 
-import { useCart, Product } from '@/contexts/CartContext';
+import { useCart, ProductInCart } from '@/contexts/CartContext';
 import Link from 'next/link';
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
@@ -10,7 +10,7 @@ const MIN_ORDER_AMOUNT = 30;
 const FREE_SHIPPING_THRESHOLD = 100;
 const SHIPPING_COST = 5;
 
-function CartItemQuantityInput({ item, startRemoval }: { item: Product, startRemoval: (itemId: string) => void }) {
+function CartItemQuantityInput({ item, startRemoval }: { item: ProductInCart, startRemoval: (itemId: string, category: string) => void }) {
     const { updateQuantity } = useCart();
     const [inputValue, setInputValue] = useState<string | number>(item.quantity);
     const [isInputActive, setIsInputActive] = useState(false);
@@ -42,10 +42,10 @@ function CartItemQuantityInput({ item, startRemoval }: { item: Product, startRem
 
         if (!isNaN(newQuantity) && newQuantity > 0) {
             if (newQuantity !== item.quantity) {
-                updateQuantity(item.id, newQuantity);
+                updateQuantity(item.id, newQuantity, item.category);
             }
         } else if (newQuantity <= 0) {
-            startRemoval(item.id);
+            startRemoval(item.id, item.category);
         } else {
             setInputValue(item.quantity);
         }
@@ -59,16 +59,16 @@ function CartItemQuantityInput({ item, startRemoval }: { item: Product, startRem
         const newQuantity = item.quantity - 1;
         if (newQuantity > 0) {
             setInputValue(newQuantity);
-            updateQuantity(item.id, newQuantity);
+            updateQuantity(item.id, newQuantity, item.category);
         } else {
-            startRemoval(item.id);
+            startRemoval(item.id, item.category);
         }
     };
 
     const handleIncrease = () => {
         const newQuantity = item.quantity + 1;
         setInputValue(newQuantity);
-        updateQuantity(item.id, newQuantity);
+        updateQuantity(item.id, newQuantity, item.category);
     };
 
     return (
@@ -111,24 +111,26 @@ export default function CartPage() {
         };
     }, []);
 
-    const startRemoval = (itemId: string) => {
+    const startRemoval = (itemId: string, category: string) => {
+        const key = `${itemId}-${category}`;
         // Don't start a new timer if one is already running
-        if (removalTimers.current.has(itemId)) return;
+        if (removalTimers.current.has(key)) return;
 
-        setPendingRemoval(prev => [...prev, itemId]);
+        setPendingRemoval(prev => [...prev, key]);
         const timer = setTimeout(() => {
-            removeFromCart(itemId);
-            setPendingRemoval(prev => prev.filter(id => id !== itemId));
-            removalTimers.current.delete(itemId);
+            removeFromCart(itemId, category);
+            setPendingRemoval(prev => prev.filter(id => id !== key));
+            removalTimers.current.delete(key);
         }, 5000);
-        removalTimers.current.set(itemId, timer);
+        removalTimers.current.set(key, timer);
     };
 
-    const cancelRemoval = (itemId: string) => {
-        if (removalTimers.current.has(itemId)) {
-            clearTimeout(removalTimers.current.get(itemId));
-            removalTimers.current.delete(itemId);
-            setPendingRemoval(prev => prev.filter(id => id !== itemId));
+    const cancelRemoval = (itemId: string, category: string) => {
+        const key = `${itemId}-${category}`;
+        if (removalTimers.current.has(key)) {
+            clearTimeout(removalTimers.current.get(key));
+            removalTimers.current.delete(key);
+            setPendingRemoval(prev => prev.filter(id => id !== key));
         }
     };
 
@@ -156,9 +158,11 @@ export default function CartPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                         <div className="lg:col-span-2 bg-gray-800/40 rounded-xl shadow-lg backdrop-blur-sm">
                             <ul className="divide-y divide-gray-700/50">
-                                {cartItems.map(item => (
-                                    <li key={item.id} className="flex flex-col sm:flex-row justify-between items-center p-5 gap-4">
-                                        <Link href={`/products/${item.categoryKey}/${item.id}`} className={`flex items-center gap-5 w-full sm:w-auto group self-start ${pendingRemoval.includes(item.id) ? 'pointer-events-none opacity-50' : ''}`}>
+                                {cartItems.map(item => {
+                                    const key = `${item.id}-${item.category}`;
+                                    return (
+                                    <li key={key} className="flex flex-col sm:flex-row justify-between items-center p-5 gap-4">
+                                        <Link href={`/products/${item.categoryKey}/${item.id}`} className={`flex items-center gap-5 w-full sm:w-auto group self-start ${pendingRemoval.includes(key) ? 'pointer-events-none opacity-50' : ''}`}>
                                             <img src={item.image_url} alt={item.title} className="w-20 h-20 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"/>
                                             <div>
                                                 <h2 className="font-bold text-lg text-gray-200 group-hover:text-lime-400 transition-colors duration-300">{item.title}</h2>
@@ -167,24 +171,24 @@ export default function CartPage() {
                                         </Link>
                                         
                                         <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-center w-full sm:w-auto">
-                                            {pendingRemoval.includes(item.id) ? (
+                                            {pendingRemoval.includes(key) ? (
                                                 <div className="relative h-10 font-medium rounded-xl bg-gray-800/80 border border-transparent shadow-inner flex items-center justify-center overflow-hidden w-[116px]">
                                                     <div className="undo-progress-bar absolute top-0 left-0 h-full"></div>
-                                                    <button onClick={() => cancelRemoval(item.id)} className="text-white font-bold z-10">
+                                                    <button onClick={() => cancelRemoval(item.id, item.category)} className="text-white font-bold z-10">
                                                         Вернуть
                                                     </button>
                                                 </div>
                                             ) : (
                                                 <>
                                                     <CartItemQuantityInput item={item} startRemoval={startRemoval} />
-                                                    <button id={`remove-btn-${item.id}`} onClick={() => startRemoval(item.id)} className="text-gray-400 hover:text-red-500 p-2 rounded-full transition-colors duration-300 hover:bg-red-500/10">
+                                                    <button id={`remove-btn-${item.id}`} onClick={() => startRemoval(item.id, item.category)} className="text-gray-400 hover:text-red-500 p-2 rounded-full transition-colors duration-300 hover:bg-red-500/10">
                                                         <TrashIcon className="h-6 w-6" />
                                                     </button>
                                                 </>
                                             )}
                                         </div>
                                     </li>
-                                ))}
+                                )}) }
                             </ul>
                         </div>
 
@@ -225,7 +229,7 @@ export default function CartPage() {
                                 )}
 
                                 <button onClick={() => {
-                                    cartItems.forEach(item => startRemoval(item.id));
+                                    cartItems.forEach(item => startRemoval(item.id, item.category));
                                 }} className="w-full text-center bg-gray-700 text-gray-300 font-semibold py-2 px-6 rounded-lg hover:bg-red-600 hover:text-white transition-colors duration-300">
                                     Очистить корзину
                                 </button>

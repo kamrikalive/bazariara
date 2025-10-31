@@ -31,7 +31,7 @@ type CartContextType = {
     cartItems: ProductInCart[];
     addToCart: (item: Product) => void;
     removeFromCart: (itemId: string, category: string) => void;
-    updateQuantity: (itemId: string, quantity: string, category: string) => void;
+    updateQuantity: (itemId: string, quantity: number, category: string) => void;
     clearCart: () => void;
 };
 

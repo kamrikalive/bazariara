@@ -4,7 +4,7 @@ import { database } from '@/lib/firebase/server';
 
 interface OrderItem {
   product: {
-    id: number; 
+    id: string; 
     title: string;
     price: number;
     category: string;
@@ -26,7 +26,7 @@ interface OrderDetails {
 }
 
 interface EnrichedItemData {
-    id: number; 
+    id: string; 
     title: string;
     price: number;
     quantity: number;

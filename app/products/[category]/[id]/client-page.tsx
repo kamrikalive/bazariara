@@ -14,7 +14,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 
 type Product = {
-    id: number;
+    id: string;
     title: string;
     category: string;
     price: number;
@@ -71,7 +71,7 @@ function RelatedProductCard({ category, id }: { category: string; id: string }) 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
-  const cartItem = cartItems.find(item => item.id === product.id);
+  const cartItem = cartItems.find(item => item.id === product.id && item.category === product.category);
   const [inputValue, setInputValue] = useState<string | number>('');
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     if (cartItem) {
       const newQuantity = cartItem.quantity + 1;
       setInputValue(newQuantity);
-      updateQuantity(cartItem.id, newQuantity);
+      updateQuantity(cartItem.id, newQuantity, cartItem.category);
     }
   };
 
@@ -102,9 +102,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         if (cartItem.quantity > 1) {
             const newQuantity = cartItem.quantity - 1;
             setInputValue(newQuantity);
-            updateQuantity(cartItem.id, newQuantity);
+            updateQuantity(cartItem.id, newQuantity, cartItem.category);
         } else {
-            removeFromCart(cartItem.id);
+            removeFromCart(cartItem.id, cartItem.category);
         }
     }
   };
@@ -117,7 +117,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     if (cartItem) {
         const newQuantity = parseInt(inputValue.toString(), 10);
         if (!isNaN(newQuantity) && newQuantity > 0) {
-            updateQuantity(cartItem.id, newQuantity);
+            updateQuantity(cartItem.id, newQuantity, cartItem.category);
         } else {
             // If input is invalid or empty, reset to original quantity
             setInputValue(cartItem.quantity);
@@ -137,7 +137,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         price: product.price.toFixed(2),
         priceCurrency: "GEL",
         availability: product.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-        url: `https://BAZARI ARA.ge/products/${product.categoryKey}/${product.id}`
+        url: `https://bazariara.ge/products/${product.categoryKey}/${product.id}`
     },
     brand: {
         "@type": "Brand",

@@ -26,7 +26,7 @@ async function getProduct(category: string, id: string): Promise<Product | null>
     const productData = snapshot.val();
     return {
       ...productData,
-      id: parseInt(id, 10),
+      id: id,
       categoryKey: category,
     };
   } catch (err) {
