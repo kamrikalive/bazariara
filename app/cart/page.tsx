@@ -228,9 +228,7 @@ export default function CartPage() {
                                     <p className="text-sm text-center text-red-400 font-semibold">Минимальная сумма заказа {MIN_ORDER_AMOUNT} ₾</p>
                                 )}
 
-                                <button onClick={() => {
-                                    cartItems.forEach(item => startRemoval(item.id, item.category));
-                                }} className="w-full text-center bg-gray-700 text-gray-300 font-semibold py-2 px-6 rounded-lg hover:bg-red-600 hover:text-white transition-colors duration-300">
+                                <button onClick={clearCart} className="w-full text-center bg-gray-700 text-gray-300 font-semibold py-2 px-6 rounded-lg hover:bg-red-600 hover:text-white transition-colors duration-300">
                                     Очистить корзину
                                 </button>
                             </div>
