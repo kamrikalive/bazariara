@@ -1,14 +1,18 @@
+import { Metadata } from 'next';
 import './globals.css';
 import { CartProvider } from '@/contexts/CartContext';
 import { OrderProvider } from '@/contexts/OrderContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'BAZARI ARA',
   description: 'A one-stop shop for all your needs',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', type: 'image/x-icon' },
+      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+    ],
   },
 };
 
