@@ -73,8 +73,8 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
 
 // === 🔹 SEO, Facebook (Open Graph) и Twitter ===
 export const metadata: Metadata = {
-  metadataBase: new URL('https://bazariara.ge'),
-  title: 'BazarIara: Товары для дома, сада, туризма и отдыха',
+  metadataBase: new URL('https://BAZARIara.ge'),
+  title: 'BAZARIara: Товары для дома, сада, туризма и отдыха',
   description:
     'Широкий ассортимент товаров: мебель, инструменты, игрушки, всё для сада, дома и активного отдыха. Быстрая доставка по Тбилиси за 2 часа!',
   keywords: [
@@ -86,37 +86,37 @@ export const metadata: Metadata = {
     'инструменты',
     'игрушки',
     'доставка Тбилиси',
-    'BazarIara',
+    'BAZARIara',
   ],
   alternates: {
-    canonical: 'https://bazariara.ge',
+    canonical: 'https://BAZARIara.ge',
   },
   openGraph: {
     type: 'website',
     locale: 'ru_RU',
-    url: 'https://bazariara.ge',
-    siteName: 'BazarIara',
-    title: 'BazarIara: Всё для дома, сада, туризма и отдыха',
+    url: 'https://BAZARIara.ge',
+    siteName: 'BAZARIara',
+    title: 'BAZARIara: Всё для дома, сада, туризма и отдыха',
     description: 'Быстрая доставка по Тбилиси за 2 часа. Всё для комфорта дома и активного отдыха!',
     images: [
       {
         url: 'https://i.ibb.co/nMkbLTfC/IMG-4573.png',
         width: 1200,
         height: 630,
-        alt: 'BazarIara — интернет-магазин товаров для дома, сада и отдыха',
+        alt: 'BAZARIara — интернет-магазин товаров для дома, сада и отдыха',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'BazarIara — всё для дома и отдыха',
+    title: 'BAZARIara — всё для дома и отдыха',
     description: 'Мебель, инструменты, туризм, сад и огород. Быстрая доставка по Тбилиси!',
     images: ['https://i.ibb.co/nMkbLTfC/IMG-4573.png'],
   },
   other: {
     'og:image:width': '1200',
     'og:image:height': '630',
-    'og:image:alt': 'BazarIara — интернет-магазин товаров для дома, сада и отдыха',
+    'og:image:alt': 'BAZARIara — интернет-магазин товаров для дома, сада и отдыха',
     'og:locale:alternate': 'en_US',
     'fb:app_id': '1234567890', // 🔸 можно добавить свой ID Facebook App, если есть
   },

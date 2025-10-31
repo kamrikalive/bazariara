@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bazariara.ge/sitemap.xml
+Sitemap: https://BAZARIara.ge/sitemap.xml

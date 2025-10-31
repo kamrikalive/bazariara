@@ -137,11 +137,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         price: product.price.toFixed(2),
         priceCurrency: "GEL",
         availability: product.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-        url: `https://bazariara.ge/products/${product.categoryKey}/${product.id}`
+        url: `https://BAZARIara.ge/products/${product.categoryKey}/${product.id}`
     },
     brand: {
         "@type": "Brand",
-        name: "BazarIara"
+        name: "BAZARIara"
     }
   };
 

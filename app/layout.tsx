@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata = {
-  title: 'MarketGE',
+  title: 'BAZARIara',
   description: 'A one-stop shop for all your needs',
   icons: {
     icon: '/favicon-32x32.png',
