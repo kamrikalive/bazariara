@@ -55,10 +55,10 @@ export async function generateMetadata({ params }: { params: { category: string;
     ? `${product.description} Быстрая доставка по Тбилиси. Цена: ${product.price} ₾.`
     : `Купите ${product.title} по выгодной цене ${product.price} ₾ с быстрой доставкой по Тбилиси.`;
   const image = product.image_url || '/default-product.png';
-  const url = `https://BAZARI ARA.ge/${product.categoryKey}/${product.id}`;
+  const url = `https://bazariara.ge/${product.categoryKey}/${product.id}`;
 
   return {
-    metadataBase: new URL('https://BAZARI ARA.ge'),
+    metadataBase: new URL('https://bazariara.ge'),
     title,
     description,
     alternates: {
@@ -116,7 +116,7 @@ export default async function ProductDetailPage({ params }: { params: { category
       availability: product.in_stock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
-      url: `https://BAZARI ARA.ge/${product.categoryKey}/${product.id}`,
+      url: `https://bazariara.ge/${product.categoryKey}/${product.id}`,
       seller: {
         '@type': 'Organization',
         name: 'BAZARI ARA',
