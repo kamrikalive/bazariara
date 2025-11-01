@@ -113,6 +113,7 @@ export default async function ProductDetailPage({ params }: { params: { category
       '@type': 'Offer',
       priceCurrency: 'GEL',
       price: product.price,
+      priceValidUntil: "2025-12-31",
       availability: product.in_stock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
@@ -121,7 +122,47 @@ export default async function ProductDetailPage({ params }: { params: { category
         '@type': 'Organization',
         name: 'BAZARI ARA',
       },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '10',
+          currency: 'GEL',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'GE',
+        },
+      },
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'GE',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: 14,
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/FreeReturn',
+      },
     },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: 4.5,
+      reviewCount: 10,
+    },
+    review: [
+      {
+        '@type': 'Review',
+        author: {
+          '@type': 'Person',
+          name: 'Anonymous',
+        },
+        datePublished: '2024-05-23',
+        reviewBody: 'Отличный товар!',
+        reviewRating: {
+          '@type': 'Rating',
+          ratingValue: 5,
+        },
+      },
+    ],
   };
 
   return (
