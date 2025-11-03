@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     description,
     images: [
       {
-        url: new URL('/android-chrome-512x512.png', siteUrl).toString(),
+        url: new URL('/icon_512x512.png', siteUrl).toString(),
         width: 512,
         height: 512,
         alt: 'Логотип BAZARI ARA',
@@ -44,11 +44,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru">
       <head>
         {/* --- Иконки сайта (Favicon) для всех устройств --- */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-        <link rel="manifest" href="/site.webmanifest" />
         <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icon_32x32.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/icon_96x96.png" />
+        <link rel="icon" type="image/png" sizes="128x128" href="/icon_128x128.png" />
+        <link rel="icon" type="image/png" sizes="256x256" href="/icon_256x256.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon_512x512.png" />
+        <link rel="apple-touch-icon" sizes="128x128" href="/icon_128x128.png" />
+        <link rel="manifest" href="/site.webmanifest" />
         <meta name="msapplication-TileColor" content="#1a202c" />
         <meta name="theme-color" content="#1a202c" />
       </head>

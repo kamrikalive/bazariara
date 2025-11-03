@@ -3,15 +3,20 @@
   "short_name": "Bazari",
   "icons": [
     {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
+      "src": "/icon_128x128.png",
+      "sizes": "128x128",
       "type": "image/png"
     },
     {
-      "src": "/android-chrome-512x512.png",
-      "sizes": "512x512",
+      "src": "/icon_256x256.png",
+      "sizes": "256x256",
       "type": "image/png"
-    }
+    },
+    {
+        "src": "/icon_512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
   ],
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
