@@ -99,16 +99,23 @@ export default async function ProductDetailPage({ params }: { params: { category
       </div>
     );
   }
+  
+  const allImages = [product.image_url, ...(product.image_urls || [])].filter(Boolean) as string[];
+  const absoluteImageUrls = allImages.map(url => url.startsWith('/') ? `https://bazariara.ge${url}` : url);
 
   // === Добавляем JSON-LD (структурированные данные) для Google ===
   const jsonLd = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name: product.title,
-    image: product.image_url,
+    image: absoluteImageUrls,
     description: product.description || '',
     sku: product.id.toString(),
     category: product.category,
+    brand: {
+        '@type': 'Brand',
+        name: 'BAZARI ARA',
+    },
     offers: {
       '@type': 'Offer',
       priceCurrency: 'GEL',
@@ -121,6 +128,10 @@ export default async function ProductDetailPage({ params }: { params: { category
       seller: {
         '@type': 'Organization',
         name: 'BAZARI ARA',
+        logo: {
+            '@type': 'ImageObject',
+            url: 'https://bazariara.ge/android-chrome-512x512.png',
+        },
       },
       shippingDetails: {
         '@type': 'OfferShippingDetails',
