@@ -58,11 +58,12 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
       }
     });
 
-    // Сортировка: категория "top" — первая
+    // Сортировка: "top" и "hiking" — первые
     allProducts.sort((a, b) => {
-      if (a.categoryKey === 'top' && b.categoryKey !== 'top') return -1;
-      if (a.categoryKey !== 'top' && b.categoryKey === 'top') return 1;
-      return 0;
+      const order: Record<string, number> = { top: 1, hiking: 2 };
+      const aOrder = order[a.categoryKey] || 3;
+      const bOrder = order[b.categoryKey] || 3;
+      return aOrder - bOrder;
     });
 
     return allProducts;
