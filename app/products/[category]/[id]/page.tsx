@@ -61,6 +61,7 @@ export async function generateMetadata({ params }: { params: { category: string;
     metadataBase: new URL('https://bazariara.ge'),
     title,
     description,
+    keywords: [product.title, product.category, 'купить в Тбилиси', 'доставка по Тбилиси', 'BAZARI ARA', 'интернет-магазин в Грузии'],
     alternates: {
       canonical: url,
     },
@@ -143,6 +144,7 @@ export default async function ProductDetailPage({ params }: { params: { category
         shippingDestination: {
           '@type': 'DefinedRegion',
           addressCountry: 'GE',
+          addressRegion: 'Тбилиси'
         },
       },
       hasMerchantReturnPolicy: {
