@@ -26,9 +26,9 @@ export const metadata: Metadata = {
     description,
     images: [
       {
-        url: new URL('/icon_512x512.png', siteUrl).toString(),
-        width: 512,
-        height: 512,
+        url: new URL('/icon_96x96.png', siteUrl).toString(),
+        width: 96,
+        height: 96,
         alt: 'Логотип BAZARI ARA',
       },
     ],
