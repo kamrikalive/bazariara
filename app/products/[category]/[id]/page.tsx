@@ -1,6 +1,7 @@
 import { database } from '@/lib/firebase/server';
 import ProductDetailClient from './client-page';
 import { Metadata } from 'next';
+import { calculateDisplayPrice } from '@/lib/priceLogic';
 
 // === 🔸 Тип товара ===
 type Product = {
@@ -50,10 +51,11 @@ export async function generateMetadata({ params }: { params: { category: string;
     };
   }
 
+  const displayPrice = calculateDisplayPrice(product.price);
   const title = `${product.title} — купить в Тбилиси с доставкой | BAZARI ARA`;
   const description = product.description
-    ? `${product.description} Быстрая доставка по Тбилиси. Цена: ${product.price} ₾.`
-    : `Купите ${product.title} по выгодной цене ${product.price} ₾ с быстрой доставкой по Тбилиси.`;
+    ? `${product.description} Быстрая доставка по Тбилиси. Цена: ${displayPrice} ₾.`
+    : `Купите ${product.title} по выгодной цене ${displayPrice} ₾ с быстрой доставкой по Тбилиси.`;
   const image = product.image_url || '/default-product.png';
   const url = `https://bazariara.ge/${product.categoryKey}/${product.id}`;
 
@@ -120,7 +122,7 @@ export default async function ProductDetailPage({ params }: { params: { category
     offers: {
       '@type': 'Offer',
       priceCurrency: 'GEL',
-      price: product.price,
+      price: calculateDisplayPrice(product.price),
       priceValidUntil: "2025-12-31",
       availability: product.in_stock
         ? 'https://schema.org/InStock'
