@@ -36,9 +36,9 @@ export const metadata: Metadata = {
     description,
     images: [
       {
-        url: new URL('/icon_32x32.png', siteUrl).toString(),
-        width: 32,
-        height: 32,
+        url: new URL('/web-app-manifest-512x512.png', siteUrl).toString(),
+        width: 512,
+        height: 512,
         alt: 'Логотип BAZARI ARA',
       },
     ],
