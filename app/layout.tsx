@@ -22,13 +22,10 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico' },
-      { url: '/icon_32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icon_96x96.png', sizes: '96x96', type: 'image/png' },
-      { url: '/icon_128x128.png', sizes: '128x128', type: 'image/png' },
-      { url: '/icon_256x256.png', sizes: '256x256', type: 'image/png' },
-      { url: '/icon_512x512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
-    apple: '/icon_128x128.png',
+    apple: '/apple-touch-icon.png',
   },
   
   openGraph: {
@@ -61,9 +58,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
-      <head>
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-      </head>
+      <head />
       <body className="flex flex-col min-h-screen bg-gray-900">
         <OrderProvider>
           <CartProvider>
