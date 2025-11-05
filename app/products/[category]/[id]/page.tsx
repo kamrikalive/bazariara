@@ -105,7 +105,8 @@ export default async function ProductDetailPage({ params }: { params: { category
       </div>
     );
   }
-  
+
+  const displayPrice = calculateDisplayPrice(product.price);
   const allImages = [product.image_url, ...(product.image_urls || [])].filter(Boolean) as string[];
   const absoluteImageUrls = allImages.map(url => url.startsWith('/') ? `https://bazariara.ge${url}` : url);
 
@@ -125,7 +126,7 @@ export default async function ProductDetailPage({ params }: { params: { category
     offers: {
       '@type': 'Offer',
       priceCurrency: 'GEL',
-      price: calculateDisplayPrice(product.price),
+      price: displayPrice,
       priceValidUntil: "2025-12-31",
       availability: product.in_stock
         ? 'https://schema.org/InStock'
