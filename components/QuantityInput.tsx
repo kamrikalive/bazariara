@@ -83,8 +83,8 @@ export default function QuantityInput({ product }: QuantityInputProps) {
                 onClick={() => addToCart(product)}
                 className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
             >
-                <ShoppingCartIcon className="h-5 w-5 mr-2" />
-                В корзину
+                <ShoppingCartIcon className="h-5 w-5 mr-2 hidden sm:inline-block" />
+                <span>В корзину</span>
             </button>
         );
     }
