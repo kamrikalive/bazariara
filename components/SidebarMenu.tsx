@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { XMarkIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { database } from '@/lib/firebaseClient';
 import { ref, get } from 'firebase/database';
 
@@ -13,14 +13,28 @@ const CategoryIcon = () => (
   </svg>
 );
 
+// Утилита для генерации ключа, аналогичная той, что в page.tsx
+const generateKey = (name: string) => {
+  if (!name) return '';
+  return name.trim().toLowerCase().replace(/\s+/g, '-');
+};
+
 type Product = {
   category: string;
+  sub_category?: string;
+};
+
+type SubCategoryInfo = {
+    name: string;
+    key: string; // ключ для URL, в нижнем регистре
+    count: number;
 };
 
 type CategoryInfo = {
   name: string;
-  key: string; // e.g. 'sad', 'dom'
+  key: string;
   count: number;
+  subCategories: SubCategoryInfo[];
 };
 
 async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
@@ -28,7 +42,7 @@ async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
     const snapshot = await get(productsRef);
     const productsData = snapshot.val();
 
-    if (!productsData) return [{ name: 'Все', key: 'all', count: 0 }];
+    if (!productsData) return [{ name: 'Все', key: 'all', count: 0, subCategories: [] }];
 
     const categories: CategoryInfo[] = [];
     let totalProducts = 0;
@@ -42,14 +56,29 @@ async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
             
             if (count > 0) {
                 const categoryName = productList[0].category || categoryKey;
-                categories.push({ name: categoryName, key: categoryKey, count });
+                const subCategoryCounts: { [name: string]: number } = {};
+
+                productList.forEach(product => {
+                    if (product.sub_category) {
+                        subCategoryCounts[product.sub_category] = (subCategoryCounts[product.sub_category] || 0) + 1;
+                    }
+                });
+
+                const subCategories: SubCategoryInfo[] = Object.entries(subCategoryCounts)
+                    .map(([name, count]) => ({
+                        name, // Оригинальное имя для отображения ("Стулья")
+                        count,
+                        key: generateKey(name), // Ключ для URL ("стулья")
+                    }))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+
+                categories.push({ name: categoryName, key: categoryKey, count, subCategories });
             }
         }
     }
     
     categories.sort((a, b) => a.name.localeCompare(b.name));
-
-    categories.unshift({ name: 'Все', key: 'all', count: totalProducts });
+    categories.unshift({ name: 'Все', key: 'all', count: totalProducts, subCategories: [] });
     
     return categories;
 }
@@ -57,6 +86,7 @@ async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
 export default function SidebarMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -87,6 +117,10 @@ export default function SidebarMenu() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
+
+  const handleCategoryToggle = (categoryKey: string) => {
+    setOpenCategory(openCategory === categoryKey ? null : categoryKey);
+  };
 
   return (
     <div>
@@ -124,18 +158,45 @@ export default function SidebarMenu() {
         <nav>
           <ul>
             {categories.map(category => (
-              <li key={category.key} className="mb-3">
-                <Link 
-                  href={category.key === 'all' ? '/' : `/?category=${encodeURIComponent(category.key)}`}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 rounded-lg text-lg text-gray-300 hover:bg-lime-500/10 hover:text-lime-300 border border-transparent hover:border-lime-500/30 transition-all duration-200"
-                >
-                  <div className="flex items-center">
-                    <CategoryIcon />
-                    <span>{category.name}</span>
-                  </div>
-                  <span className="text-sm font-mono bg-lime-500/20 text-lime-300 rounded-full px-2 py-0.5">{category.count}</span>
-                </Link>
+              <li key={category.key} className="mb-2">
+                <div className="flex flex-col">
+                    <div 
+                        className="flex items-center justify-between px-4 py-3 rounded-lg text-lg text-gray-300 hover:bg-lime-500/10 hover:text-lime-300 border border-transparent hover:border-lime-500/30 transition-all duration-200 cursor-pointer"
+                        onClick={() => category.subCategories.length > 0 ? handleCategoryToggle(category.key) : setIsOpen(false)}
+                    >
+                        <Link 
+                            href={category.key === 'all' ? '/' : `/?category=${encodeURIComponent(category.key)}`}
+                            onClick={(e) => { if (category.subCategories.length > 0) e.preventDefault(); }}
+                            className="flex items-center flex-grow"
+                        > 
+                            <CategoryIcon />
+                            <span>{category.name}</span>
+                        </Link>
+                        <div className="flex items-center">
+                            <span className="text-sm font-mono bg-lime-500/20 text-lime-300 rounded-full px-2 py-0.5">{category.count}</span>
+                            {category.subCategories.length > 0 && (
+                                <ChevronDownIcon className={`w-5 h-5 ml-2 transition-transform duration-300 ${openCategory === category.key ? 'rotate-180' : ''}`} />
+                            )}
+                        </div>
+                    </div>
+
+                    {category.subCategories.length > 0 && openCategory === category.key && (
+                        <ul className="pl-8 mt-2 space-y-2">
+                            {category.subCategories.map(sub => (
+                                <li key={sub.key}>
+                                    <Link 
+                                        href={`/?category=${encodeURIComponent(category.key)}&subcategory=${encodeURIComponent(sub.key)}`}
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center justify-between py-2 px-3 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                                    >
+                                        <span>{sub.name}</span>
+                                        <span className="text-xs font-mono bg-gray-600 text-gray-300 rounded-full px-1.5 py-0.5">{sub.count}</span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
               </li>
             ))}
           </ul>
