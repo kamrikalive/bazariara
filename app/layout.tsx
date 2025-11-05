@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru">
       <head>
-        {/* Favicon теги больше не нужны - они генерируются из Metadata */}
+        <link rel="icon" href="/favicon.ico" />
       </head>
       <body className="flex flex-col min-h-screen bg-gray-900">
         <OrderProvider>

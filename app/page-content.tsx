@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
@@ -50,6 +50,9 @@ export default function HomePageContent({ products: initialProducts }: { product
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const searchQuery = searchParams.get('search') || '';
 
+  const [inputValue, setInputValue] = useState(searchQuery);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     const productsWithImages = initialProducts.filter(p => p.image_url && p.image_url.trim() !== '');
     const sortedProducts = [...productsWithImages].sort((a, b) => {
@@ -73,6 +76,10 @@ export default function HomePageContent({ products: initialProducts }: { product
     setCategories(uniqueCategories);
 
   }, [initialProducts]);
+
+  useEffect(() => {
+    setInputValue(searchQuery);
+  }, [searchQuery]);
 
   const subCategories = useMemo(() => {
     if (selectedCategory === 'all') {
@@ -109,7 +116,7 @@ export default function HomePageContent({ products: initialProducts }: { product
       products = products.filter(p => p.subCategoryKey === selectedSubCategory);
     }
 
-    if (searchQuery) {
+    if (searchQuery.length >= 2) {
       products = products.filter(p => 
         p.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -154,10 +161,25 @@ export default function HomePageContent({ products: initialProducts }: { product
   }
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('search', e.target.value);
-    params.set('page', '1');
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    const newValue = e.target.value;
+    setInputValue(newValue);
+
+    if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('page', '1');
+
+        if (newValue.length >= 2) {
+            params.set('search', newValue);
+            router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        } else if (newValue.length === 0) {
+            params.delete('search');
+            router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        }
+    }, 500); 
   }
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -178,7 +200,7 @@ export default function HomePageContent({ products: initialProducts }: { product
               <input
                 type="text"
                 placeholder="Поиск по названию..."
-                value={searchQuery}
+                value={inputValue}
                 onChange={handleSearchChange}
                 className="w-full px-4 py-2 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-500"
               />
