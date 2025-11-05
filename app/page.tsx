@@ -84,9 +84,6 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
     title: 'BAZARIara: Товары для дома, сада, туризма и отдыха',
     description:
       'Широкий ассортимент товаров: мебель, инструменты, игрушки, всё для сада, дома и активного отдыха. Быстрая доставка по Тбилиси за 2 часа!',
-    icons: {
-      icon: '/icon_32x32.png',
-    },
     keywords: [
       'товары для дома',
       'сад и огород',
