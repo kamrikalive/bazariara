@@ -170,7 +170,7 @@ export default function CartPage() {
                                             </div>
                                         </Link>
                                         
-                                        <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-center w-full sm:w-auto">
+                                        <div className="flex items-center justify-end gap-3 sm:gap-4 self-end sm:self-center w-full sm:w-auto">
                                             {pendingRemoval.includes(key) ? (
                                                 <div className="relative h-10 font-medium rounded-xl bg-gray-800/80 border border-transparent shadow-inner flex items-center justify-center overflow-hidden w-[116px]">
                                                     <div className="undo-progress-bar absolute top-0 left-0 h-full"></div>
