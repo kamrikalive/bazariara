@@ -63,6 +63,9 @@ export async function generateMetadata({ params }: { params: { category: string;
     metadataBase: new URL('https://bazariara.ge'),
     title,
     description,
+    icons: {
+      icon: '/icon_32x32.png',
+    },
     keywords: [product.title, product.category, 'купить в Тбилиси', 'доставка по Тбилиси', 'BAZARI ARA', 'интернет-магазин в Грузии'],
     alternates: {
       canonical: url,
