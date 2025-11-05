@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: { params: { category: string;
       canonical: url,
     },
     openGraph: {
-      locale: 'ru_RU',
+      locale: 'ru_GE',
       url,
       siteName: 'BAZARI ARA',
       title,
