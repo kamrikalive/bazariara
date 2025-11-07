@@ -30,7 +30,7 @@ type Product = {
 
 async function fetchProduct(category: string, id: string): Promise<Product | null> {
     try {
-        const response = await fetch(`/products/${category}/${id}`);
+        const response = await fetch(`/api/products/${category}/${id}`);
         if (!response.ok) {
             return null;
         }
@@ -236,18 +236,23 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
         {/* === Related Products === */}
         {product.links && product.links.length > 0 && (
-            <div className="mt-12">
-                <h3 className="text-2xl font-bold mb-6 text-white">С этим покупают:</h3>
+            <div className="mt-2">
+                <h3 className="text-2xl font-bold mb-2 text-white">С этим покупают:</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    {product.links.map((link, index) => (
-                        <Link key={index} href={link} className="block bg-gray-800 rounded-lg shadow-md hover:shadow-lime-500/20 transition-shadow duration-300">
-                            <div className="w-full h-32 bg-gray-700 rounded-t-lg"></div>
-                            <div className="p-4">
-                                <h4 className="font-bold text-md truncate text-white">Загрузка...</h4>
-                                <p className="text-lime-400 font-semibold">---</p>
-                            </div>
-                        </Link>
-                    ))}
+                    {product.links.map((link, index) => {
+                        try {
+                            const url = new URL(link);
+                            const pathnameParts = url.pathname.split('/');
+                            if (pathnameParts.length >= 4) {
+                                const category = pathnameParts[2];
+                                const id = pathnameParts[3];
+                                return <RelatedProductCard key={index} category={category} id={id} />
+                            }
+                        } catch (error) {
+                            console.error("Invalid URL in product links", link, error);
+                        }
+                        return null;
+                    })}
                 </div>
             </div>
         )}
