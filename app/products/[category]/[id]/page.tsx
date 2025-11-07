@@ -141,7 +141,7 @@ export default async function ProductDetailPage({ params }: { params: { category
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: '10',
+          value: '5',
           currency: 'GEL',
         },
         shippingDestination: {
@@ -161,7 +161,7 @@ export default async function ProductDetailPage({ params }: { params: { category
     },
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: 4.5,
+      ratingValue: 4.9,
       reviewCount: 10,
     },
     review: [
