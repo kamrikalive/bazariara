@@ -12,15 +12,6 @@ body.cart-updating a {
   opacity: 0.5;
 }
 
-@keyframes flash {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
-}
-
-.flashing-slogan {
-  animation: flash 1.5s infinite;
-}
-
 /* Custom scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

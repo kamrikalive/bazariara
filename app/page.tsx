@@ -107,7 +107,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
       description: 'Быстрая доставка по Тбилиси за 2 часа. Всё для комфорта дома и активного отдыха!',
       images: [
         {
-          url: 'https://i.ibb.co/nMkbLTfC/IMG-4573.png',
+          url: 'https://i.ibb.co/Rkpg2k2d/Chat-GPT-Image-29-2025-14-40-32.png',
           width: 1200,
           height: 630,
           alt: 'BAZARI ARA — интернет-магазин товаров для дома, сада и отдыха',
@@ -118,13 +118,13 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
       card: 'summary_large_image',
       title: 'BAZARI ARA — всё для дома и отдыха',
       description: 'Мебель, инструменты, туризм, сад и огород. Быстрая доставка по Тбилиси!',
-      images: ['https://i.ibb.co/nMkbLTfC/IMG-4573.png'],
+      images: ['https://i.ibb.co/Rkpg2k2d/Chat-GPT-Image-29-2025-14-40-32.png'],
     },
     other: {
       'og:image:width': '1200',
       'og:image:height': '630',
       'og:image:alt': 'BAZARI ARA — интернет-магазин товаров для дома, сада и отдыха',
-      'og:locale:alternate': 'en_US',
+      'og:locale:alternate': 'ru_RU',
       'fb:app_id': '1234567890', // 🔸 можно добавить свой ID Facebook App, если есть
     },
   };
