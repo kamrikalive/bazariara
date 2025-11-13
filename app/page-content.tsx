@@ -37,10 +37,17 @@ type Category = {
 
 const ITEMS_PER_PAGE = 20;
 
-export default function HomePageContent({ products: initialProducts }: { products: Product[] }) {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  
+export default function HomePageContent({ 
+    products,
+    totalProducts,
+    allProducts,
+    categories 
+}: { 
+    products: Product[], 
+    totalProducts: number,
+    allProducts: Product[],
+    categories: Category[]
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -54,30 +61,6 @@ export default function HomePageContent({ products: initialProducts }: { product
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const productsWithImages = initialProducts.filter(p => p.image_url && p.image_url.trim() !== '');
-    const sortedProducts = [...productsWithImages].sort((a, b) => {
-        if (a.in_stock && !b.in_stock) return -1;
-        if (!a.in_stock && b.in_stock) return 1;
-        return 0;
-    });
-    setAllProducts(sortedProducts);
-
-    const categoryMap = new Map<string, { name: string; imageUrl: string }>();
-    sortedProducts.forEach(product => {
-        if (!categoryMap.has(product.categoryKey)) {
-            categoryMap.set(product.categoryKey, {
-                name: product.category,
-                imageUrl: product.image_url!,
-            });
-        }
-    });
-
-    const uniqueCategories = Array.from(categoryMap.entries()).map(([key, { name, imageUrl }]) => ({ key, name, imageUrl }));
-    setCategories(uniqueCategories);
-
-  }, [initialProducts]);
-
-  useEffect(() => {
     setInputValue(searchQuery);
   }, [searchQuery]);
 
@@ -85,6 +68,7 @@ export default function HomePageContent({ products: initialProducts }: { product
     if (selectedCategory === 'all') {
       return [];
     }
+    // Derive subcategories from the *complete* list of products
     const categoryProducts = allProducts.filter(p => p.categoryKey === selectedCategory);
     const subCategoryMap = new Map<string, { name: string; key: string; imageUrl: string }>();
     
@@ -104,26 +88,6 @@ export default function HomePageContent({ products: initialProducts }: { product
 
     return Array.from(subCategoryMap.values());
   }, [allProducts, selectedCategory]);
-
-  const filteredProducts = useMemo(() => {
-    let products = allProducts;
-
-    if (selectedCategory !== 'all') {
-      products = products.filter(p => p.categoryKey === selectedCategory);
-    }
-
-    if (selectedSubCategory !== 'all') {
-      products = products.filter(p => p.subCategoryKey === selectedSubCategory);
-    }
-
-    if (searchQuery.length >= 2) {
-      products = products.filter(p => 
-        p.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    return products;
-  }, [allProducts, selectedCategory, selectedSubCategory, searchQuery]);
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -182,17 +146,27 @@ export default function HomePageContent({ products: initialProducts }: { product
     }, 500); 
   }
 
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-  const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    return filteredProducts.slice(start, end);
-  }, [filteredProducts, currentPage]);
+  const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
+  
+  const getTitle = () => {
+    if (selectedCategory !== 'all') {
+        const category = categories.find(c => c.key === selectedCategory);
+        if (category) {
+            if (selectedSubCategory !== 'all') {
+                const subCategory = subCategories.find(sc => sc.key === selectedSubCategory);
+                return subCategory ? `${category.name} - ${subCategory.name}` : category.name;
+            }
+            return category.name;
+        }
+    }
+    return 'Все товары';
+  }
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-1 sm:px-6 lg:px-8">
         <div className="text-center py-4">
+            <h1 className="text-4xl font-bold text-white mb-4">{getTitle()}</h1>
             <p className="text-2xl font-bold text-lime-400">Доставим за 2 часа по Тбилиси</p>
         </div>
         <div className="mb-2">
@@ -215,7 +189,7 @@ export default function HomePageContent({ products: initialProducts }: { product
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-          {paginatedProducts.map((product, idx) => {
+          {products.map((product, idx) => {
               const imageUrls = [product.image_url, ...(product.image_urls || [])].filter(url => url && url.trim() !== '');
               const uniqueImageUrls = [...new Set(imageUrls)];
               const hasMultipleImages = uniqueImageUrls.length > 1;
@@ -254,7 +228,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                             )}
                           </div>
                           <div className="p-5">
-                              <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
+                              <h3 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h3>
                               <p className="text-gray-400 text-sm mb-3">{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</p>
                                <div className="flex justify-between items-center">
                                   <p className="text-2xl font-semibold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>

@@ -4,7 +4,7 @@ import { database } from '@/lib/firebase/server';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 60; // 🔁 обновление данных каждые 60 секунд
+export const revalidate = 60;
 
 type Product = {
   id: string;
@@ -21,19 +21,14 @@ type Product = {
   subCategoryKey?: string;
 };
 
-// === 🔹 Получение данных из Firebase ===
-async function fetchProductsFromFirebase(): Promise<Product[]> {
+async function fetchAllProductsFromFirebase(): Promise<Product[]> {
   try {
     const productsRef = database.ref('products');
     const snapshot = await productsRef.once('value');
     const categoriesData = snapshot.val() || {};
 
     const allProducts: Product[] = [];
-
-    const generateKey = (name: string) => {
-      if (!name) return '';
-      return name.trim().toLowerCase().replace(/\s+/g, '-');
-    };
+    const generateKey = (name: string) => name ? name.trim().toLowerCase().replace(/\s+/g, '-') : '';
 
     Object.keys(categoriesData).forEach(categoryKey => {
       const productsInCategory = categoriesData[categoryKey];
@@ -41,31 +36,16 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
         Object.keys(productsInCategory).forEach(firebaseDocumentKey => {
           const productData = productsInCategory[firebaseDocumentKey];
           if (productData && typeof productData === 'object' && productData.title) {
-            const newProduct: Product = {
+            allProducts.push({
               ...productData,
-              id: firebaseDocumentKey, // ← Сохраняем оригинальный Firebase ключ
+              id: firebaseDocumentKey,
               categoryKey: categoryKey,
-              firebaseKey: firebaseDocumentKey, // ← Опционально, для ясности
-            };
-
-            if (productData.sub_category) {
-              newProduct.subCategoryKey = generateKey(productData.sub_category);
-            }
-
-            allProducts.push(newProduct);
+              subCategoryKey: productData.sub_category ? generateKey(productData.sub_category) : undefined,
+            });
           }
         });
       }
     });
-
-    // Сортировка: "top" и "hiking" — первые
-    allProducts.sort((a, b) => {
-      const order: Record<string, number> = { top: 1, hiking: 2 };
-      const aOrder = order[a.categoryKey] || 3;
-      const bOrder = order[b.categoryKey] || 3;
-      return aOrder - bOrder;
-    });
-
     return allProducts;
   } catch (error) {
     console.error('Ошибка при загрузке товаров:', error);
@@ -73,77 +53,125 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
   }
 }
 
-// === 🔹 SEO, Facebook (Open Graph) и Twitter ===
+// ... (generateMetadata function remains the same)
+
 export async function generateMetadata({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }): Promise<Metadata> {
-  const category = searchParams.category;
-  const baseUrl = 'https://bazariara.ge';
-  const canonicalUrl = category ? `${baseUrl}/?category=${category}` : baseUrl;
-
-  return {
-    metadataBase: new URL(baseUrl),
-    title: 'BAZARIara: Товары для дома, сада, туризма и отдыха',
-    description:
-      'Широкий ассортимент товаров: мебель, инструменты, игрушки, всё для сада, дома и активного отдыха. Быстрая доставка по Тбилиси за 2 часа!',
-    keywords: [
-      'товары для дома',
-      'сад и огород',
-      'туризм',
-      'отдых',
-      'мебель',
-      'инструменты',
-      'игрушки',
-      'доставка Тбилиси',
-      'BAZARI ARA',
-    ],
-    alternates: {
-      canonical: canonicalUrl,
-    },
-    openGraph: {
-      type: 'website',
-      locale: 'ru_RU',
-      url: canonicalUrl,
-      siteName: 'BAZARI ARA',
-      title: 'BAZARI ARA: Всё для дома, сада, туризма и отдыха',
-      description: 'Быстрая доставка по Тбилиси за 2 часа. Всё для комфорта дома и активного отдыха!',
-      images: [
-        {
-          url: 'https://i.ibb.co/Rkpg2k2d/Chat-GPT-Image-29-2025-14-40-32.png',
-          width: 1200,
-          height: 630,
-          alt: 'BAZARI ARA — интернет-магазин товаров для дома, сада и отдыха',
-        },
+    const category = searchParams.category;
+    const baseUrl = 'https://bazariara.ge';
+    const canonicalUrl = category ? `${baseUrl}/?category=${category}` : baseUrl;
+  
+    return {
+      metadataBase: new URL(baseUrl),
+      title: 'BAZARIara: Товары для дома, сада, туризма и отдыха',
+      description:
+        'Широкий ассортимент товаров: мебель, инструменты, игрушки, всё для сада, дома и активного отдыха. Быстрая доставка по Тбилиси за 2 часа!',
+      keywords: [
+        'товары для дома',
+        'сад и огород',
+        'туризм',
+        'отдых',
+        'мебель',
+        'инструменты',
+        'игрушки',
+        'доставка Тбилиси',
+        'BAZARI ARA',
       ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: 'BAZARI ARA — всё для дома и отдыха',
-      description: 'Мебель, инструменты, туризм, сад и огород. Быстрая доставка по Тбилиси!',
-      images: ['https://i.ibb.co/Rkpg2k2d/Chat-GPT-Image-29-2025-14-40-32.png'],
-    },
-    other: {
-      'og:image:width': '1200',
-      'og:image:height': '630',
-      'og:image:alt': 'BAZARI ARA — интернет-магазин товаров для дома, сада и отдыха',
-      'og:locale:alternate': 'ru_RU',
-      'fb:app_id': '1234567890', // 🔸 можно добавить свой ID Facebook App, если есть
-    },
-  };
-}
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        type: 'website',
+        locale: 'ru_RU',
+        url: canonicalUrl,
+        siteName: 'BAZARI ARA',
+        title: 'BAZARI ARA: Всё для дома, сада, туризма и отдыха',
+        description: 'Быстрая доставка по Тбилиси за 2 часа. Всё для комфорта дома и активного отдыха!',
+        images: [
+          {
+            url: 'https://i.ibb.co/Rkpg2k2d/Chat-GPT-Image-29-2025-14-40-32.png',
+            width: 1200,
+            height: 630,
+            alt: 'BAZARI ARA — интернет-магазин товаров для дома, сада и отдыха',
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: 'BAZARI ARA — всё для дома и отдыха',
+        description: 'Мебель, инструменты, туризм, сад и огород. Быстрая доставка по Тбилиси!',
+        images: ['https://i.ibb.co/Rkpg2k2d/Chat-GPT-Image-29-2025-14-40-32.png'],
+      },
+      other: {
+        'og:image:width': '1200',
+        'og:image:height': '630',
+        'og:image:alt': 'BAZARI ARA — интернет-магазин товаров для дома, сада и отдыха',
+        'og:locale:alternate': 'ru_RU',
+        'fb:app_id': '1234567890', // 🔸 можно добавить свой ID Facebook App, если есть
+      },
+    };
+  }
 
 
-// === 🔹 Главная страница ===
-export default async function HomePage() {
-  const products = await fetchProductsFromFirebase();
+export default async function HomePage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined }}) {
+  const page = parseInt(searchParams?.page as string || '1', 10);
+  const selectedCategory = searchParams?.category as string;
+  const selectedSubCategory = searchParams?.subcategory as string;
+  const searchQuery = searchParams?.search as string || '';
+
+  const allProducts = await fetchAllProductsFromFirebase();
+
+  const productsWithImages = allProducts.filter(p => p.image_url && p.image_url.trim() !== '');
+
+  // 1. Derive categories from ALL products
+  const categoryMap = new Map<string, { name: string; imageUrl: string }>();
+  productsWithImages.forEach(product => {
+      if (!categoryMap.has(product.categoryKey)) {
+          categoryMap.set(product.categoryKey, {
+              name: product.category,
+              imageUrl: product.image_url!,
+          });
+      }
+  });
+  const categories = Array.from(categoryMap.entries()).map(([key, { name, imageUrl }]) => ({ key, name, imageUrl }));
+
+  // 2. Filter products
+  let filteredProducts = productsWithImages;
+
+  if (selectedCategory) {
+    filteredProducts = filteredProducts.filter(p => p.categoryKey === selectedCategory);
+  }
+  if (selectedSubCategory) {
+    filteredProducts = filteredProducts.filter(p => p.subCategoryKey === selectedSubCategory);
+  }
+  if (searchQuery.length >= 2) {
+    filteredProducts = filteredProducts.filter(p => 
+      p.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  // 3. Sort products
+  filteredProducts.sort((a, b) => {
+    if (a.in_stock && !b.in_stock) return -1;
+    if (!a.in_stock && b.in_stock) return 1;
+    const order: Record<string, number> = { top: 1, hiking: 2 };
+    const aOrder = order[a.categoryKey] || 3;
+    const bOrder = order[b.categoryKey] || 3;
+    return aOrder - bOrder;
+  });
+
+  // 4. Paginate the final list
+  const totalProducts = filteredProducts.length;
+  const ITEMS_PER_PAGE = 20;
+  const paginatedProducts = filteredProducts.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[60vh] text-white">
-          Загрузка главной страницы...
-        </div>
-      }
-    >
-      <HomePageContent products={products} />
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh] text-white">Загрузка...</div>}>
+      <HomePageContent 
+        products={paginatedProducts} 
+        totalProducts={totalProducts} 
+        allProducts={productsWithImages} // Pass all products for subcategory derivation
+        categories={categories} 
+      />
     </Suspense>
   );
 }
