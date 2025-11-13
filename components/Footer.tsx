@@ -20,9 +20,14 @@ const Footer = () => {
             </svg>
           </a>
         </div>
-        <div className="text-center mt-4 text-s text-gray-500">
-          <p>&copy; 2025 BAZARI ARA. Тбилиси. Все права защищены.</p>
-          <Link href="/privacy-policy" className="underline">
+        <div className="text-center mt-4 text-sm text-gray-500">
+          <span>&copy; 2025 BAZARI ARA. Тбилиси. Все права защищены.</span>
+          <span className="mx-2">|</span>
+          <Link href="/returns" className="underline hover:text-lime-400 transition-colors duration-300">
+            Правила возврата
+          </Link>
+          <span className="mx-2">|</span>
+          <Link href="/privacy-policy" className="underline hover:text-lime-400 transition-colors duration-300">
             Политика конфиденциальности
           </Link>
         </div>
