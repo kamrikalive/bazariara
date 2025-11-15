@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import CategoryCarousel from '@/components/CategoryCarousel';
@@ -40,6 +40,7 @@ const ITEMS_PER_PAGE = 20;
 export default function HomePageContent({ products: initialProducts }: { products: Product[] }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [isCategoryCarouselVisible, setIsCategoryCarouselVisible] = useState(false);
   
   const router = useRouter();
   const pathname = usePathname();
@@ -205,13 +206,26 @@ export default function HomePageContent({ products: initialProducts }: { product
                 className="w-full px-4 py-2 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-500"
               />
             </div>
-            <CategoryCarousel categories={categories} selectedCategory={selectedCategory} onSelectCategory={handleCategoryChange} />
-            
-            {subCategories.length > 0 && (
-                <div className="mt-4">
-                    <CategoryCarousel categories={subCategories} selectedCategory={selectedSubCategory} onSelectCategory={handleSubCategoryChange} />
-                </div>
-            )}
+            <div className="w-full px-2 sm:px-4 mt-4">
+                <button 
+                    onClick={() => setIsCategoryCarouselVisible(!isCategoryCarouselVisible)}
+                    className="w-full flex justify-between items-center bg-gray-800 text-white py-3 px-4 rounded-lg text-left mb-4"
+                >
+                    <span className="font-semibold">{isCategoryCarouselVisible ? 'Скрыть категории' : 'Все категории'}</span>
+                    {isCategoryCarouselVisible ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
+                </button>
+
+                {isCategoryCarouselVisible && (
+                    <>
+                        <CategoryCarousel categories={categories} selectedCategory={selectedCategory} onSelectCategory={handleCategoryChange} />
+                        {subCategories.length > 0 && (
+                            <div className="mt-4">
+                                <CategoryCarousel categories={subCategories} selectedCategory={selectedSubCategory} onSelectCategory={handleSubCategoryChange} />
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
