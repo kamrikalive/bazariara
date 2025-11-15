@@ -45,7 +45,6 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
               ...productData,
               id: firebaseDocumentKey, // ← Сохраняем оригинальный Firebase ключ
               categoryKey: categoryKey,
-              firebaseKey: firebaseDocumentKey, // ← Опционально, для ясности
             };
 
             if (productData.sub_category) {
@@ -135,15 +134,82 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
 export default async function HomePage() {
   const products = await fetchProductsFromFirebase();
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        url: 'https://bazariara.ge',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: 'https://bazariara.ge/?search={search_term_string}',
+          },
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Organization',
+        name: 'BAZARIara',
+        url: 'https://bazariara.ge',
+        logo: 'https://i.ibb.co/Rkpg2k2d/Chat-GPT-Image-29-2025-14-40-32.png',
+        contactPoint: {
+          '@type': 'ContactPoint',
+          telephone: '+995591017945',
+          contactType: 'customer service',
+        },
+      },
+      {
+        '@type': 'ItemList',
+        itemListElement: products.map((product, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          item: {
+            '@type': 'Product',
+            name: product.title,
+            description: product.description || product.title,
+            image: product.image_url,
+            sku: product.id,
+            mpn: product.id,
+            brand: {
+              '@type': 'Brand',
+              name: product.category,
+            },
+            offers: {
+              '@type': 'Offer',
+              url: `https://bazariara.ge/products/${product.categoryKey}/${product.id}`,
+              priceCurrency: 'GEL',
+              price: product.price,
+              availability: product.in_stock
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
+              seller: {
+                '@type': 'Organization',
+                name: 'BAZARIara',
+              },
+            },
+          },
+        })),
+      },
+    ],
+  };
+
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[60vh] text-white">
-          Загрузка главной страницы...
-        </div>
-      }
-    >
-      <HomePageContent products={products} />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center min-h-[60vh] text-white">
+            Загрузка главной страницы...
+          </div>
+        }
+      >
+        <HomePageContent products={products} />
+      </Suspense>
+    </>
   );
 }
