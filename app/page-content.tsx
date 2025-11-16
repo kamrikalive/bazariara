@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
-import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import CategoryCarousel from '@/components/CategoryCarousel';
@@ -40,7 +40,6 @@ const ITEMS_PER_PAGE = 20;
 export default function HomePageContent({ products: initialProducts }: { products: Product[] }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [isCategoryCarouselVisible, setIsCategoryCarouselVisible] = useState(false);
   
   const router = useRouter();
   const pathname = usePathname();
@@ -189,11 +188,25 @@ export default function HomePageContent({ products: initialProducts }: { product
     const end = start + ITEMS_PER_PAGE;
     return filteredProducts.slice(start, end);
   }, [filteredProducts, currentPage]);
+  
+  const categoryName = useMemo(() => {
+    if (selectedSubCategory !== 'all') {
+      const subCategory = subCategories.find(sc => sc.key === selectedSubCategory);
+      return subCategory ? subCategory.name : 'Все товары';
+    }
+    if (selectedCategory !== 'all') {
+      const category = categories.find(c => c.key === selectedCategory);
+      return category ? category.name : 'Все товары';
+    }
+    return 'Все товары';
+  }, [selectedCategory, selectedSubCategory, categories, subCategories]);
+
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-1 sm:px-6 lg:px-8">
         <div className="text-center py-4">
+             <h1 className="text-4xl font-bold text-white mb-4">Товары для дома, сада и отдыха</h1>
             <p className="text-2xl font-bold text-lime-400">Доставим за 2 часа по Тбилиси</p>
         </div>
         <div className="mb-2">
@@ -206,28 +219,18 @@ export default function HomePageContent({ products: initialProducts }: { product
                 className="w-full px-4 py-2 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-500"
               />
             </div>
-            <div className="w-full px-2 sm:px-4 mt-4">
-                <button 
-                    onClick={() => setIsCategoryCarouselVisible(!isCategoryCarouselVisible)}
-                    className="w-full flex justify-between items-center bg-gray-800 text-white py-3 px-4 rounded-lg text-left mb-4"
-                >
-                    <span className="font-semibold">{isCategoryCarouselVisible ? 'Скрыть категории' : 'Все категории'}</span>
-                    {isCategoryCarouselVisible ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
-                </button>
-
-                {isCategoryCarouselVisible && (
-                    <>
-                        <CategoryCarousel categories={categories} selectedCategory={selectedCategory} onSelectCategory={handleCategoryChange} />
-                        {subCategories.length > 0 && (
-                            <div className="mt-4">
-                                <CategoryCarousel categories={subCategories} selectedCategory={selectedSubCategory} onSelectCategory={handleSubCategoryChange} />
-                            </div>
-                        )}
-                    </>
+            <div className="w-full px-2 sm:px-4 mt-4 hidden md:block">
+                <CategoryCarousel categories={categories} selectedCategory={selectedCategory} onSelectCategory={handleCategoryChange} />
+                {subCategories.length > 0 && (
+                    <div className="mt-4">
+                        <CategoryCarousel categories={subCategories} selectedCategory={selectedSubCategory} onSelectCategory={handleSubCategoryChange} />
+                    </div>
                 )}
             </div>
         </div>
 
+<section>
+ <h2 className="text-3xl font-bold text-white my-8">{categoryName}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
           {paginatedProducts.map((product, idx) => {
               const imageUrls = [product.image_url, ...(product.image_urls || [])].filter(url => url && url.trim() !== '');
@@ -268,7 +271,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                             )}
                           </div>
                           <div className="p-5">
-                              <h2 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h2>
+                              <h3 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h3>
                               <p className="text-gray-400 text-sm mb-3">{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</p>
                                <div className="flex justify-between items-center">
                                   <p className="text-2xl font-semibold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
@@ -285,6 +288,7 @@ export default function HomePageContent({ products: initialProducts }: { product
             })
           }
         </div>
+</section>
 
         {totalPages > 1 && (
             <div className="mt-16 flex justify-center items-center gap-4">
