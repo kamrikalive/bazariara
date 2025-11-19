@@ -5,6 +5,7 @@ import { CartProvider } from '@/contexts/CartContext';
 import { OrderProvider } from '@/contexts/OrderContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Script from 'next/script';
 
 const siteName = 'BAZARI ARA';
 const siteUrl = new URL('https://bazariara.ge');
@@ -60,7 +61,21 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
-      <head />
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-EN4C3S417X"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-EN4C3S417X');
+          `}
+        </Script>
+      </head>
       <body className="flex flex-col min-h-screen bg-gray-900">
         <OrderProvider>
           <CartProvider>
