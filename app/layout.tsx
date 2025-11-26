@@ -18,7 +18,37 @@ export const metadata: Metadata = {
     template: `%s | ${siteName}`,
   },
   description,
-  keywords: ['BAZARI ARA', 'интернет-магазин', 'товары для дома', 'товары для дачи', 'отдых', 'кемпинг', 'рыбалка', 'купить в Тбилиси', 'доставка по Тбилиси', 'Грузия'],
+  keywords: [
+    // Русский
+    'товары для дома', 'мебель', 'мягкая мебель', 'кухонная мебель', 'детская мебель',
+    'офисная мебель', 'мебель под заказ', 'шкафы', 'столы', 'стулья', 'диваны', 'кровати',
+    'сад и огород', 'садовая техника', 'инструменты для сада', 'растения', 'семена', 'цветы',
+    'горшки для растений', 'садовые аксессуары', 'грядки', 'удобрения', 'туризм', 'отдых',
+    'пляжный отдых', 'семейный отдых', 'походы', 'кемпинг', 'палатки', 'спальные мешки',
+    'туристические рюкзаки', 'туристическое снаряжение', 'игрушки', 'мягкие игрушки',
+    'конструкторы', 'развивающие игрушки', 'настольные игры', 'строительные инструменты',
+    'электроинструменты', 'ручные инструменты', 'инструменты для ремонта', 'дрели', 'шуруповерты',
+    'газ', 'баллоны газа', 'газовое оборудование', 'термобелье', 'термос', 'дождевик',
+    'доставка Тбилиси', 'онлайн заказ', 'быстрая доставка', 'доставка по Грузии', 'BAZARI ARA',
+    'онлайн магазин', 'купить мебель Тбилиси', 'купить игрушки Тбилиси', 'купить инструменты Тбилиси',
+    'садовый магазин Тбилиси', 'туристические товары Тбилиси', 'аксессуары для дома', 'декор для дома',
+    'освещение', 'ковры', 'текстиль', 'подушки', 'занавески', 'кухонные принадлежности',
+    'посуда', 'бытовая техника', 'очистка и уборка', 'интерьер',
+  
+    // English
+    'home goods', 'furniture', 'sofa', 'kitchen furniture', 'kids furniture', 'office furniture',
+    'custom furniture', 'wardrobes', 'tables', 'chairs', 'beds', 'garden and yard', 'garden tools',
+    'plants', 'seeds', 'flowers', 'flower pots', 'garden accessories', 'raised beds', 'fertilizers',
+    'tourism', 'vacation', 'beach vacation', 'family vacation', 'hiking', 'camping', 'tents',
+    'sleeping bags', 'backpacks', 'tourist gear', 'toys', 'soft toys', 'construction toys',
+    'educational toys', 'board games', 'construction tools', 'power tools', 'hand tools', 'repair tools',
+    'drills', 'screwdrivers', 'gas', 'gas cylinders', 'gas equipment', 'thermal underwear', 'thermos', 'raincoat',
+    'Tbilisi delivery', 'online order', 'fast delivery', 'delivery in Georgia', 'BAZARI ARA', 'online store',
+    'buy furniture Tbilisi', 'buy toys Tbilisi', 'buy tools Tbilisi', 'garden store Tbilisi',
+    'tourist goods Tbilisi', 'home accessories', 'home decor', 'lighting', 'carpets', 'textiles',
+    'pillows', 'curtains', 'kitchen utensils', 'tableware', 'appliances', 'cleaning', 'painting supplies',
+    'interior design'
+  ],  
   
   // --- Иконки через Metadata API ---
   icons: {
