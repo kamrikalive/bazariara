@@ -6,6 +6,8 @@ import { OrderProvider } from '@/contexts/OrderContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Script from 'next/script';
+import Snowfall from '@/components/Snowfall';
+import ChristmasGarland from '@/components/ChristmasGarland';
 
 const siteName = 'BAZARI ARA';
 const siteUrl = new URL('https://bazariara.ge');
@@ -107,6 +109,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
       </head>
       <body className="flex flex-col min-h-screen bg-gray-900">
+        <Snowfall />
+        <ChristmasGarland />
         <OrderProvider>
           <CartProvider>
             <Header />

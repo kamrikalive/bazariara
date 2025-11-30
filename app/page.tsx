@@ -57,9 +57,9 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
       }
     });
 
-    // Сортировка: "top" и "hiking" — первые
+    // Сортировка: "new-year", "top" и "hiking" — первые
     allProducts.sort((a, b) => {
-      const order: Record<string, number> = { top: 1, hiking: 2 };
+      const order: Record<string, number> = { 'new-year': 0, top: 1, hiking: 2 };
       const aOrder = order[a.categoryKey] || 3;
       const bOrder = order[b.categoryKey] || 3;
       return aOrder - bOrder;
@@ -85,6 +85,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
       'Широкий ассортимент товаров: мебель, инструменты, игрушки, всё для сада, дома и активного отдыха. Быстрая доставка по Тбилиси за 2 часа!',
       keywords: [
         // Русский
+        'новогодние товары', 'новый год', 'елки', 'гирлянды', 'елочные игрушки',
         'товары для дома', 'мебель', 'мягкая мебель', 'кухонная мебель', 'детская мебель',
         'офисная мебель', 'мебель под заказ', 'шкафы', 'столы', 'стулья', 'диваны', 'кровати',
         'сад и огород', 'садовая техника', 'инструменты для сада', 'растения', 'семена', 'цветы',
@@ -101,6 +102,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
         'посуда', 'бытовая техника', 'очистка и уборка', 'интерьер',
       
         // English
+        'new year goods', 'new year', 'christmas trees', 'garlands', 'christmas decorations',
         'home goods', 'furniture', 'sofa', 'kitchen furniture', 'kids furniture', 'office furniture',
         'custom furniture', 'wardrobes', 'tables', 'chairs', 'beds', 'garden and yard', 'garden tools',
         'plants', 'seeds', 'flowers', 'flower pots', 'garden accessories', 'raised beds', 'fertilizers',
