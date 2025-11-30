@@ -1,27 +1,40 @@
 'use client';
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const ChristmasGarland = () => {
-  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    const [lights, setLights] = useState<React.CSSProperties[]>([]);
 
-  return (
-    <div className="christmas-garland">
-      <div className="christmas-garland-light">
-        <ul>
-          {Array.from({ length: 40 }).map((_, i) => (
-            <li
-              key={i}
-              style={{
-                left: `${(i * 2.5)}%`,
-                backgroundColor: colors[i % colors.length],
-              }}
-            ></li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
+    useEffect(() => {
+        const lightElements: React.CSSProperties[] = [];
+        const colors = ['#fbbd05', '#34a853', '#ea4335', '#4285f4', '#ffffff'];
+        const lightCount = Math.floor(window.innerWidth / 35);
+
+        for (let i = 0; i < lightCount; i++) {
+            const color = colors[i % colors.length];
+            const animationDelay = `${(i * 2) / lightCount}s`;
+            const left = `${i * 35}px`;
+
+            lightElements.push({
+                background: color,
+                animationDelay,
+                left,
+                boxShadow: `0 0 15px ${color}, 0 0 25px ${color}`
+            });
+        }
+        setLights(lightElements);
+    }, []);
+
+    return (
+        <div className="christmas-garland">
+            <div className="christmas-garland-light">
+                <ul>
+                    {lights.map((style, index) => (
+                        <li key={index} style={style}></li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
 };
 
 export default ChristmasGarland;

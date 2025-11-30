@@ -2,109 +2,175 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  /* Добавляем новогодние цвета */
+  --christmas-green: #005f4c; /* Темно-зеленый для елок */
+  --christmas-red: #cc0000;   /* Красный для акцентов */
+  --christmas-gold: #ffd700;  /* Золотой/Желтый для гирлянд */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
 body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  
+  /* --- Новогодний паттерн (Елки и Шишки) --- */
+  background-color: var(--background);
+  background-image: 
+    /* Елочки */
+    radial-gradient(circle at 10% 10%, var(--christmas-green) 2px, transparent 0),
+    radial-gradient(circle at 70% 30%, var(--christmas-green) 3px, transparent 0),
+    /* Шишки */
+    radial-gradient(ellipse at 40% 60%, #8b4513 3px, transparent 0),
+    radial-gradient(ellipse at 90% 80%, #a0522d 2px, transparent 0);
+    
+  background-size: 80px 80px, 80px 80px, 80px 80px, 80px 80px; /* Размер паттерна */
+  background-repeat: repeat;
+  
+  /* Важно для позиционирования гирлянд */
+  position: relative; 
+  overflow-x: hidden; 
 }
 
-body.cart-updating a {
-  pointer-events: none;
-  opacity: 0.5;
+main, section {
+  background-color: transparent !important;
 }
 
-/* Custom scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+
+/* --- КЛЮЧЕВЫЕ КАДРЫ ДЛЯ МЕРЦАНИЯ --- */
+@keyframes blink {
+  0%, 100% { opacity: 1; text-shadow: 0 0 5px var(--christmas-gold); }
+  50% { opacity: 0.5; text-shadow: none; }
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+@keyframes flash {
+  0%, 100% { box-shadow: 0 0 10px 1px var(--christmas-gold); }
+  25% { box-shadow: 0 0 8px 1px var(--christmas-red); }
+  50% { box-shadow: 0 0 10px 1px var(--christmas-green); }
+  75% { box-shadow: 0 0 8px 1px var(--christmas-gold); }
 }
 
-::-webkit-scrollbar-thumb {
-  background-color: #a3e635;
-  border-radius: 10px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
 
-::-webkit-scrollbar-thumb:hover {
-  background-color: #82c029;
-}
-
-/* For Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #a3e635 rgba(0, 0, 0, 0.1);
-}
-
-@keyframes slide-out-width {
-  from {
-    width: 100%;
-  }
-  to {
-    width: 0%;
-  }
-}
-
-.undo-progress-bar {
-  animation: slide-out-width 5s linear forwards;
-  background-color: rgba(130, 192, 41, 0.7);
-}
-
-@keyframes fall {
-  0% {
-    transform: translateY(-100px);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-}
+/* ########################################## */
+/* --- 1. ВЕРХНЯЯ ГОРИЗОНТАЛЬНАЯ ГИРЛЯНДА --- */
+/* ########################################## */
 
 .christmas-garland {
-  position: relative;
-  height: 36px;
-  background: #333;
-  overflow: hidden;
-}
-
-.christmas-garland-light {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
+  height: 20px;
+  z-index: 100; /* Должна быть поверх контента */
+  pointer-events: none; /* Не должна мешать кликам */
+}
+
+.christmas-garland ul {
+  display: flex;
+  justify-content: space-around;
+  list-style: none;
+  padding: 0;
+  margin: 0;
   height: 100%;
 }
 
-.christmas-garland-light ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.christmas-garland-light li {
-  position: absolute;
-  top: 10px;
-  width: 12px;
-  height: 12px;
+.christmas-garland li {
+  /* Имитация лампочки */
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  animation-name: garland-light-animation;
+  background: var(--christmas-gold);
+  
+  /* Эффект свечения */
+  box-shadow: 0 0 10px 1px var(--christmas-gold);
+  
+  /* Анимация мерцания */
+  animation: flash 1.5s infinite alternate;
+}
+
+/* Смещение анимации для разных лампочек */
+.christmas-garland li:nth-child(3n + 1) {
+  background: var(--christmas-red);
   animation-duration: 2s;
-  animation-iteration-count: infinite;
+}
+.christmas-garland li:nth-child(3n + 2) {
+  background: var(--christmas-green);
+  animation-duration: 1.8s;
 }
 
-.christmas-garland-light li:nth-child(2n) {
-  animation-delay: 1s;
+
+/* ########################################## */
+/* --- 2. БОКОВЫЕ ВЕРТИКАЛЬНЫЕ ГИРЛЯНДЫ --- */
+/* ########################################## */
+
+.side-garland {
+  position: fixed;
+  top: 0;
+  width: 10px;
+  height: 100vh; /* На всю высоту */
+  z-index: 99;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly; /* Равномерное распределение */
+  padding: 10px 0;
 }
 
-@keyframes garland-light-animation {
-  0%, 100% {
-    box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+.side-garland.left {
+  left: 0;
+}
+
+.side-garland.right {
+  right: 0;
+}
+
+.side-garland .light {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--christmas-gold);
+  box-shadow: 0 0 8px 0.5px var(--christmas-gold);
+  animation: flash 2s infinite alternate;
+}
+
+/* Смещение цвета/анимации для боковых гирлянд */
+.side-garland .light:nth-child(4n + 1) {
+  background: var(--christmas-red);
+  animation-duration: 2.2s;
+}
+.side-garland .light:nth-child(4n + 2) {
+  background: var(--christmas-green);
+  animation-duration: 1.6s;
+}
+
+
+/* ########################################## */
+/* --- АДАПТАЦИЯ (МОБИЛЬНЫЕ) --- */
+/* ########################################## */
+
+@media (max-width: 768px) {
+  /* 1. Уменьшаем размер паттерна */
+  body {
+    background-size: 50px 50px, 50px 50px, 50px 50px, 50px 50px; 
   }
-  50% {
-    box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.2);
+
+  /* 2. Уменьшаем ВЕРХНЮЮ гирлянду */
+  .christmas-garland {
+    height: 15px;
+  }
+  
+  .christmas-garland li {
+    width: 6px;
+    height: 6px;
+    box-shadow: 0 0 8px 0.5px var(--christmas-gold);
   }
 }
