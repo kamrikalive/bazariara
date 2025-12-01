@@ -12,7 +12,7 @@ const SideGarlands = () => {
         <ul>
           {Array.from({ length: lightCount }).map((_, i) => {
             const color = colors[i % colors.length];
-            const animationDelay = `${Math.random() * 3}s`;
+            const animationDelay = `${(i * 0.2)}s`;
             return (
               <li key={`left-${i}`} style={{ 
                   background: color, 
@@ -29,7 +29,7 @@ const SideGarlands = () => {
         <ul>
           {Array.from({ length: lightCount }).map((_, i) => {
             const color = colors[i % colors.length];
-            const animationDelay = `${Math.random() * 3}s`;
+            const animationDelay = `${(i * 0.2)}s`;
             return (
               <li key={`right-${i}`} style={{ 
                   background: color, 
