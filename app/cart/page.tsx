@@ -160,13 +160,17 @@ export default function CartPage() {
                             <ul className="divide-y divide-gray-700/50">
                                 {cartItems.map(item => {
                                     const key = `${item.id}-${item.category}`;
+                                    const oldPrice = Math.round(item.price * 2.2);
                                     return (
                                     <li key={key} className="flex flex-col sm:flex-row justify-between items-center p-5 gap-4">
                                         <Link href={`/products/${item.categoryKey}/${item.id}`} className={`flex items-center gap-5 w-full sm:w-auto group self-start ${pendingRemoval.includes(key) ? 'pointer-events-none opacity-50' : ''}`}>
                                             <img src={item.image_url} alt={item.title} className="w-20 h-20 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"/>
                                             <div>
                                                 <h2 className="font-bold text-lg text-gray-200 group-hover:text-lime-400 transition-colors duration-300">{item.title}</h2>
-                                                <p className="text-lime-500 font-semibold mt-1">₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <p className="text-lime-500 font-semibold">₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
+                                                    <p className="text-red-500 line-through text-sm">₾{calculateDisplayPrice(oldPrice).toFixed(2)}</p>
+                                                </div>
                                             </div>
                                         </Link>
                                         
@@ -218,7 +222,7 @@ export default function CartPage() {
 
                             <div className="mt-8 flex flex-col gap-4">
                                 <Link href="/checkout" 
-                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform shadow-lg ${isCheckoutDisabled || pendingRemoval.length > 0 ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 hover:scale-105 shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40'}`}
+                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform shadow-lg ${isCheckoutDisabled || pendingRemoval.length > 0 ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}`}
                                    onClick={(e) => (isCheckoutDisabled || pendingRemoval.length > 0) && e.preventDefault()}
                                 >
                                     Перейти к оформлению

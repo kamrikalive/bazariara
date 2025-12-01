@@ -45,6 +45,8 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Product not found.</div>;
   }
 
+  const oldPrice = Math.round(product.price * 2.2);
+
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       <header className="py-12 bg-gray-800 text-center">
@@ -60,7 +62,10 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             <h1 className="text-4xl font-bold mb-4">{product.title}</h1>
             <p className="text-gray-400 mb-6 text-lg">{product.category}</p>
             <p className="text-gray-300 mb-6">{product.description}</p>
-            <p className="text-2xl font-semibold mb-6">₾{calculateDisplayPrice(product.price)}</p>
+            <div className="flex items-center mb-6">
+              <p className="text-2xl font-semibold">₾{calculateDisplayPrice(product.price)}</p>
+              <p className="text-xl text-red-500 line-through ml-4">₾{calculateDisplayPrice(oldPrice)}</p>
+            </div>
             <button className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-600 transition-colors duration-300">
               Add to Cart
             </button>

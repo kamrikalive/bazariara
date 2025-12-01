@@ -236,6 +236,7 @@ export default function HomePageContent({ products: initialProducts }: { product
               const imageUrls = [product.image_url, ...(product.image_urls || [])].filter(url => url && url.trim() !== '');
               const uniqueImageUrls = [...new Set(imageUrls)];
               const hasMultipleImages = uniqueImageUrls.length > 1;
+              const oldPrice = Math.round(product.price * 2.2);
 
               return (
                 <div 
@@ -274,7 +275,10 @@ export default function HomePageContent({ products: initialProducts }: { product
                               <h3 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h3>
                               <p className="text-gray-400 text-sm mb-3">{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</p>
                                <div className="flex justify-between items-center">
-                                  <p className="text-2xl font-semibold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
+                                   <div className="flex items-center gap-2">
+                                      <p className="text-2xl font-semibold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
+                                      <p className="text-red-500 line-through text-sm">{calculateDisplayPrice(oldPrice)} ₾</p>
+                                  </div>
                                   {product.in_stock && <span className="text-sm font-semibold text-green-400">В наличии</span>}
                               </div>
                           </div>
