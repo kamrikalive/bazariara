@@ -7,8 +7,8 @@ import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useState, useEffect, useRef } from 'react';
 
 const MIN_ORDER_AMOUNT = 30;
-const FREE_SHIPPING_THRESHOLD = 100;
-const SHIPPING_COST = 5;
+const FREE_SHIPPING_THRESHOLD = 200;
+const SHIPPING_COST = 20
 
 function CartItemQuantityInput({ item, startRemoval }: { item: ProductInCart, startRemoval: (itemId: string, category: string) => void }) {
     const { updateQuantity } = useCart();
