@@ -274,12 +274,12 @@ export default function HomePageContent({ products: initialProducts }: { product
                           <div className="p-5">
                               <h3 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h3>
                               <p className="text-gray-400 text-sm mb-3">{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</p>
-                               <div className="flex justify-between items-center">
-                                   <div className="flex items-center gap-2">
-                                      <p className="text-2xl font-semibold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
-                                      <p className="text-red-500 line-through text-sm">{calculateDisplayPrice(oldPrice)} ₾</p>
+                               <div className="flex items-center flex-wrap gap-2">
+                                   <div className="flex items-baseline gap-2 mr-auto">
+                                      <p className="text-2xl font-semibold text-lime-500 whitespace-nowrap">{calculateDisplayPrice(product.price)} ₾</p>
+                                      <p className="text-red-500 line-through text-sm whitespace-nowrap">{calculateDisplayPrice(oldPrice)} ₾</p>
                                   </div>
-                                  {product.in_stock && <span className="text-sm font-semibold text-green-400">В наличии</span>}
+                                  {product.in_stock && <span className="text-sm font-semibold text-green-400 shrink-0">В наличии</span>}
                               </div>
                           </div>
                       </Link>
