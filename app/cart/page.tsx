@@ -2,6 +2,7 @@
 
 import { useCart, ProductInCart } from '@/contexts/CartContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // Импортируем useRouter
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useState, useEffect, useRef } from 'react';
@@ -9,6 +10,11 @@ import { useState, useEffect, useRef } from 'react';
 const MIN_ORDER_AMOUNT = 30;
 const FREE_SHIPPING_THRESHOLD = 100;
 const SHIPPING_COST = 10
+
+// Simple Spinner component
+const Spinner = () => (
+    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+);
 
 function CartItemQuantityInput({ item, startRemoval }: { item: ProductInCart, startRemoval: (itemId: string, category: string) => void }) {
     const { updateQuantity } = useCart();
@@ -101,8 +107,10 @@ function CartItemQuantityInput({ item, startRemoval }: { item: ProductInCart, st
 
 export default function CartPage() {
     const { cartItems, removeFromCart, clearCart } = useCart();
+    const router = useRouter(); // Используем useRouter
     const [pendingRemoval, setPendingRemoval] = useState<string[]>([]);
     const removalTimers = useRef(new Map<string, NodeJS.Timeout>());
+    const [isNavigating, setIsNavigating] = useState(false); // Состояние для отслеживания перехода
 
     useEffect(() => {
         // Cleanup timers on component unmount
@@ -133,6 +141,12 @@ export default function CartPage() {
             setPendingRemoval(prev => prev.filter(id => id !== key));
         }
     };
+
+    const handleCheckout = () => {
+        if (isCheckoutDisabled || pendingRemoval.length > 0) return;
+        setIsNavigating(true);
+        router.push('/checkout');
+    }
 
     const subtotal = cartItems.reduce((acc, item) => acc + calculateDisplayPrice(item.price) * item.quantity, 0);
     
@@ -221,12 +235,13 @@ export default function CartPage() {
                             )}
 
                             <div className="mt-8 flex flex-col gap-4">
-                                <Link href="/checkout"
-                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg ${isCheckoutDisabled || pendingRemoval.length > 0 ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 shadow-lime-500/30 hover:shadow-xl'}`}
-                                   onClick={(e) => (isCheckoutDisabled || pendingRemoval.length > 0) && e.preventDefault()}
+                                <button 
+                                   onClick={handleCheckout}
+                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center ${isCheckoutDisabled || pendingRemoval.length > 0 || isNavigating ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 shadow-lime-500/30 hover:shadow-xl'}`}
+                                   disabled={isCheckoutDisabled || pendingRemoval.length > 0 || isNavigating}
                                 >
-                                    Перейти к оформлению
-                               </Link>
+                                    {isNavigating ? <Spinner /> : 'Перейти к оформлению'}
+                               </button>
 
                                 {isCheckoutDisabled && (
                                     <p className="text-sm text-center text-red-400 font-semibold">Минимальная сумма заказа {MIN_ORDER_AMOUNT} ₾</p>

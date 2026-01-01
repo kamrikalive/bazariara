@@ -16,6 +16,11 @@ const socialOptions = [
     { key: 'facebook', label: 'Facebook', selectedColor: 'bg-blue-600', hoverColor: 'hover:bg-blue-700' },
 ];
 
+// Simple Spinner component
+const Spinner = () => (
+    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+);
+
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
   const { addOrder } = useOrders();
@@ -260,10 +265,10 @@ export default function CheckoutPage() {
 
                 <button 
                     type="submit" 
-                    className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 disabled:opacity-50 disabled:cursor-wait"
+                    className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 disabled:opacity-50 disabled:cursor-wait flex items-center justify-center"
                     disabled={isSubmitting || checkoutItems.length === 0}
                 >
-                    {isSubmitting ? 'Обработка...' : 'Отправить заказ'}
+                    {isSubmitting ? <Spinner /> : 'Отправить заказ'}
                 </button>
             </form>
         </div>
