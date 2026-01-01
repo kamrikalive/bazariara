@@ -59,7 +59,7 @@ async function fetchProductsFromFirebase(): Promise<Product[]> {
 
     // Сортировка: "new-year", "top" и "hiking" — первые
     allProducts.sort((a, b) => {
-      const order: Record<string, number> = { newyear: 1, top: 2 };
+      const order: Record<string, number> = { top: 1, hiking: 2 };
       const aOrder = order[a.categoryKey] || 3;
       const bOrder = order[b.categoryKey] || 3;
       return aOrder - bOrder;
