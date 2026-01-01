@@ -5,10 +5,6 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  /* Добавляем новогодние цвета */
-  --christmas-green: #005f4c; /* Темно-зеленый для елок */
-  --christmas-red: #cc0000;   /* Красный для акцентов */
-  --christmas-gold: #ffd700;  /* Золотой/Желтый для гирлянд */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,18 +18,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-  
-  /* --- Новогодний паттерн (Елки и Шишки) --- */
-  background-color: var(--background);
-  background-image: 
-    radial-gradient(circle at 10% 10%, var(--christmas-green) 2px, transparent 0),
-    radial-gradient(circle at 70% 30%, var(--christmas-green) 3px, transparent 0),
-    radial-gradient(ellipse at 40% 60%, #8b4513 3px, transparent 0),
-    radial-gradient(ellipse at 90% 80%, #a0522d 2px, transparent 0);
-    
-  background-size: 80px 80px, 80px 80px, 80px 80px, 80px 80px;
-  background-repeat: repeat;
-  
   position: relative; 
   overflow-x: hidden; 
 }
@@ -42,11 +26,6 @@ main, section {
   background-color: transparent !important;
 }
 
-/* ########################################## */
-/* --- АНИМАЦИИ --- */
-/* ########################################## */
-
-/* --- Анимация падения для снега/звезд --- */
 @keyframes fall {
   from {
     transform: translateY(-10vh) rotate(0deg);
@@ -56,142 +35,12 @@ main, section {
   }
 }
 
-/* --- Анимация мерцания для звезд (ИСПРАВЛЕНО) --- */
 @keyframes twinkle {
   0%, 100% {
     opacity: 0.6;
-    text-shadow: 0 0 5px var(--christmas-gold);
   }
   50% {
     opacity: 1;
-    text-shadow: 0 0 12px #ffffff;
-  }
-}
-
-/* --- Анимация мерцания для лампочек гирлянды --- */
-@keyframes blink {
-  0%, 100% { opacity: 1; text-shadow: 0 0 5px var(--christmas-gold); }
-  50% { opacity: 0.5; text-shadow: none; }
-}
-
-@keyframes flash {
-  0%, 100% { box-shadow: 0 0 10px 2px var(--christmas-gold); }
-  25% { box-shadow: 0 0 8px 2px var(--christmas-red); }
-  50% { box-shadow: 0 0 10px 2px var(--christmas-green); }
-  75% { box-shadow: 0 0 8px 2px var(--christmas-gold); }
-}
-
-
-/* ########################################## */
-/* --- 1. ВЕРХНЯЯ ГОРИЗОНТАЛЬНАЯ ГИРЛЯНДА --- */
-/* ########################################## */
-
-.christmas-garland {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 30px;
-  z-index: 100;
-  pointer-events: none;
-}
-
-.christmas-garland ul {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  height: 100%;
-}
-
-.christmas-garland li {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--christmas-gold);
-  box-shadow: 0 0 15px 3px var(--christmas-gold);
-  animation: flash 1.5s infinite alternate;
-}
-
-.christmas-garland li:nth-child(3n + 1) {
-  background: var(--christmas-red);
-  animation-duration: 2s;
-}
-.christmas-garland li:nth-child(3n + 2) {
-  background: var(--christmas-green);
-  animation-duration: 1.8s;
-}
-
-
-/* ########################################## */
-/* --- 2. БОКОВЫЕ ВЕРТИКАЛЬНЫЕ ГИРЛЯНДЫ --- */
-/* ########################################## */
-
-.side-garland {
-  position: fixed;
-  top: 0;
-  width: 25px;
-  height: 100vh;
-  z-index: 99;
-  pointer-events: none;
-}
-
-.side-garland.left {
-  left: 0;
-}
-
-.side-garland.right {
-  right: 0;
-}
-
-.side-garland ul {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  list-style: none;
-  padding: 20px 0;
-  margin: 0;
-  height: 100%;
-  align-items: center;
-}
-
-.side-garland li {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  animation: flash 2s infinite alternate;
-}
-
-
-/* ########################################## */
-/* --- АДАПТАЦИЯ (МОБИЛЬНЫЕ) --- */
-/* ########################################## */
-
-@media (max-width: 768px) {
-  body {
-    background-size: 50px 50px, 50px 50px, 50px 50px, 50px 50px; 
-  }
-
-  .christmas-garland {
-    height: 20px;
-  }
-  
-  .christmas-garland li {
-    width: 8px;
-    height: 8px;
-    box-shadow: 0 0 10px 1px var(--christmas-gold);
-  }
-  
-  /* Боковые гирлянды теперь видны на мобильных */
-  .side-garland {
-    width: 20px;
-  }
-
-  .side-garland li {
-    width: 6px;
-    height: 6px;
   }
 }
 

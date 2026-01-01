@@ -8,8 +8,6 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Script from 'next/script';
 import Snowfall from '@/components/Snowfall';
-import ChristmasGarland from '@/components/ChristmasGarland';
-import SideGarlands from '@/components/SideGarlands';
 
 const siteName = 'BAZARI ARA';
 const siteUrl = new URL('https://bazariara.ge');
@@ -112,8 +110,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="flex flex-col min-h-screen">
         <Snowfall />
-        <ChristmasGarland />
-        <SideGarlands />
 
         <OrderProvider>
           <CartProvider>
