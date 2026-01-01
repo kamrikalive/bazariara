@@ -1,12 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import ruTranslations from '@/lib/translations/ru.json';
-import enTranslations from '@/lib/translations/en.json';
+import { translations } from '@/lib/translations';
 
 type Language = 'ru' | 'en';
 
-type Translations = typeof ruTranslations;
 
 interface LanguageContextType {
   language: Language;
@@ -45,9 +43,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [language, isClient]);
 
   const getTranslation = (key: string, params?: Record<string, string | number>): string => {
-    const translations = language === 'en' ? enTranslations : ruTranslations;
+    const currentTranslations = translations[language];
     const keys = key.split('.');
-    let value: any = translations;
+    let value: any = currentTranslations;
     
     for (const k of keys) {
       value = value?.[k];
