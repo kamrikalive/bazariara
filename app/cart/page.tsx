@@ -7,8 +7,8 @@ import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useState, useEffect, useRef } from 'react';
 
 const MIN_ORDER_AMOUNT = 30;
-const FREE_SHIPPING_THRESHOLD = 200;
-const SHIPPING_COST = 20
+const FREE_SHIPPING_THRESHOLD = 100;
+const SHIPPING_COST = 10
 
 function CartItemQuantityInput({ item, startRemoval }: { item: ProductInCart, startRemoval: (itemId: string, category: string) => void }) {
     const { updateQuantity } = useCart();
@@ -221,8 +221,8 @@ export default function CartPage() {
                             )}
 
                             <div className="mt-8 flex flex-col gap-4">
-                                <Link href="/checkout" 
-                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform shadow-lg ${isCheckoutDisabled || pendingRemoval.length > 0 ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}`}
+                                <Link href="/checkout"
+                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg ${isCheckoutDisabled || pendingRemoval.length > 0 ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 shadow-lime-500/30 hover:shadow-xl'}`}
                                    onClick={(e) => (isCheckoutDisabled || pendingRemoval.length > 0) && e.preventDefault()}
                                 >
                                     Перейти к оформлению

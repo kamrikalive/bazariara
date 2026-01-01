@@ -194,3 +194,17 @@ main, section {
     height: 6px;
   }
 }
+
+@keyframes shrink-width {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.undo-progress-bar {
+  background-color: rgba(239, 68, 68, 0.5);
+  animation: shrink-width 5s linear forwards;
+}
