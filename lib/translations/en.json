@@ -1,0 +1,90 @@
+{
+  "common": {
+    "categories": "Categories",
+    "all": "All",
+    "tbilisi": "Tbilisi",
+    "allRightsReserved": "All rights reserved"
+  },
+  "header": {
+    "title": "BAZARI ARA"
+  },
+  "footer": {
+    "copyright": "© 2025 BAZARI ARA. Tbilisi. All rights reserved.",
+    "returns": "Returns Policy",
+    "privacy": "Privacy Policy"
+  },
+  "cart": {
+    "title": "Your Cart",
+    "empty": "Your cart is currently empty.",
+    "startShopping": "Start Shopping",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "free": "FREE",
+    "total": "Total",
+    "addMoreForFreeShipping": "Add ₾{amount} more for free shipping.",
+    "backToProducts": "Back to Products",
+    "minOrderAmount": "Minimum order amount {amount} ₾",
+    "proceedToCheckout": "Proceed to Checkout",
+    "clearCart": "Clear Cart",
+    "restore": "Restore"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "yourOrder": "Your Order ({count} items)",
+    "empty": "Your cart is empty.",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "free": "FREE",
+    "total": "Total",
+    "contactDetails": "Contact Details",
+    "contactHint": "Please provide your name and at least one contact method: phone or/and social media",
+    "name": "Name",
+    "phone": "Phone Number (Georgia)",
+    "phonePlaceholder": "555 123 456",
+    "socialNetworks": "Social Networks",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp",
+    "facebook": "Facebook",
+    "telegramPlaceholder": "@username",
+    "whatsappPlaceholder": "Phone number",
+    "profileLinkPlaceholder": "Profile link",
+    "submitOrder": "Submit Order",
+    "errorContactRequired": "Please provide your name and at least one contact: phone or social media.",
+    "errorEmptyCart": "Your cart is empty.",
+    "errorOrderFailed": "Failed to place order."
+  },
+  "returns": {
+    "title": "Returns Policy",
+    "subtitle": "We value your trust and strive to make the purchasing process as transparent and convenient as possible.",
+    "returnPeriod": "Return Period",
+    "returnPeriodText": "You can return items within 7 days of purchase.",
+    "itemCondition": "Item Condition",
+    "itemConditionText": "Items must be returned in perfect, new condition.",
+    "packaging": "Packaging Integrity",
+    "packagingText": "Original, undamaged box and complete packaging must be included.",
+    "importantNote": "Important Note",
+    "importantNoteText": "Please carefully inspect items for mechanical damage or incomplete items (defects) immediately upon receiving your order."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "intro": "Welcome to BAZARI ARA! We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our website.",
+    "section1Title": "1. Information Collection",
+    "section1Text": "We collect information that you provide to us directly, such as when you create an account, place an order, or contact customer service. This information may include your name, email address, phone number, and delivery address.",
+    "section2Title": "2. Information Use",
+    "section2Text": "We use the collected information to:",
+    "section2Item1": "Process and fulfill your orders.",
+    "section2Item2": "Improve our website and services.",
+    "section2Item3": "Send you updates, promotional materials, and other information related to our services.",
+    "section2Item4": "Respond to your inquiries and provide support.",
+    "section3Title": "3. Data Storage and Security",
+    "section3Text": "We take reasonable measures to protect your personal information from unauthorized access, use, or disclosure. Your data is stored on secure servers, and we use encryption to protect sensitive information.",
+    "section4Title": "4. Disclosure to Third Parties",
+    "section4Text": "We do not sell, trade, or transfer your personal information to third parties without your consent, except as required by law or to fulfill our obligations to you (for example, sharing data with delivery services).",
+    "section5Title": "5. Your Rights",
+    "section5Text": "You have the right to access, correct, or delete your personal information. You can also opt-out of receiving our marketing messages at any time.",
+    "section6Title": "6. Policy Changes",
+    "section6Text": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page. We recommend reviewing this page periodically for the latest information.",
+    "contact": "If you have any questions about this Privacy Policy, please contact us."
+  }
+}

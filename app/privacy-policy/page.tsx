@@ -1,45 +1,43 @@
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Политика конфиденциальности | BAZARI ARA',
-  description: 'Ознакомьтесь с политикой конфиденциальности интернет-магазина BAZARI ARA. Мы ценим вашу приватность и защищаем ваши данные.',
-};
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PrivacyPolicyPage() {
+  const { t } = useLanguage();
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="bg-gray-800 rounded-lg shadow-xl p-6 md:p-8 lg:p-10 max-w-4xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl font-bold text-lime-400 mb-6">Политика конфиденциальности</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-lime-400 mb-6">{t('privacy.title')}</h1>
           
           <div className="space-y-4 text-gray-300">
-            <p>Добро пожаловать в BAZARI ARA! Мы ценим вашу конфиденциальность и стремимся защищать ваши личные данные. Настоящая Политика конфиденциальности объясняет, как мы собираем, используем, раскрываем и защищаем вашу информацию при использовании нашего веб-сайта.</p>
+            <p>{t('privacy.intro')}</p>
 
-            <h2 className="text-2xl font-semibold text-lime-300 pt-4">1. Сбор информации</h2>
-            <p>Мы собираем информацию, которую вы нам предоставляете напрямую, например, при создании учетной записи, оформлении заказа или обращении в службу поддержки. Эта информация может включать ваше имя, адрес электронной почты, номер телефона и адрес доставки.</p>
+            <h2 className="text-2xl font-semibold text-lime-300 pt-4">{t('privacy.section1Title')}</h2>
+            <p>{t('privacy.section1Text')}</p>
 
-            <h2 className="text-2xl font-semibold text-lime-300 pt-4">2. Использование информации</h2>
-            <p>Мы используем собранную информацию для:</p>
+            <h2 className="text-2xl font-semibold text-lime-300 pt-4">{t('privacy.section2Title')}</h2>
+            <p>{t('privacy.section2Text')}</p>
             <ul className="list-disc list-inside pl-4 space-y-2">
-              <li>Обработки и выполнения ваших заказов.</li>
-              <li>Улучшения нашего веб-сайта и услуг.</li>
-              <li>Отправки вам обновлений, рекламных материалов и другой информации, связанной с нашими услугами.</li>
-              <li>Ответов на ваши запросы и оказания поддержки.</li>
+              <li>{t('privacy.section2Item1')}</li>
+              <li>{t('privacy.section2Item2')}</li>
+              <li>{t('privacy.section2Item3')}</li>
+              <li>{t('privacy.section2Item4')}</li>
             </ul>
 
-            <h2 className="text-2xl font-semibold text-lime-300 pt-4">3. Хранение и безопасность данных</h2>
-            <p>Мы принимаем разумные меры для защиты вашей личной информации от несанкционированного доступа, использования или раскрытия. Ваши данные хранятся на защищенных серверах, и мы используем шифрование для защиты конфиденциальной информации.</p>
+            <h2 className="text-2xl font-semibold text-lime-300 pt-4">{t('privacy.section3Title')}</h2>
+            <p>{t('privacy.section3Text')}</p>
 
-            <h2 className="text-2xl font-semibold text-lime-300 pt-4">4. Раскрытие информации третьим лицам</h2>
-            <p>Мы не продаем, не обмениваем и не передаем вашу личную информацию третьим лицам без вашего согласия, за исключением случаев, предусмотренных законодательством, или для выполнения наших обязательств перед вами (например, передача данных службе доставки).</p>
+            <h2 className="text-2xl font-semibold text-lime-300 pt-4">{t('privacy.section4Title')}</h2>
+            <p>{t('privacy.section4Text')}</p>
 
-            <h2 className="text-2xl font-semibold text-lime-300 pt-4">5. Ваши права</h2>
-            <p>Вы имеете право на доступ, исправление или удаление вашей личной информации. Вы также можете отказаться от получения наших маркетинговых сообщений в любое время.</p>
+            <h2 className="text-2xl font-semibold text-lime-300 pt-4">{t('privacy.section5Title')}</h2>
+            <p>{t('privacy.section5Text')}</p>
 
-            <h2 className="text-2xl font-semibold text-lime-300 pt-4">6. Изменения в политике</h2>
-            <p>Мы можем время от времени обновлять настоящую Политику конфиденциальности. Мы уведомим вас о любых изменениях, опубликовав новую политику на этой странице. Рекомендуется периодически просматривать эту страницу для получения актуальной информации.</p>
+            <h2 className="text-2xl font-semibold text-lime-300 pt-4">{t('privacy.section6Title')}</h2>
+            <p>{t('privacy.section6Text')}</p>
 
-            <p className="pt-6">Если у вас есть какие-либо вопросы относительно этой Политики конфиденциальности, вы можете связаться с нами.</p>
+            <p className="pt-6">{t('privacy.contact')}</p>
           </div>
         </div>
       </main>

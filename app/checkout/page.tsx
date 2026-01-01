@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useOrders } from '@/contexts/OrderContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { handlePlaceOrder } from './actions';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
@@ -10,10 +11,10 @@ import { calculateDisplayPrice } from '@/lib/priceLogic';
 const FREE_SHIPPING_THRESHOLD = 100;
 const SHIPPING_COST = 5;
 
-const socialOptions = [
-    { key: 'telegram', label: 'Telegram', selectedColor: 'bg-sky-500', hoverColor: 'hover:bg-sky-600' },
-    { key: 'whatsapp', label: 'WhatsApp', selectedColor: 'bg-green-500', hoverColor: 'hover:bg-green-600' },
-    { key: 'facebook', label: 'Facebook', selectedColor: 'bg-blue-600', hoverColor: 'hover:bg-blue-700' },
+const getSocialOptions = (t: (key: string) => string) => [
+    { key: 'telegram', label: t('checkout.telegram'), selectedColor: 'bg-sky-500', hoverColor: 'hover:bg-sky-600' },
+    { key: 'whatsapp', label: t('checkout.whatsapp'), selectedColor: 'bg-green-500', hoverColor: 'hover:bg-green-600' },
+    { key: 'facebook', label: t('checkout.facebook'), selectedColor: 'bg-blue-600', hoverColor: 'hover:bg-blue-700' },
 ];
 
 // Simple Spinner component
@@ -24,6 +25,7 @@ const Spinner = () => (
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
   const { addOrder } = useOrders();
+  const { t } = useLanguage();
   const router = useRouter();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -51,6 +53,7 @@ export default function CheckoutPage() {
   const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
   const total = subtotal + shippingCost;
   const cartCount = checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
+  const socialOptions = getSocialOptions(t);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -82,13 +85,13 @@ export default function CheckoutPage() {
     const socialContactProvided = selectedSocial.some(p => socialMedia[p as keyof typeof socialMedia]);
 
     if (!name || (!phone && !socialContactProvided)) {
-      setError('Укажите имя и хотя бы один контакт: телефон или соцсеть.');
+      setError(t('checkout.errorContactRequired'));
       setIsSubmitting(false);
       return;
     }
 
     if (checkoutItems.length === 0) {
-        setError('Ваша корзина пуста.');
+        setError(t('checkout.errorEmptyCart'));
         setIsSubmitting(false);
         return;
     }
@@ -127,7 +130,7 @@ export default function CheckoutPage() {
         clearCart();
         router.push('/order-success');
       } else {
-        throw new Error(result.message || 'Не удалось разместить заказ.');
+        throw new Error(result.message || t('checkout.errorOrderFailed'));
       }
     } catch (err: any) {
       setError(err.message);
@@ -139,10 +142,10 @@ export default function CheckoutPage() {
   return (
     <div className="bg-gray-900 min-h-screen text-white p-4 md:p-12">
       <main className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center text-lime-400">Оформление заказа</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center text-lime-400">{t('checkout.title')}</h1>
         
         <div className="bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Ваш заказ ({cartCount} поз.)</h2>
+          <h2 className="text-2xl font-semibold mb-4">{t('checkout.yourOrder', { count: cartCount })}</h2>
           {checkoutItems.length > 0 ? (
             <ul className="divide-y divide-gray-700">
               {checkoutItems.map((item, idx) => (
@@ -159,34 +162,34 @@ export default function CheckoutPage() {
               ))}
             </ul>
           ) : (
-            <p className="text-center text-gray-400">Ваша корзина пуста.</p>
+            <p className="text-center text-gray-400">{t('checkout.empty')}</p>
           )}
            <div className="mt-6 pt-4 border-t border-gray-700">
               <div className="flex justify-between text-gray-400 mb-2">
-                <span>Подытог</span>
+                <span>{t('checkout.subtotal')}</span>
                 <span>₾{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-400 mb-4">
-                <span>Доставка</span>
+                <span>{t('checkout.shipping')}</span>
                 {subtotal >= FREE_SHIPPING_THRESHOLD ? (
-                  <span className="font-semibold text-lime-500">БЕСПЛАТНО</span>
+                  <span className="font-semibold text-lime-500">{t('checkout.free')}</span>
                 ) : (
                   <span>₾{shippingCost.toFixed(2)}</span>
                 )}
               </div>
               <div className="flex justify-between font-bold text-2xl">
-                <span>Итого</span>
+                <span>{t('checkout.total')}</span>
                 <span>₾{total.toFixed(2)}</span>
               </div>
             </div>
         </div>
 
         <div className="bg-gray-800 rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-semibold mb-2">Контактные данные</h2>
-            <p className="text-sm text-gray-400 mb-6">Укажите имя и хотя бы один контакт: телефон или/и соцсеть</p>
+            <h2 className="text-2xl font-semibold mb-2">{t('checkout.contactDetails')}</h2>
+            <p className="text-sm text-gray-400 mb-6">{t('checkout.contactHint')}</p>
             <form onSubmit={handleSubmit}>
                 <div className="mb-6">
-                    <label htmlFor="name" className="block text-gray-300 mb-2 font-medium">Имя</label>
+                    <label htmlFor="name" className="block text-gray-300 mb-2 font-medium">{t('checkout.name')}</label>
                     <input 
                         type="text" 
                         id="name"
@@ -198,7 +201,7 @@ export default function CheckoutPage() {
                 </div>
                 
                 <div className="mb-6">
-                    <label htmlFor="phone" className="block text-gray-300 mb-2 font-medium">Номер телефона (Грузия)</label>
+                    <label htmlFor="phone" className="block text-gray-300 mb-2 font-medium">{t('checkout.phone')}</label>
                     <div className="flex items-center bg-gray-700 border border-gray-600 rounded-lg focus-within:ring-2 focus-within:ring-lime-500 transition-all duration-300">
                         <div className="flex items-center pl-4 pr-3 pointer-events-none">
                             <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f1ec-1f1ea.png" alt="Georgia Flag" className="w-6 h-6 mr-2"/>
@@ -210,14 +213,14 @@ export default function CheckoutPage() {
                             value={phone}
                             onChange={handlePhoneChange}
                             className="flex-1 bg-transparent px-4 py-3 text-white placeholder-gray-400 focus:outline-none"
-                            placeholder="555 123 456"
+                            placeholder={t('checkout.phonePlaceholder')}
                             maxLength={9}
                         />
                     </div>
                 </div>
 
                 <div className="mb-6">
-                    <label className="block text-gray-300 mb-4 font-medium text-center">Соцсети для связи</label>
+                    <label className="block text-gray-300 mb-4 font-medium text-center">{t('checkout.socialNetworks')}</label>
                     <div className="flex justify-center flex-wrap gap-3 mb-4">
                         {socialOptions.map(({ key, label, selectedColor, hoverColor }) => {
                             const isSelected = selectedSocial.includes(key);
@@ -252,9 +255,9 @@ export default function CheckoutPage() {
                                 onChange={(e) => handleSocialMediaInputChange(p, e.target.value)}
                                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lime-500 transition-all duration-300"
                                 placeholder={
-                                    p === 'telegram' ? '@username' :
-                                    p === 'whatsapp' ? 'Номер телефона' :
-                                    'Ссылка на профиль'
+                                    p === 'telegram' ? t('checkout.telegramPlaceholder') :
+                                    p === 'whatsapp' ? t('checkout.whatsappPlaceholder') :
+                                    t('checkout.profileLinkPlaceholder')
                                 }
                             />
                         </div>
@@ -268,7 +271,7 @@ export default function CheckoutPage() {
                     className="w-full bg-lime-500 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 disabled:opacity-50 disabled:cursor-wait flex items-center justify-center"
                     disabled={isSubmitting || checkoutItems.length === 0}
                 >
-                    {isSubmitting ? <Spinner /> : 'Отправить заказ'}
+                    {isSubmitting ? <Spinner /> : t('checkout.submitOrder')}
                 </button>
             </form>
         </div>

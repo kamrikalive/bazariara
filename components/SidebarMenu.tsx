@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { database } from '@/lib/firebaseClient';
 import { ref, get } from 'firebase/database';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Иконка для категории
 const CategoryIcon = () => (
@@ -42,7 +43,7 @@ async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
     const snapshot = await get(productsRef);
     const productsData = snapshot.val();
 
-    if (!productsData) return [{ name: 'Все', key: 'all', count: 0, subCategories: [] }];
+    if (!productsData) return [{ name: '', key: 'all', count: 0, subCategories: [] }];
 
     const categories: CategoryInfo[] = [];
     let totalProducts = 0;
@@ -78,12 +79,13 @@ async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
     }
     
     categories.sort((a, b) => a.name.localeCompare(b.name));
-    categories.unshift({ name: 'Все', key: 'all', count: totalProducts, subCategories: [] });
+    categories.unshift({ name: '', key: 'all', count: totalProducts, subCategories: [] });
     
     return categories;
 }
 
 export default function SidebarMenu() {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
@@ -154,7 +156,7 @@ export default function SidebarMenu() {
             <XMarkIcon className="h-7 w-7" />
           </button>
         </div>
-        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500 mb-8">Категории</h2>
+        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500 mb-8">{t('common.categories')}</h2>
         <nav>
           <ul>
             {categories.map(category => (
@@ -170,7 +172,7 @@ export default function SidebarMenu() {
                             className="flex items-center flex-grow"
                         > 
                             <CategoryIcon />
-                            <span>{category.name}</span>
+                            <span>{category.key === 'all' ? t('common.all') : category.name}</span>
                         </Link>
                         <div className="flex items-center">
                             <span className="text-sm font-mono bg-lime-500/20 text-lime-300 rounded-full px-2 py-0.5">{category.count}</span>

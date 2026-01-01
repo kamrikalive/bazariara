@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useOrders } from '@/contexts/OrderContext';
-import { ShoppingCartIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { ShoppingCartIcon, ArchiveBoxIcon, GlobeAltIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import SidebarMenu from './SidebarMenu';
 
 export default function Header() {
     const { cartItems } = useCart();
     const { orders } = useOrders();
+    const { language, setLanguage } = useLanguage();
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -21,6 +23,10 @@ export default function Header() {
     const totalPrice = cartItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
     const orderCount = orders.length;
 
+    const toggleLanguage = () => {
+        setLanguage(language === 'ru' ? 'en' : 'ru');
+    };
+
     return (
         <header className="bg-gray-800 p-4 shadow-md sticky top-0 z-20">
             <div className="container mx-auto flex justify-between items-center">
@@ -30,9 +36,17 @@ export default function Header() {
                         BAZARI ARA
                     </Link>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4">
                     {isClient && (
                         <>
+                            <button
+                                onClick={toggleLanguage}
+                                className="flex items-center gap-2 text-white hover:text-lime-400 transition-colors duration-300 px-3 py-2 rounded-lg hover:bg-gray-700"
+                                aria-label="Switch language"
+                            >
+                                <GlobeAltIcon className="h-6 w-6" />
+                                <span className="font-semibold text-sm uppercase">{language === 'ru' ? 'EN' : 'RU'}</span>
+                            </button>
                             <Link href="/orders" className="relative flex items-center text-white hover:text-lime-400 transition-colors duration-300">
                                 <ArchiveBoxIcon className="h-8 w-8" />
                                 {orderCount > 0 && (

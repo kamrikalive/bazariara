@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 import { CartProvider } from '@/contexts/CartContext';
 import { OrderProvider } from '@/contexts/OrderContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Script from 'next/script';
@@ -111,13 +112,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex flex-col min-h-screen">
         <Snowfall />
 
-        <OrderProvider>
-          <CartProvider>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-          </CartProvider>
-        </OrderProvider>
+        <LanguageProvider>
+          <OrderProvider>
+            <CartProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </CartProvider>
+          </OrderProvider>
+        </LanguageProvider>
         <Analytics />
       </body>
     </html>

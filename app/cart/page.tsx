@@ -1,6 +1,7 @@
 'use client';
 
 import { useCart, ProductInCart } from '@/contexts/CartContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
@@ -107,6 +108,7 @@ function CartItemQuantityInput({ item, startRemoval }: { item: ProductInCart, st
 
 export default function CartPage() {
     const { cartItems, removeFromCart, clearCart } = useCart();
+    const { t } = useLanguage();
     const router = useRouter();
     const [pendingRemoval, setPendingRemoval] = useState<string[]>([]);
     const removalTimers = useRef(new Map<string, NodeJS.Timeout>());
@@ -157,14 +159,14 @@ export default function CartPage() {
         <div className="bg-gray-900 min-h-screen text-white">
             <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
                 <h1 className="text-4xl font-extrabold text-center mb-10 text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">
-                    Ваша корзина
+                    {t('cart.title')}
                 </h1>
 
                 {cartItems.length === 0 && pendingRemoval.length === 0 ? (
                     <div className="text-center bg-gray-800/50 rounded-xl p-12 shadow-2xl shadow-black/20">
-                        <p className="text-2xl font-semibold mb-6 text-gray-300">Ваша корзина пока пуста.</p>
+                        <p className="text-2xl font-semibold mb-6 text-gray-300">{t('cart.empty')}</p>
                         <Link href="/" className="bg-lime-500 text-gray-900 font-bold py-3 px-8 rounded-full hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40">
-                            Начать покупки
+                            {t('cart.startShopping')}
                         </Link>
                     </div>
                 ) : (
@@ -192,7 +194,7 @@ export default function CartPage() {
                                                 <div className="relative h-10 font-medium rounded-xl bg-gray-800/80 border border-transparent shadow-inner flex items-center justify-center overflow-hidden w-[116px]">
                                                     <div className="undo-progress-bar absolute top-0 left-0 h-full"></div>
                                                     <button onClick={() => cancelRemoval(item.id, item.category)} className="text-white font-bold z-10">
-                                                        Вернуть
+                                                        {t('cart.restore')}
                                                     </button>
                                                 </div>
                                             ) : (
@@ -211,26 +213,26 @@ export default function CartPage() {
 
                         {/* Order Summary */}
                         <div className="lg:col-span-1 bg-gray-800/60 rounded-xl shadow-xl p-6 backdrop-blur-sm top-20 sticky">
-                           <h2 className="text-2xl font-bold border-b border-gray-700 pb-4 mb-4">Сумма заказа</h2>
+                           <h2 className="text-2xl font-bold border-b border-gray-700 pb-4 mb-4">{t('cart.orderSummary')}</h2>
                             <div className="flex justify-between mb-2 text-gray-300">
-                                <span>Подытог</span>
+                                <span>{t('cart.subtotal')}</span>
                                 <span>₾{subtotal.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between mb-4 text-gray-300">
-                                <span>Доставка</span>
+                                <span>{t('cart.shipping')}</span>
                                 {subtotal >= FREE_SHIPPING_THRESHOLD ? (
-                                    <span className="font-semibold text-lime-500">БЕСПЛАТНО</span>
+                                    <span className="font-semibold text-lime-500">{t('cart.free')}</span>
                                 ) : (
                                     <span>₾{shippingCost.toFixed(2)}</span>
                                 )}
                             </div>
                             <div className="flex justify-between font-extrabold text-2xl border-t border-gray-700 pt-4">
-                                <span>Итог</span>
+                                <span>{t('cart.total')}</span>
                                 <span>₾{total.toFixed(2)}</span>
                             </div>
 
                             {subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD && (
-                                <p className="text-sm text-center text-gray-400 mt-4 bg-gray-700/50 p-2 rounded-lg">Добавьте товаров еще на ₾{(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)}, чтобы доставка была бесплатной.</p>
+                                <p className="text-sm text-center text-gray-400 mt-4 bg-gray-700/50 p-2 rounded-lg">{t('cart.addMoreForFreeShipping', { amount: (FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2) })}</p>
                             )}
 
                             <div className="mt-8 flex flex-col gap-4">
@@ -239,10 +241,10 @@ export default function CartPage() {
                                         <Link href="/"
                                             className="w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg bg-lime-500 text-gray-900 hover:bg-lime-400 shadow-lime-500/30 hover:shadow-xl"
                                         >
-                                            Вернуться к товарам
+                                            {t('cart.backToProducts')}
                                         </Link>
                                         {subtotal > 0 && (
-                                            <p className="text-sm text-center text-red-400 font-semibold">Минимальная сумма заказа {MIN_ORDER_AMOUNT} ₾</p>
+                                            <p className="text-sm text-center text-red-400 font-semibold">{t('cart.minOrderAmount', { amount: MIN_ORDER_AMOUNT })}</p>
                                         )}
                                     </>
                                 ) : (
@@ -251,12 +253,12 @@ export default function CartPage() {
                                         className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center ${pendingRemoval.length > 0 || isNavigating ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 shadow-lime-500/30 hover:shadow-xl'}`}
                                         disabled={pendingRemoval.length > 0 || isNavigating}
                                     >
-                                        {isNavigating ? <Spinner /> : 'Перейти к оформлению'}
+                                        {isNavigating ? <Spinner /> : t('cart.proceedToCheckout')}
                                     </button>
                                 )}
 
                                 <button onClick={clearCart} className="w-full text-center bg-gray-700 text-gray-300 font-semibold py-2 px-6 rounded-lg hover:bg-red-600 hover:text-white transition-colors duration-300">
-                                    Очистить корзину
+                                    {t('cart.clearCart')}
                                 </button>
                             </div>
                         </div>
