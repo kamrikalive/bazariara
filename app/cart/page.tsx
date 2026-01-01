@@ -2,7 +2,7 @@
 
 import { useCart, ProductInCart } from '@/contexts/CartContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Импортируем useRouter
+import { useRouter } from 'next/navigation';
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useState, useEffect, useRef } from 'react';
@@ -107,10 +107,10 @@ function CartItemQuantityInput({ item, startRemoval }: { item: ProductInCart, st
 
 export default function CartPage() {
     const { cartItems, removeFromCart, clearCart } = useCart();
-    const router = useRouter(); // Используем useRouter
+    const router = useRouter();
     const [pendingRemoval, setPendingRemoval] = useState<string[]>([]);
     const removalTimers = useRef(new Map<string, NodeJS.Timeout>());
-    const [isNavigating, setIsNavigating] = useState(false); // Состояние для отслеживания перехода
+    const [isNavigating, setIsNavigating] = useState(false);
 
     useEffect(() => {
         // Cleanup timers on component unmount
@@ -121,7 +121,6 @@ export default function CartPage() {
 
     const startRemoval = (itemId: string, category: string) => {
         const key = `${itemId}-${category}`;
-        // Don't start a new timer if one is already running
         if (removalTimers.current.has(key)) return;
 
         setPendingRemoval(prev => [...prev, key]);
@@ -235,16 +234,25 @@ export default function CartPage() {
                             )}
 
                             <div className="mt-8 flex flex-col gap-4">
-                                <button 
-                                   onClick={handleCheckout}
-                                   className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center ${isCheckoutDisabled || pendingRemoval.length > 0 || isNavigating ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 shadow-lime-500/30 hover:shadow-xl'}`}
-                                   disabled={isCheckoutDisabled || pendingRemoval.length > 0 || isNavigating}
-                                >
-                                    {isNavigating ? <Spinner /> : 'Перейти к оформлению'}
-                               </button>
-
-                                {isCheckoutDisabled && (
-                                    <p className="text-sm text-center text-red-400 font-semibold">Минимальная сумма заказа {MIN_ORDER_AMOUNT} ₾</p>
+                                {isCheckoutDisabled ? (
+                                    <>
+                                        <Link href="/"
+                                            className="w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg bg-lime-500 text-gray-900 hover:bg-lime-400 shadow-lime-500/30 hover:shadow-xl"
+                                        >
+                                            Вернуться к товарам
+                                        </Link>
+                                        {subtotal > 0 && (
+                                            <p className="text-sm text-center text-red-400 font-semibold">Минимальная сумма заказа {MIN_ORDER_AMOUNT} ₾</p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <button 
+                                        onClick={handleCheckout}
+                                        className={`w-full text-center font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center ${pendingRemoval.length > 0 || isNavigating ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-lime-500 text-gray-900 hover:bg-lime-400 shadow-lime-500/30 hover:shadow-xl'}`}
+                                        disabled={pendingRemoval.length > 0 || isNavigating}
+                                    >
+                                        {isNavigating ? <Spinner /> : 'Перейти к оформлению'}
+                                    </button>
                                 )}
 
                                 <button onClick={clearCart} className="w-full text-center bg-gray-700 text-gray-300 font-semibold py-2 px-6 rounded-lg hover:bg-red-600 hover:text-white transition-colors duration-300">
