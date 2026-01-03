@@ -86,5 +86,26 @@
     "section6Title": "6. Policy Changes",
     "section6Text": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page. We recommend reviewing this page periodically for the latest information.",
     "contact": "If you have any questions about this Privacy Policy, please contact us."
+  },
+  "home": {
+    "title": "Home, Garden & Leisure Products",
+    "delivery": "Delivery within 2 hours in Tbilisi",
+    "searchPlaceholder": "Search by name...",
+    "allProducts": "All Products",
+    "inStock": "In Stock",
+    "page": "Page {current} of {total}",
+    "photo": "photo {number}",
+    "loading": "Loading home page..."
+  },
+  "product": {
+    "backToProducts": "Back to Products",
+    "inStock": "In Stock",
+    "inCart": "In Cart:",
+    "addToCart": "Add to Cart",
+    "relatedProducts": "Frequently Bought Together:",
+    "photo": "photo {number}",
+    "notFound": "Product not found.",
+    "notFoundTitle": "Product not found — BAZARI ARA",
+    "notFoundDescription": "The requested product does not exist or has been removed."
   }
 }

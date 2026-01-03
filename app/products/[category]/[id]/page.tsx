@@ -2,6 +2,7 @@ import { database } from '@/lib/firebase/server';
 import ProductDetailClient from './client-page';
 import { Metadata } from 'next';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
+import { translations } from '@/lib/translations';
 
 // === 🔸 Тип товара ===
 type Product = {
@@ -39,14 +40,17 @@ async function getProduct(category: string, id: string): Promise<Product | null>
 // === 🔸 Мета-данные для SEO, Facebook и Twitter ===
 export async function generateMetadata({ params }: { params: { category: string; id: string } }): Promise<Metadata> {
   const product = await getProduct(params.category, params.id);
+  
+  // Default to Russian for metadata (SEO purposes)
+  const t = translations.ru;
 
   if (!product) {
     return {
-      title: 'Товар не найден — BAZARI ARA',
-      description: 'Запрошенный товар не существует или был удалён.',
+      title: t.product.notFoundTitle,
+      description: t.product.notFoundDescription,
       openGraph: {
-        title: 'Товар не найден',
-        description: 'Запрошенный товар не существует или был удалён.',
+        title: t.product.notFoundTitle,
+        description: t.product.notFoundDescription,
       },
     };
   }
@@ -92,15 +96,13 @@ export async function generateMetadata({ params }: { params: { category: string;
 }
 
 // === 🔸 Компонент страницы ===
+import ProductNotFound from './not-found';
+
 export default async function ProductDetailPage({ params }: { params: { category: string; id: string } }) {
   const product = await getProduct(params.category, params.id);
 
   if (!product) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        Товар не найден.
-      </div>
-    );
+    return <ProductNotFound />;
   }
 
   const displayPrice = calculateDisplayPrice(product.price);

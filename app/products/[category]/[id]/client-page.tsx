@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Swiper imports
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -71,6 +72,7 @@ function RelatedProductCard({ category, id }: { category: string; id: string }) 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
+  const { t } = useLanguage();
   const cartItem = cartItems.find(item => item.id === product.id && item.category === product.category);
   const [inputValue, setInputValue] = useState<string | number>('');
   const oldPrice = Math.round(product.price * 2.2);
@@ -156,7 +158,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <div className="mb-8">
           <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ArrowLeftIcon className="h-5 w-5"/>
-            Назад к товарам
+            {t('product.backToProducts')}
           </button>
         </div>
 
@@ -175,7 +177,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       <SwiperSlide key={index}>
                         <img 
                           src={url} 
-                          alt={`${product.title} - фото ${index + 1}`}
+                          alt={`${product.title} - ${t('product.photo', { number: index + 1 })}`}
                           className="w-full h-full object-cover"
                         />
                       </SwiperSlide>
@@ -201,7 +203,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                         <p className="text-4xl font-bold text-lime-500">{calculateDisplayPrice(product.price)} ₾</p>
                         <p className="text-2xl text-red-500 line-through">{calculateDisplayPrice(oldPrice)} ₾</p>
                     </div>
-                    {product.in_stock && <span className="text-sm font-semibold text-green-400 bg-green-900/50 rounded-full px-3 py-1">В наличии</span>}
+                    {product.in_stock && <span className="text-sm font-semibold text-green-400 bg-green-900/50 rounded-full px-3 py-1">{t('product.inStock')}</span>}
                 </div>
 
                 {product.description && (
@@ -216,7 +218,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <div className="mt-8">
                 {cartItem ? (
                     <div className="flex items-center gap-4">
-                        <p className="text-lg font-semibold">В корзине:</p>
+                        <p className="text-lg font-semibold">{t('product.inCart')}</p>
                         <div className="flex items-center gap-2">
                             <button onClick={handleDecreaseQuantity} className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"><MinusIcon className="h-5 w-5" /></button>
                             <input
@@ -231,7 +233,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                         </div>
                     </div>
                 ) : (
-                    <button onClick={handleAddToCart} className="w-full flex items-center justify-center px-4 py-4 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"><ShoppingCartIcon className="h-6 w-6 mr-3"/>Добавить в корзину</button>
+                    <button onClick={handleAddToCart} className="w-full flex items-center justify-center px-4 py-4 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"><ShoppingCartIcon className="h-6 w-6 mr-3"/>{t('product.addToCart')}</button>
                 )}
               </div>
             </div>
@@ -241,7 +243,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         {/* === Related Products === */}
         {product.links && product.links.length > 0 && (
             <div className="mt-2">
-                <h3 className="text-2xl font-bold mb-2 text-white">С этим покупают:</h3>
+                <h3 className="text-2xl font-bold mb-2 text-white">{t('product.relatedProducts')}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {product.links.map((link, index) => {
                         try {

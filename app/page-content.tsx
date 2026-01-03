@@ -8,6 +8,7 @@ import { calculateDisplayPrice } from '@/lib/priceLogic';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import CategoryCarousel from '@/components/CategoryCarousel';
 import QuantityInput from '@/components/QuantityInput';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Swiper imports
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -40,6 +41,7 @@ const ITEMS_PER_PAGE = 20;
 export default function HomePageContent({ products: initialProducts }: { products: Product[] }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const { t } = useLanguage();
   
   const router = useRouter();
   const pathname = usePathname();
@@ -192,28 +194,28 @@ export default function HomePageContent({ products: initialProducts }: { product
   const categoryName = useMemo(() => {
     if (selectedSubCategory !== 'all') {
       const subCategory = subCategories.find(sc => sc.key === selectedSubCategory);
-      return subCategory ? subCategory.name : 'Все товары';
+      return subCategory ? subCategory.name : t('home.allProducts');
     }
     if (selectedCategory !== 'all') {
       const category = categories.find(c => c.key === selectedCategory);
-      return category ? category.name : 'Все товары';
+      return category ? category.name : t('home.allProducts');
     }
-    return 'Все товары';
-  }, [selectedCategory, selectedSubCategory, categories, subCategories]);
+    return t('home.allProducts');
+  }, [selectedCategory, selectedSubCategory, categories, subCategories, t]);
 
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       <main className="container mx-auto px-4 py-1 sm:px-6 lg:px-8">
         <div className="text-center py-4">
-             <h1 className="text-4xl font-bold text-white mb-4">Товары для дома, сада и отдыха</h1>
-            <p className="text-2xl font-bold text-lime-400">Доставим за 2 часа по Тбилиси</p>
+             <h1 className="text-4xl font-bold text-white mb-4">{t('home.title')}</h1>
+            <p className="text-2xl font-bold text-lime-400">{t('home.delivery')}</p>
         </div>
         <div className="mb-2">
             <div className="mb-2 max-w-md mx-auto">
               <input
                 type="text"
-                placeholder="Поиск по названию..."
+                placeholder={t('home.searchPlaceholder')}
                 value={inputValue}
                 onChange={handleSearchChange}
                 className="w-full px-4 py-2 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-500"
@@ -257,7 +259,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                                   <SwiperSlide key={`${product.id}-${index}-${url}`}>
                                     <img 
                                       src={url} 
-                                      alt={`${product.title} - фото ${index + 1}`}
+                                      alt={`${product.title} - ${t('home.photo', { number: index + 1 })}`}
                                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
                                     />
                                   </SwiperSlide>
@@ -279,7 +281,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                                       <p className="text-2xl font-semibold text-lime-500 whitespace-nowrap">{calculateDisplayPrice(product.price)} ₾</p>
                                       <p className="text-red-500 line-through text-sm whitespace-nowrap">{calculateDisplayPrice(oldPrice)} ₾</p>
                                   </div>
-                                  {product.in_stock && <span className="text-sm font-semibold text-green-400 shrink-0">В наличии</span>}
+                                  {product.in_stock && <span className="text-sm font-semibold text-green-400 shrink-0">{t('home.inStock')}</span>}
                               </div>
                           </div>
                       </Link>
@@ -304,7 +306,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                     <ChevronLeftIcon className="h-6 w-6" />
                 </button>
 
-                <span className="text-lg font-semibold text-white bg-gray-800/80 rounded-full px-5 py-2 shadow-inner">Страница {currentPage} из {totalPages}</span>
+                <span className="text-lg font-semibold text-white bg-gray-800/80 rounded-full px-5 py-2 shadow-inner">{t('home.page', { current: currentPage, total: totalPages })}</span>
 
                 <button 
                     onClick={() => handlePageChange(currentPage + 1)}

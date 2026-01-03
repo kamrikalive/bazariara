@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import HomePageContent from './page-content';
 import { database } from '@/lib/firebase/server';
 import type { Metadata } from 'next';
+import { translations } from '@/lib/translations';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60; // 🔁 обновление данных каждые 60 секунд
@@ -226,7 +227,7 @@ export default async function HomePage() {
       <Suspense
         fallback={
           <div className="flex items-center justify-center min-h-[60vh] text-white">
-            Загрузка главной страницы...
+            {translations.ru.home.loading}
           </div>
         }
       >
