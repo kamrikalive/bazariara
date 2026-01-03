@@ -19,19 +19,24 @@ import 'swiper/css/pagination';
 type Product = {
   id: string;
   title: string;
+  title_en?: string;
   category: string;
+  category_en?: string;
   price: number;
   in_stock: boolean;
   description?: string;
+  description_en?: string;
   image_url?: string;
   categoryKey: string;
   sub_category?: string;
+  sub_category_en?: string;
   subCategoryKey?: string;
   image_urls?: string[];
 };
 
 type Category = {
     name: string;
+    name_en?: string;
     key: string;
     imageUrl: string;
 };
@@ -41,7 +46,7 @@ const ITEMS_PER_PAGE = 20;
 export default function HomePageContent({ products: initialProducts }: { products: Product[] }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const router = useRouter();
   const pathname = usePathname();
@@ -64,17 +69,18 @@ export default function HomePageContent({ products: initialProducts }: { product
     });
     setAllProducts(sortedProducts);
 
-    const categoryMap = new Map<string, { name: string; imageUrl: string }>();
+    const categoryMap = new Map<string, { name: string; name_en?: string; imageUrl: string }>();
     sortedProducts.forEach(product => {
         if (!categoryMap.has(product.categoryKey)) {
             categoryMap.set(product.categoryKey, {
                 name: product.category,
+                name_en: product.category_en,
                 imageUrl: product.image_url!,
             });
         }
     });
 
-    const uniqueCategories = Array.from(categoryMap.entries()).map(([key, { name, imageUrl }]) => ({ key, name, imageUrl }));
+    const uniqueCategories = Array.from(categoryMap.entries()).map(([key, { name, name_en, imageUrl }]) => ({ key, name, name_en, imageUrl }));
     setCategories(uniqueCategories);
 
   }, [initialProducts]);
@@ -88,12 +94,13 @@ export default function HomePageContent({ products: initialProducts }: { product
       return [];
     }
     const categoryProducts = allProducts.filter(p => p.categoryKey === selectedCategory);
-    const subCategoryMap = new Map<string, { name: string; key: string; imageUrl: string }>();
+    const subCategoryMap = new Map<string, { name: string; name_en?: string; key: string; imageUrl: string }>();
     
     categoryProducts.forEach(product => {
       if (product.sub_category && product.subCategoryKey && !subCategoryMap.has(product.subCategoryKey)) {
         subCategoryMap.set(product.subCategoryKey, {
           name: product.sub_category,
+          name_en: product.sub_category_en,
           key: product.subCategoryKey,
           imageUrl: product.image_url!, 
         });
@@ -120,7 +127,8 @@ export default function HomePageContent({ products: initialProducts }: { product
 
     if (searchQuery.length >= 2) {
       products = products.filter(p => 
-        p.title.toLowerCase().includes(searchQuery.toLowerCase())
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.title_en && p.title_en.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
@@ -194,14 +202,16 @@ export default function HomePageContent({ products: initialProducts }: { product
   const categoryName = useMemo(() => {
     if (selectedSubCategory !== 'all') {
       const subCategory = subCategories.find(sc => sc.key === selectedSubCategory);
-      return subCategory ? subCategory.name : t('home.allProducts');
+      if (!subCategory) return t('home.allProducts');
+      return language === 'en' && subCategory.name_en ? subCategory.name_en : subCategory.name;
     }
     if (selectedCategory !== 'all') {
       const category = categories.find(c => c.key === selectedCategory);
-      return category ? category.name : t('home.allProducts');
+      if (!category) return t('home.allProducts');
+      return language === 'en' && category.name_en ? category.name_en : category.name;
     }
     return t('home.allProducts');
-  }, [selectedCategory, selectedSubCategory, categories, subCategories, t]);
+  }, [selectedCategory, selectedSubCategory, categories, subCategories, t, language]);
 
 
   return (
@@ -239,10 +249,14 @@ export default function HomePageContent({ products: initialProducts }: { product
               const uniqueImageUrls = [...new Set(imageUrls)];
               const hasMultipleImages = uniqueImageUrls.length > 1;
               const oldPrice = Math.round(product.price * 2.2);
+              
+              const title = (language === 'en' && product.title_en) ? product.title_en : product.title;
+              const category = (language === 'en' && product.category_en) ? product.category_en : product.category;
+              const sub_category = (language === 'en' && product.sub_category_en) ? product.sub_category_en : product.sub_category;
 
               return (
                 <div 
-                  key={`product-${product.id}-${currentPage}-${idx}`} 
+                  key={`product-${product.id}-${currentPage}-${idx}`}
                   className="bg-gray-800/40 rounded-xl shadow-lg overflow-hidden flex flex-col group transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl hover:shadow-lime-500/20"
                 >
                     <div className="relative flex-grow">
@@ -259,7 +273,7 @@ export default function HomePageContent({ products: initialProducts }: { product
                                   <SwiperSlide key={`${product.id}-${index}-${url}`}>
                                     <img 
                                       src={url} 
-                                      alt={`${product.title} - ${t('home.photo', { number: index + 1 })}`}
+                                      alt={`${title} - ${t('home.photo', { number: index + 1 })}`}
                                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
                                     />
                                   </SwiperSlide>
@@ -268,14 +282,14 @@ export default function HomePageContent({ products: initialProducts }: { product
                             ) : (
                               <img 
                                 src={product.image_url} 
-                                alt={product.title} 
+                                alt={title} 
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
                               />
                             )}
                           </div>
                           <div className="p-5">
-                              <h3 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{product.title}</h3>
-                              <p className="text-gray-400 text-sm mb-3">{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</p>
+                              <h3 className="text-xl font-bold mb-2 truncate group-hover:text-lime-400 transition-colors duration-300">{title}</h3>
+                              <p className="text-gray-400 text-sm mb-3">{category}{sub_category ? ` / ${sub_category}` : ''}</p>
                                <div className="flex items-center flex-wrap gap-2">
                                    <div className="flex items-baseline gap-2 mr-auto">
                                       <p className="text-2xl font-semibold text-lime-500 whitespace-nowrap">{calculateDisplayPrice(product.price)} ₾</p>

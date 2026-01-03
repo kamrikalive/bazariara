@@ -17,15 +17,19 @@ import 'swiper/css/pagination';
 type Product = {
     id: string;
     title: string;
+    title_en?: string; // Добавлено
     category: string;
+    category_en?: string; // Добавлено
     price: number;
     in_stock: boolean;
     description?: string;
+    description_en?: string; // Добавлено
     image_url?: string;
     categoryKey: string;
     image_urls?: string[];
     links?: string[];
     sub_category?: string;
+    sub_category_en?: string; // Добавлено
     subCategoryKey?: string;
 };
 
@@ -72,7 +76,14 @@ function RelatedProductCard({ category, id }: { category: string; id: string }) 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage(); // Достаем language
+  
+  // Логика выбора контента
+  const displayTitle = (language === 'en' && product.title_en) ? product.title_en : product.title;
+  const displayCategory = (language === 'en' && product.category_en) ? product.category_en : product.category;
+  const displaySubCategory = (language === 'en' && product.sub_category_en) ? product.sub_category_en : product.sub_category;
+  const displayDescription = (language === 'en' && product.description_en) ? product.description_en : product.description;
+
   const cartItem = cartItems.find(item => item.id === product.id && item.category === product.category);
   const [inputValue, setInputValue] = useState<string | number>('');
   const oldPrice = Math.round(product.price * 2.2);
@@ -131,9 +142,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: product.title,
+    name: displayTitle, // Используем переведенный заголовок
     image: product.image_url,
-    description: product.description,
+    description: displayDescription, // Используем переведенное описание
     sku: product.id.toString(),
     offers: {
         "@type": "Offer",
@@ -177,7 +188,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       <SwiperSlide key={index}>
                         <img 
                           src={url} 
-                          alt={`${product.title} - ${t('product.photo', { number: index + 1 })}`}
+                          alt={`${displayTitle} - ${t('product.photo', { number: index + 1 })}`}
                           className="w-full h-full object-cover"
                         />
                       </SwiperSlide>
@@ -186,7 +197,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 ) : (
                   <img
                     src={product.image_url}
-                    alt={product.title}
+                    alt={displayTitle}
                     className="w-full h-[400px] object-cover rounded-lg shadow-lg"
                   />
                 )}
@@ -195,8 +206,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             {/* === Product Info === */}
             <div className="p-8 flex flex-col justify-center">
               <div>
-                <p className="text-sm text-lime-400 font-semibold mb-2">{product.category}{product.sub_category && ` / ${product.sub_category}`}</p>
-                <h1 className="text-4xl lg:text-5xl font-extrabold mb-4 text-gray-100">{product.title}</h1>
+                 {/* Категории */}
+                <p className="text-sm text-lime-400 font-semibold mb-2">
+                    {displayCategory}{displaySubCategory && ` / ${displaySubCategory}`}
+                </p>
+                
+                {/* Заголовок */}
+                <h1 className="text-4xl lg:text-5xl font-extrabold mb-4 text-gray-100">
+                    {displayTitle}
+                </h1>
                 
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-baseline gap-3">
@@ -206,9 +224,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     {product.in_stock && <span className="text-sm font-semibold text-green-400 bg-green-900/50 rounded-full px-3 py-1">{t('product.inStock')}</span>}
                 </div>
 
-                {product.description && (
+                {/* Описание */}
+                {displayDescription && (
                   <div className="text-gray-300 leading-relaxed space-y-4 whitespace-pre-line">
-                    {product.description.split('\n').map((paragraph, index) => (
+                    {displayDescription.split('\n').map((paragraph, index) => (
                         <p key={index}>{paragraph}</p>
                     ))}
                   </div>

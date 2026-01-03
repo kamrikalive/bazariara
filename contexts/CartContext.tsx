@@ -6,25 +6,33 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 export type ProductInCart = {
     id: string;
     title: string;
+    title_en?: string;
     price: number;
     image_url?: string;
     quantity: number;
     category: string;
+    category_en?: string;
     categoryKey: string;
     sub_category?: string;
+    sub_category_en?: string;
     subCategoryKey?: string;
 };
 
 export type Product = {
     id: string;
     title: string;
+    title_en?: string;
     price: number;
     image_url?: string;
     category: string;
+    category_en?: string;
     categoryKey: string;
     description?: string;
+    description_en?: string;
     sub_category?: string;
+    sub_category_en?: string;
     subCategoryKey?: string;
+    in_stock: boolean;
 };
 
 type CartContextType = {
@@ -71,7 +79,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                     i.id === item.id && i.category === item.category ? { ...i, quantity: i.quantity + 1 } : i
                 );
             } else {
-                return [...prevItems, { ...item, quantity: 1 }];
+                const { description, description_en, in_stock, ...cartItemData } = item;
+                return [...prevItems, { ...cartItemData, quantity: 1 }];
             }
         });
     };

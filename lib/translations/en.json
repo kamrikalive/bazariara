@@ -107,5 +107,8 @@
     "notFound": "Product not found.",
     "notFoundTitle": "Product not found — BAZARI ARA",
     "notFoundDescription": "The requested product does not exist or has been removed."
+  },
+  "quantityInput": {
+    "addToCart": "Add to Cart"
   }
 }

@@ -107,5 +107,8 @@
     "notFound": "Товар не найден.",
     "notFoundTitle": "Товар не найден — BAZARI ARA",
     "notFoundDescription": "Запрошенный товар не существует или был удалён."
+  },
+  "quantityInput": {
+    "addToCart": "В корзину"
   }
 }

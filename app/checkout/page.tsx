@@ -25,7 +25,7 @@ const Spinner = () => (
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
   const { addOrder } = useOrders();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -45,8 +45,6 @@ export default function CheckoutPage() {
     // When the component mounts, or when cartItems changes,
     // update our stable local copy. This freezes the cart state for this checkout attempt.
     setCheckoutItems(cartItems);
-    console.log("--- CLIENT-SIDE: CHECKOUT PAGE INITIALIZED/UPDATED ---");
-    console.log("Stable checkoutItems set:", JSON.stringify(cartItems, null, 2));
   }, [cartItems]);
 
   const subtotal = checkoutItems.reduce((sum, item) => sum + calculateDisplayPrice(item.price) * item.quantity, 0);
@@ -76,9 +74,6 @@ export default function CheckoutPage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    console.log("--- CLIENT-SIDE: SUBMITTING ORDER ---");
-    console.log("Using stable checkoutItems for submission:", JSON.stringify(checkoutItems, null, 2));
-
     setIsSubmitting(true);
     setError(null);
 
@@ -110,6 +105,7 @@ export default function CheckoutPage() {
         product: {
           id: item.id,
           title: item.title,
+          title_en: item.title_en, // Pass english title
           price: calculateDisplayPrice(item.price),
           category: item.category,
           categoryKey: item.categoryKey,
@@ -120,8 +116,6 @@ export default function CheckoutPage() {
       total,
       shippingCost,
     };
-
-    console.log("Sending this final payload to server:", JSON.stringify(orderDetails, null, 2));
 
     try {
       const result = await handlePlaceOrder(orderDetails);
@@ -148,18 +142,21 @@ export default function CheckoutPage() {
           <h2 className="text-2xl font-semibold mb-4">{t('checkout.yourOrder', { count: cartCount })}</h2>
           {checkoutItems.length > 0 ? (
             <ul className="divide-y divide-gray-700">
-              {checkoutItems.map((item, idx) => (
-                <li key={`${item.categoryKey}-${item.id}-${idx}`} className="py-4 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <img src={item.image_url} alt={item.title} className="w-16 h-16 object-cover rounded-md mr-4" />
-                    <div>
-                      <h3 className="font-semibold">{item.title}</h3>
-                      <p className="text-gray-400">{item.quantity} x ₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
+              {checkoutItems.map((item, idx) => {
+                const title = language === 'en' && item.title_en ? item.title_en : item.title;
+                return (
+                    <li key={`${item.categoryKey}-${item.id}-${idx}`} className="py-4 flex items-center justify-between">
+                    <div className="flex items-center">
+                        <img src={item.image_url} alt={title} className="w-16 h-16 object-cover rounded-md mr-4" />
+                        <div>
+                        <h3 className="font-semibold">{title}</h3>
+                        <p className="text-gray-400">{item.quantity} x ₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
+                        </div>
                     </div>
-                  </div>
-                  <span className="font-semibold">₾{(calculateDisplayPrice(item.price) * item.quantity).toFixed(2)}</span>
-                </li>
-              ))}
+                    <span className="font-semibold">₾{(calculateDisplayPrice(item.price) * item.quantity).toFixed(2)}</span>
+                    </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="text-center text-gray-400">{t('checkout.empty')}</p>

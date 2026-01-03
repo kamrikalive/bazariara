@@ -22,17 +22,21 @@ const generateKey = (name: string) => {
 
 type Product = {
   category: string;
+  category_en?: string;
   sub_category?: string;
+  sub_category_en?: string;
 };
 
 type SubCategoryInfo = {
     name: string;
+    name_en?: string;
     key: string; // ключ для URL, в нижнем регистре
     count: number;
 };
 
 type CategoryInfo = {
   name: string;
+  name_en?: string;
   key: string;
   count: number;
   subCategories: SubCategoryInfo[];
@@ -56,24 +60,30 @@ async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
             totalProducts += count;
             
             if (count > 0) {
-                const categoryName = productList[0].category || categoryKey;
-                const subCategoryCounts: { [name: string]: number } = {};
+                const firstProduct = productList[0];
+                const categoryName = firstProduct.category || categoryKey;
+                const categoryNameEn = firstProduct.category_en;
+                const subCategoryCounts: { [name: string]: { count: number, name_en?: string } } = {};
 
                 productList.forEach(product => {
                     if (product.sub_category) {
-                        subCategoryCounts[product.sub_category] = (subCategoryCounts[product.sub_category] || 0) + 1;
+                        if (!subCategoryCounts[product.sub_category]) {
+                            subCategoryCounts[product.sub_category] = { count: 0, name_en: product.sub_category_en };
+                        }
+                        subCategoryCounts[product.sub_category].count++;
                     }
                 });
 
                 const subCategories: SubCategoryInfo[] = Object.entries(subCategoryCounts)
-                    .map(([name, count]) => ({
+                    .map(([name, { count, name_en }]) => ({
                         name, // Оригинальное имя для отображения ("Стулья")
+                        name_en,
                         count,
                         key: generateKey(name), // Ключ для URL ("стулья")
                     }))
                     .sort((a, b) => a.name.localeCompare(b.name));
 
-                categories.push({ name: categoryName, key: categoryKey, count, subCategories });
+                categories.push({ name: categoryName, name_en: categoryNameEn, key: categoryKey, count, subCategories });
             }
         }
     }
@@ -85,7 +95,7 @@ async function fetchCategoriesFromFirebase(): Promise<CategoryInfo[]> {
 }
 
 export default function SidebarMenu() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
@@ -159,7 +169,9 @@ export default function SidebarMenu() {
         <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500 mb-8">{t('common.categories')}</h2>
         <nav>
           <ul>
-            {categories.map(category => (
+            {categories.map(category => {
+              const categoryName = (language === 'en' && category.name_en) ? category.name_en : category.name;
+              return (
               <li key={category.key} className="mb-2">
                 <div className="flex flex-col">
                     <div 
@@ -172,7 +184,7 @@ export default function SidebarMenu() {
                             className="flex items-center flex-grow"
                         > 
                             <CategoryIcon />
-                            <span>{category.key === 'all' ? t('common.all') : category.name}</span>
+                            <span>{category.key === 'all' ? t('common.all') : categoryName}</span>
                         </Link>
                         <div className="flex items-center">
                             <span className="text-sm font-mono bg-lime-500/20 text-lime-300 rounded-full px-2 py-0.5">{category.count}</span>
@@ -184,23 +196,26 @@ export default function SidebarMenu() {
 
                     {category.subCategories.length > 0 && openCategory === category.key && (
                         <ul className="pl-8 mt-2 space-y-2">
-                            {category.subCategories.map(sub => (
+                            {category.subCategories.map(sub => {
+                                const subCategoryName = (language === 'en' && sub.name_en) ? sub.name_en : sub.name;
+                                return (
                                 <li key={sub.key}>
                                     <Link 
                                         href={`/?category=${encodeURIComponent(category.key)}&subcategory=${encodeURIComponent(sub.key)}`}
                                         onClick={() => setIsOpen(false)}
                                         className="flex items-center justify-between py-2 px-3 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                                     >
-                                        <span>{sub.name}</span>
+                                        <span>{subCategoryName}</span>
                                         <span className="text-xs font-mono bg-gray-600 text-gray-300 rounded-full px-1.5 py-0.5">{sub.count}</span>
                                     </Link>
                                 </li>
-                            ))}
+                            )})}
                         </ul>
                     )}
                 </div>
               </li>
-            ))}
+            )})
+          }
           </ul>
         </nav>
       </div>

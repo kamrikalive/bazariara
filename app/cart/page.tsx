@@ -108,7 +108,7 @@ function CartItemQuantityInput({ item, startRemoval }: { item: ProductInCart, st
 
 export default function CartPage() {
     const { cartItems, removeFromCart, clearCart } = useCart();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const router = useRouter();
     const [pendingRemoval, setPendingRemoval] = useState<string[]>([]);
     const removalTimers = useRef(new Map<string, NodeJS.Timeout>());
@@ -176,12 +176,13 @@ export default function CartPage() {
                                 {cartItems.map(item => {
                                     const key = `${item.id}-${item.category}`;
                                     const oldPrice = Math.round(item.price * 2.2);
+                                    const title = (language === 'en' && item.title_en) ? item.title_en : item.title;
                                     return (
                                     <li key={key} className="flex flex-col sm:flex-row justify-between items-center p-5 gap-4">
                                         <Link href={`/products/${item.categoryKey}/${item.id}`} className={`flex items-center gap-5 w-full sm:w-auto group self-start ${pendingRemoval.includes(key) ? 'pointer-events-none opacity-50' : ''}`}>
-                                            <img src={item.image_url} alt={item.title} className="w-20 h-20 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"/>
+                                            <img src={item.image_url} alt={title} className="w-20 h-20 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"/>
                                             <div>
-                                                <h2 className="font-bold text-lg text-gray-200 group-hover:text-lime-400 transition-colors duration-300">{item.title}</h2>
+                                                <h2 className="font-bold text-lg text-gray-200 group-hover:text-lime-400 transition-colors duration-300">{title}</h2>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <p className="text-lime-500 font-semibold">₾{calculateDisplayPrice(item.price).toFixed(2)}</p>
                                                     <p className="text-red-500 line-through text-sm">₾{calculateDisplayPrice(oldPrice).toFixed(2)}</p>

@@ -1,9 +1,11 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type Category = {
     name: string;
+    name_en?: string;
     key: string;
     imageUrl: string;
 };
@@ -19,6 +21,7 @@ export default function CategoryCarousel({
 }) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [scrollProgress, setScrollProgress] = useState(0);
+    const { language } = useLanguage();
 
     useEffect(() => {
         const el = scrollRef.current;
@@ -55,39 +58,42 @@ export default function CategoryCarousel({
                 className="flex space-x-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2
                            [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-                {categories.map((category) => (
-                    <button 
-                        key={category.key}
-                        id={`category-${category.key}`} // Добавляем id для прямого поиска
-                        onClick={() => onSelectCategory(category.key)}
-                        className={`flex flex-col items-center justify-between flex-shrink-0 w-40 sm:w-48 md:w-52 rounded-2xl overflow-hidden snap-start transition-all duration-300
-                            ${selectedCategory === category.key 
-                                ? 'ring-2 ring-lime-500 shadow-md shadow-lime-500/30 scale-[1.04]' 
-                                : 'ring-1 ring-gray-700 hover:ring-lime-400 hover:scale-[1.03]'
-                            }`}
-                    >
-                        {/* Фото категории */}
-                        <div className="w-full flex justify-center items-center bg-gray-900">
-                            <img 
-                                src={category.imageUrl} 
-                                alt={category.name} 
-                                className="object-cover w-full h-auto"
-                                loading="lazy"
-                            />
-                        </div>
-
-                        {/* Название категории */}
-                        <span 
-                            className={`w-full text-center py-1.5 text-[11px] sm:text-sm font-semibold tracking-wide truncate
+                {categories.map((category) => {
+                    const name = (language === 'en' && category.name_en) ? category.name_en : category.name;
+                    return (
+                        <button 
+                            key={category.key}
+                            id={`category-${category.key}`} // Добавляем id для прямого поиска
+                            onClick={() => onSelectCategory(category.key)}
+                            className={`flex flex-col items-center justify-between flex-shrink-0 w-40 sm:w-48 md:w-52 rounded-2xl overflow-hidden snap-start transition-all duration-300
                                 ${selectedCategory === category.key 
-                                    ? 'bg-lime-500 text-gray-900' 
-                                    : 'bg-gray-800 text-gray-100'
+                                    ? 'ring-2 ring-lime-500 shadow-md shadow-lime-500/30 scale-[1.04]' 
+                                    : 'ring-1 ring-gray-700 hover:ring-lime-400 hover:scale-[1.03]'
                                 }`}
                         >
-                            {category.name}
-                        </span>
-                    </button>
-                ))}
+                            {/* Фото категории */}
+                            <div className="w-full flex justify-center items-center bg-gray-900">
+                                <img 
+                                    src={category.imageUrl} 
+                                    alt={name} 
+                                    className="object-cover w-full h-auto"
+                                    loading="lazy"
+                                />
+                            </div>
+
+                            {/* Название категории */}
+                            <span 
+                                className={`w-full text-center py-1.5 text-[11px] sm:text-sm font-semibold tracking-wide truncate
+                                    ${selectedCategory === category.key 
+                                        ? 'bg-lime-500 text-gray-900' 
+                                        : 'bg-gray-800 text-gray-100'
+                                    }`}
+                            >
+                                {name}
+                            </span>
+                        </button>
+                    )
+                })}
             </div>
 
             {/* Индикатор прокрутки */}

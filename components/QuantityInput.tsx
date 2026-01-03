@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useCart, Product } from '@/contexts/CartContext';
 import { MinusIcon, PlusIcon, ShoppingCartIcon } from '@heroicons/react/24/solid';
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 interface QuantityInputProps {
     product: Product;
@@ -10,6 +11,7 @@ interface QuantityInputProps {
 
 export default function QuantityInput({ product }: QuantityInputProps) {
     const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
+    const { t } = useLanguage(); // Get t function
     const cartItem = cartItems.find(item => item.id === product.id && item.category === product.category);
 
     const [inputValue, setInputValue] = useState<string | number>('');
@@ -84,7 +86,7 @@ export default function QuantityInput({ product }: QuantityInputProps) {
                 className="w-full flex items-center justify-center px-4 py-3 font-bold rounded-lg bg-lime-500 text-gray-900 hover:bg-lime-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-lime-500/30 hover:shadow-xl hover:shadow-lime-400/40"
             >
                 <ShoppingCartIcon className="h-5 w-5 mr-2 hidden sm:inline-block" />
-                <span>В корзину</span>
+                <span>{t('quantityInput.addToCart')}</span>
             </button>
         );
     }
