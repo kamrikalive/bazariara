@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import { useOrders } from '@/contexts/OrderContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ShoppingCartIcon, ArchiveBoxIcon, GlobeAltIcon } from '@heroicons/react/24/solid';
+import { ShoppingCartIcon, ArchiveBoxIcon } from '@heroicons/react/24/solid';
 import { calculateDisplayPrice } from '@/lib/priceLogic';
 import SidebarMenu from './SidebarMenu';
 
@@ -44,7 +45,13 @@ export default function Header() {
                                 className="flex items-center gap-2 text-white hover:text-lime-400 transition-colors duration-300 px-3 py-2 rounded-lg hover:bg-gray-700"
                                 aria-label="Switch language"
                             >
-                                <GlobeAltIcon className="h-6 w-6" />
+                                <Image 
+                                  src={language === 'ru' ? '/gb.svg' : '/ru.svg'} 
+                                  alt="Language flag" 
+                                  width={24} 
+                                  height={24} 
+                                  className="w-6 h-6 rounded-full object-cover" 
+                                />
                                 <span className="font-semibold text-sm uppercase">{language === 'ru' ? 'EN' : 'RU'}</span>
                             </button>
                             <Link href="/orders" className="relative flex items-center text-white hover:text-lime-400 transition-colors duration-300">
